@@ -18,6 +18,7 @@ from typing import List, cast, Optional
 import bs4
 import more_itertools
 
+import kpse
 import nicer
 
 """
@@ -63,11 +64,12 @@ MATH_ENVS = {
     "math",
     "equ",
     "equs",
-    # tikz-cd
+    # tikz-cd package
     "tikzcd",
-    # mathtools
+    # mathtools package
     "refeq",
-    "myequation",  # 1901/1901.07820
+    # 1901/1901.07820
+    "myequation",
 }
 
 # Maps the LaTeX \ref-like command to its number of arguments
@@ -347,7 +349,7 @@ IGNORED_REDEFINES = (
             "\\HyphConv",
             "\\expandafter",  # 0003/math0003117
             "\\Section",  # 0505/math0505626
-            "\section",
+            "\\section",
             "\\subsection",
             "\\subsubsection",
             "\\chapter",
@@ -375,19 +377,6 @@ IGNORED_INCLUDES = {
     "warmread",  # 0601/math0601187
     "wick",  # 0109/hep-th0109182
 }
-
-
-@functools.lru_cache
-def in_TeX_path(filename: str) -> bool:
-    """Check if filename is a standard package."""
-    try:
-        subprocess.check_call(  # nosec
-            ["/Library/TeX/texbin/kpsewhich", filename],
-            stdout=subprocess.DEVNULL,
-        )
-        return True
-    except subprocess.CalledProcessError:
-        return False
 
 
 def tokenize_string(tex_source: str):
@@ -1641,7 +1630,9 @@ def get_proofs(
             #  (0103/math0103176/paper.tex)
             # Try not to crash.
             fn = Path(get_filename(words).lower())
-            if fn.stem not in IGNORED_INCLUDES and not in_TeX_path(fn.name):
+            if fn.stem not in IGNORED_INCLUDES and not kpse.in_TeX_path(
+                fn.name
+            ):
                 subfname: Path = directory / fn
                 try:
                     try:
@@ -1679,7 +1670,7 @@ def get_proofs(
                 fn = Path(filename.lower())
                 if fn.suffix == "":
                     fn = fn.with_suffix(".sty")
-                if fn.stem in IGNORED_INCLUDES or in_TeX_path(fn.name):
+                if fn.stem in IGNORED_INCLUDES or kpse.in_TeX_path(fn.name):
                     continue
                 subfname: Path = directory / (fn.with_suffix(".sty"))
                 try:
@@ -2016,10 +2007,11 @@ if __name__ == "__main__":
         "-m", "--matches", help="Take a list of files", action="store_true"
     )
     parser.add_argument(
-        "-s", "--serial", help="Run serially", action="store_true"
-    )
-    parser.add_argument(
         "-n", "--new", help="Skip input if output exists", action="store_true"
+    )
+
+    parser.add_argument(
+        "-p", "--cores", help="Number of cores to use", type=int, default=4
     )
 
     parser.add_argument("files", nargs="+")
@@ -2048,12 +2040,12 @@ if __name__ == "__main__":
                 new_tex_files.append(filename)
         tex_files = new_tex_files
         print(f"found {len(tex_files)} new files")
-        with open("matches", "w") as fd:
-            for filename in tex_files:
-                print(filename, file=fd)
+        # with open("matches_new", "w") as fd:
+        #     for filename in tex_files:
+        #         print(filename, file=fd)
 
-    if len(tex_files) > 1 and not args.serial:
-        with Pool(processes=4) as p:
+    if len(tex_files) > 1 and not (args.cores == 1):
+        with Pool(processes=args.cores) as p:
             # p.map(pf, tex_files, 1)
             p.starmap(
                 process_file,

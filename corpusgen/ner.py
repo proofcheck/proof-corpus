@@ -15,7 +15,7 @@ import argparse
 #             print(ent.text, ent.start_char, ent.end_char, ent.label_)
 
 known_words = set()
-with open("/Users/stone/Downloads/words_alpha.txt") as fd:
+with open("words_alpha.txt") as fd:
     for word in fd.readlines():
         word = word.strip()
         known_words.add(word)
