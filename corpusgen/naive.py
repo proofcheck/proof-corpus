@@ -1,0 +1,2085 @@
+#!/usr/bin/env python3
+
+"""Extracts proofs from .tex files, naively."""
+
+import argparse
+import functools
+from itertools import repeat
+from multiprocessing import Pool
+import os
+from pathlib import Path
+import random
+import re
+import subprocess  # nosec
+import sys
+import traceback
+from typing import List, cast, Optional
+
+import bs4
+import more_itertools
+
+import nicer
+
+"""
+Typical usage:
+   time ./naive.py -m matches/eng-matches > log.txt 2>&1
+
+ or for a single file,
+   ./naive.py t.tex
+
+ Merge commands:
+   find proofs -type f -name "*.naive.txt" -print0 \
+          | sort -z | xargs -0 ./en_cat.py >! proofs.txt
+   ./sentize2.py proofs.txt > sentences.txt
+
+ Or, if we don't care about order:
+   find proofs -type f -name "*.naive.txt" -print \
+       | xargs ./en_cat.py >! proofs.txt
+"""
+
+
+class SkipThisProof(Exception):
+    """Exception if something goes badly wrong while extracting a proof."""
+
+    pass
+
+
+# Regular expression for a LaTeX comment.
+TEX_COMMENT = re.compile(r"(?<!\\)%.*?\n[ \t]*")
+
+# Set of LaTeX environments that implicitly switch to math mode.
+MATH_ENVS = {
+    "align",
+    "alignat",
+    "displaymath",
+    "equation",
+    "eqnarray",
+    "flalign",
+    "gather",
+    "multline",
+    "dmath",
+    "darray",
+    "empheq",
+    "math",
+    "equ",
+    "equs",
+    # tikz-cd
+    "tikzcd",
+    # mathtools
+    "refeq",
+    "myequation",  # 1901/1901.07820
+}
+
+# Maps the LaTeX \ref-like command to its number of arguments
+# See also https://tinyurl.com/tbj99fsp
+TEX_REFS = {
+    "\\Autoref": 1,
+    "\\autoref": 1,
+    "\\cpageref": 1,
+    "\\cpagerefrange": 2,
+    "\\Cref": 1,
+    "\\Crefrange": 2,
+    "\\Cpageref": 1,
+    "\\Cpagerefrange": 2,
+    "\\cref": 1,
+    "\\crefrange": 2,
+    "\\eqref": 1,
+    "\\labelcref": 1,
+    "\\nameref": 1,
+    "\\pageref": 1,
+    "\\ref": 1,
+    "\\vref": 1,
+    "\\hyperref": 1,
+    # commath package
+    "\\lemref": 1,
+    "\\propref": 1,
+    "\\thmref": 1,
+    "\\defnref": 1,
+    "\\secref": 1,
+    "\\remref": 1,
+    "\\exref": 1,
+    "\\figref": 1,
+    "\\colref": 1,
+    "\\appref": 1,
+    "\\assref": 1,
+    # prettyref
+    "\\prettyref": 1,
+    # theoremref
+    "\\thref": 1,
+    "\\thnameref": 1,
+    # memoir
+    "\\fref": 1,
+    "\\tref": 1,
+    "\\pref": 1,
+    "\\Aref": 1,
+    "\\Bref": 1,
+    "\\Pref": 1,
+    "\\Cref": 1,
+    "\\Sref": 1,
+    # fancyref
+    "\\Fref": 1,
+    # iopart
+    "\\eref": 1,
+    "\\Eref": 1,
+    "\\fref": 1,
+    "\\Fref": 1,
+    "\\sref": 1,
+    "\\Sref": 1,
+    "\\tref": 1,
+    "\\Tref": 1,
+    # Misc
+    "\\relref": 1,
+    "\\fullref": 1,
+    # subfigure
+    "\\subref": 1,
+    "\\Subref": 1,
+    # 0107/math0107004
+    "\\DHrefpart": 1,
+    # 0404/cs0404006
+    "\\refrange": 2,
+}
+
+# Set of LaTeX \cite-like commands
+TEX_CITES = {
+    "\\cite",
+    "\\citealp",
+    "\\citealt",
+    "\\citeauthor",
+    "\\citep",
+    "\\citepalias",
+    "\\citet",
+    "\\citetalias",
+    "\\citetext",
+    "\\citeyear",
+    "\\citeyearpar",
+    "\\Citealp",
+    "\\Citealt",
+    "\\Citeuthor",
+    "\\Citep",
+    "\\Citet",
+    # amsref
+    "\\citelist",
+    "\\cites",
+}
+
+
+DELETE_ENVS = {
+    # Tables
+    "longtable",
+    "longtabu",
+    "tabbing",
+    "table",
+    "tabu",
+    "tabular",
+    "tabularx",
+    # Other
+    "diagram",
+    "minipage",
+    "prooftree",
+}
+
+DELETE_UNINTERPRETED_ENVS = {
+    # Verbatim
+    "alltt",
+    "code",
+    "verbatim",
+    "Verbatim",
+    "BVerbatim",
+    "LVerbatim",
+    "lstlisting",
+    "mathematica",
+    "maplettyout",
+    "maplegroup",
+    "mapleinput",
+    "maplelatex",
+    # Figure
+    "figure",
+    "Figure",
+    "floatingfigure",
+    # Picture
+    "picture",
+    "tikzpicture",
+    "pspicture",
+    # Other
+    "comment",
+    "filecontents",
+    "filecontents*",
+    "xy",
+    # 1811/1811.04372
+    "DGCpicture",
+}
+
+
+TEX_IFS = {
+    "\\iffalse",
+    "\\iftrue",
+    "\\ifnum",
+    "\\ifdim",
+    "\\ifodd",
+    "\\ifvmode",
+    "\\ifhmode",
+    "\\ifmmode",
+    "\\ifinner",
+    "\\if",
+    "\\ifcat",
+    "\\ifx",
+    "\\ifvoid",
+    "\\ifeof",
+    "\\ifcase",
+    "\\ifcsname",
+    "\\ifdefined",
+}
+
+VERB_COMMANDS = {
+    "\\verb",
+    "\\Verb",
+    "\\lstinline",
+}
+
+MATHONLY_COMMANDS = {
+    "_",
+    "\\alpha",
+    "\\approx",
+    "\\beta",
+    "\\bigcap",
+    "\\bigcup",
+    "\\cap",
+    "\\cdot",
+    "\\chi",
+    "\\choose",
+    "\\circ",
+    "\\cong",
+    "\\cup",
+    "\\delta",
+    "\\Delta",
+    "\\epsilon",
+    "\\eta",
+    "\\frac",
+    "\\gamma",
+    "\\Gamma",
+    "\\geq",
+    "\\hookrightarrow",
+    "\\in",
+    "\\int",
+    "\\kappa",
+    "\\kappa",
+    "\\lambda",
+    "\\Lambda",
+    "\\langle",
+    "\\lceil",
+    "\\leadsto",
+    "\\left",
+    "\\leftarrow",
+    "\\leftrightarrow",
+    "\\LeftRightArrow",
+    "\\leq",
+    "\\lfloor",
+    "\\Longleftrightarrow",
+    "\\mapsto",
+    "\\mathbb",
+    "\\mathcal",
+    "\\mathit",
+    "\\mathord",
+    "\\mathrel",
+    "\\mathrm",
+    "\\mathsf",
+    "\\mathtt",
+    "\\models",
+    "\\mu",
+    "\\neq",
+    "\\nu",
+    "\\omega",
+    "\\Omega",
+    "\\oplus",
+    "\\oslash",
+    "\\otimes",
+    "\\parallel",
+    "\\partial",
+    "\\phi",
+    "\\Phi",
+    "\\pi",
+    "\\Pi",
+    "\\pm",
+    "\\prec",
+    "\\prec",
+    "\\preqeq",
+    "\\prod",
+    "\\propto",
+    "\\psi",
+    "\\Psi",
+    "\\rangle",
+    "\\rho",
+    "\\right",
+    "\\rightarrow",
+    "\\Rightarrow",
+    "\\rightharpoonup",
+    "\\rightleftharpoons",
+    "\\sim",
+    "\\simeq",
+    "\\subset",
+    "\\subseteq",
+    "\\succ",
+    "\\succ",
+    "\\succeq",
+    "\\sum",
+    "\\supset",
+    "\\supseteq",
+    "\\tau",
+    "\\theta",
+    "\\Theta",
+    "\\times",
+    "\\varphi",
+    "\\vdash",
+    "\\vee",
+    "\\wedge",
+    "\\xi",
+    "\\Xi",
+    "\\zeta",
+    "^",
+}
+
+IGNORED_REDEFINES = (
+    set(TEX_IFS)
+    .union(TEX_CITES)
+    .union(TEX_REFS.keys())
+    .union(
+        [
+            "\\HyphConv",
+            "\\expandafter",  # 0003/math0003117
+            "\\Section",  # 0505/math0505626
+            "\section",
+            "\\subsection",
+            "\\subsubsection",
+            "\\chapter",
+            "\\csname",  # # 1603/1603.00294
+            "\\MakeDeclareMathSetCommand",  # 1603/1603.00294
+        ]
+    )
+)
+
+IGNORED_INCLUDES = {
+    "amsfont",
+    "cd",  # 0210/math0210194
+    "custalgorithm",  # 0906/0906.4261
+    "diagcat",  # 1811/1811.04372
+    "dynkin",  # 1210/1210.0342
+    "epsf1990",
+    "fig4tex",  # 0312/math0312037
+    "floatmodif",  # 1402/1402.4958
+    "jltmac2e",  # 0007/math0007039
+    "myfloat",  # 0603/math0603228
+    "myurl",  # 0110/cs0110030
+    "psfig",
+    "scrpage2",  # 0501/math-ph0501039
+    "sw20bams",  # 0102/math-ph0102018
+    "warmread",  # 0601/math0601187
+    "wick",  # 0109/hep-th0109182
+}
+
+
+@functools.lru_cache
+def in_TeX_path(filename: str) -> bool:
+    """Check if filename is a standard package."""
+    try:
+        subprocess.check_call(  # nosec
+            ["/Library/TeX/texbin/kpsewhich", filename],
+            stdout=subprocess.DEVNULL,
+        )
+        return True
+    except subprocess.CalledProcessError:
+        return False
+
+
+def tokenize_string(tex_source: str):
+    """
+    Turn a string (representing an entire file) into a stream of TeX-ish words.
+
+    This is a generator function returning strings.
+    """
+    # Remove a few known-bad lines
+
+    # 0002/math0002136/zinno.tex
+    #  (boxedeps.tex)
+    tex_source = tex_source.replace(
+        "{\\catcode`\\%=12\\gdef\\P@S@{%!}\\gdef\\pct@@{%%}}", ""
+    )
+
+    # Remove ps junk
+    tex_source = tex_source.replace("%%BoundingBox", "BB")
+
+    # Fix line endings
+    tex_source = tex_source.replace("\r\n", "\n")
+    tex_source = tex_source.replace("\r", "\n")
+
+    # Remove all the comments
+    tex_source = re.sub(TEX_COMMENT, "", tex_source)
+
+    # Insert "\par" where there were blank lines
+    tex_source = re.sub("^[ \\t]*$", "\\\\par", tex_source, flags=re.MULTILINE)
+
+    # Create a peekable stream of characters.
+    chars: more_itertools.peekable[str] = more_itertools.peekable(tex_source)
+
+    while chars:
+        # Start building the next input word by grabbing
+        # a single charcter.
+        word: str = cast(str, next(chars))
+        if word == "\\":
+            word += next(chars)
+            # It's a command
+            if word[1].isalpha() or word[1] == "@":
+                # It's an (alphabetic) control sequence.
+                # Grab the rest of the word
+                while True:
+                    ch = chars.peek("!")
+                    if ch.isalpha() or ch == "@":
+                        word += next(chars)
+                    else:
+                        break
+                # Spaces after _alphabetic_ control sequences
+                # are ignored by TeX. Not newlines
+                while chars.peek("!") in [" ", "\t"]:
+                    next(chars)
+        # Treat all space-like characters the same.
+        # Any sequence of spaces (including a newline
+        # and spaces at the start of the next line) are
+        # treated as a single space.
+        elif word.isspace():
+            word = " "
+            while chars.peek("!").isspace():
+                next(chars)
+        elif word == "$":
+            # It's tempting to peek ahead for another "$" and return "$$", but
+            # $\alpha$$\beta$ needs to show up as four single $'s.
+            pass
+        elif word == "~":
+            word = " "
+        elif word == "#":
+            # Make #1 through #9 into single tokens
+            d = chars.peek("!")
+            if d.isdigit() and d != "0":
+                next(chars)
+                word += d
+        elif word == "`":
+            if chars.peek("!") == "`":
+                next(chars)
+                word = '"'
+        elif word == "'":
+            if chars.peek("!") == "'":
+                next(chars)
+                word = '"'
+        elif word == "-":
+            if chars.peek("!") == "-":
+                next(chars)
+                if chars.peek("!") == "-":
+                    next(chars)
+                    word == "—"  # em-dash
+                else:
+                    word == "–"  # en-dash
+        yield word
+    return
+
+
+def get_words(filename: str):
+    """Get a stream of words from the given file."""
+    with open(filename, "r") as fh:
+        try:
+            tex_source = fh.read()
+        except UnicodeDecodeError:
+            with open(filename, "rb") as f:
+                tex_bytes = f.read()
+                tex_source = bs4.UnicodeDammit.detwingle(tex_bytes)
+                tex_source = bs4.UnicodeDammit(tex_source).unicode_markup
+                if not tex_source:
+                    tex_source = ""
+
+    return more_itertools.peekable(tokenize_string(tex_source))
+
+
+def skip_ws(words):
+    """Skip whitespace characters."""
+    while words.peek("!").isspace():
+        next(words)
+
+
+def get_arg(words) -> List[str]:
+    """Get a single macro argument."""
+    skip_ws(words)
+    w = next(words)
+    if w == "{":
+        nesting = 1
+        arg = []
+        while True:
+            w = next(words)
+            if w == "}":
+                nesting -= 1
+                assert nesting >= 0  # nosec
+                if nesting == 0:
+                    break
+            elif w == "{":
+                nesting += 1
+            arg.append(w)
+    else:
+        arg = [w]
+    if arg in [["}"], ["$"], ["\\begin"], ["\\end"]]:
+        words.prepend(*arg)
+        arg = []
+    return arg
+
+
+def skip_optional_eq(words):
+    """Skip whitespace, plus an equals-sign & more whitespace if present."""
+    skip_ws(words)
+    if words.peek("!") == "=":
+        next(words)
+        skip_ws(words)
+
+
+def skip_optional_arg(words, macros):
+    """Skip an optional (bracketed) argument, if present."""
+    if words.peek("!") == "[":
+        next(words)
+        if words[:3] == ["$", "$", "]"]:
+            next(words)
+            next(words)
+            next(words)
+            return
+        skip_rest_optional_arg(words, macros)
+
+
+def skip_rest_optional_arg(words, macros):
+    """Skip to the end of the bracketed argument we're currently in."""
+    while True:
+        w = next(words)
+        if w in {"$", "\\[", "\\("} and w not in macros:
+            single_dollar: bool = False
+            if w == "$":
+                single_dollar = True
+                if words.peek("!") == "$":
+                    next(words)
+                    single_dollar = False
+            skip_rest_math(words, macros, single_dollar)
+        elif w == "\\begin":
+            get_arg(words)
+            skip_rest_env(words, macros)
+        elif w == "{":
+            words.prepend(w)
+            get_arg(words)
+        elif w == "]":
+            break
+
+
+def get_optional_arg(words):
+    """Get one optional macro argument."""
+    w = next(words)
+    assert w == "["  # nosec
+    arg = []
+    while True:
+        if words.peek() == "{":
+            arg.append("{")
+            arg.extend(get_arg(words))
+            arg.append("}")
+        else:
+            w = next(words)
+            if w == "]":
+                break
+            arg.append(w)
+    # print("get_optional_arg", arg, words[:10])
+    return arg
+
+
+def skip_rest_conditional(words, macros, stop_on_else=True):
+    r"""
+    Skip the rest of the conditional arm we are currently inside.
+
+    Looks for \fi, and optionally \else. Skips nested
+    conditionals, but does not pay attention to { } grouping.
+    """
+    while True:
+        w = next(words)
+        # print(f"xxx skipping <<{w}>>")
+        if w == "\\fi" or (w == "\\else" and stop_on_else):
+            return
+        elif w == "\\loop" and w not in macros:
+            # Ignore primitive loops
+            while next(words) != "\\repeat":
+                pass
+        elif w in TEX_IFS or w in macros["new ifs"]:
+            skip_rest_conditional(words, macros, stop_on_else=False)
+
+
+def skip_num(words):
+    """Skip a (decimal) integer or float number."""
+    skip_ws(words)
+    # Funny numbers like `\@
+    if words.peek() == "`":
+        next(words)
+        return
+    # Digits
+    if words.peek() in {"+", "-"}:
+        next(words)
+    if words.peek().isdigit():
+        while words.peek().isdigit():
+            next(words)
+        if words.peek() in {",", "."}:
+            next(words)
+            while words.peek().isdigit():
+                next(words)
+    else:
+        # e.g., \vskip-\topskip
+        next(words)
+
+
+def skip_dimen(words):
+    """Skip a TeX dimension (with unit)."""
+    skip_num(words)
+    skip_ws(words)
+    if words[:4] == ["t", "r", "u", "e"]:
+        for _ in range(4):
+            next(words)
+    skip_ws(words)
+    try_skip_keywords(
+        words,
+        [
+            "pt",
+            "mm",
+            "cm",
+            "in",
+            "ex",
+            "em",
+            "mu",
+            "pc",
+            "dd",
+            "cc",
+            "bp",
+            "sp",
+            "nd",
+            "nc",
+        ],
+    )
+    return
+
+
+def skip_glue(words):
+    """Skip TeX glue (dimension with optional stretch/shrink)."""
+    skip_dimen(words)
+    while try_skip_keywords(words, ["plus", "minus"]):
+        skip_dimen(words)
+
+
+def get_primitive_def(words, debug=False, verbose=False):
+    r"""
+    Process the contents of a \def.
+
+    We currently abuse this to also handle
+    \gdef, \xdef, and \edef; we don't respect
+    local-global definitions, and don't
+    expand the bodies.
+    """
+    # Get name
+    name = next(words)
+    if debug:
+        print("   defining", name)
+    if name == "\\csname":
+        while next(words) != "\\endcsname":
+            pass
+        skip_to_lbrace(words)
+        get_arg(words)
+        return None, [[]], None
+    elif not name.startswith("\\") or name in IGNORED_REDEFINES:
+        skip_to_lbrace(words)
+        get_arg(words)
+        return None, [[]], None
+    skip_ws(words)
+
+    # Gather the formal parameter tokens (but don't process them yet)
+    parameter_tokens: List[str] = []
+    while True:
+        tok = next(words)
+        if tok == "{":
+            break
+        parameter_tokens.append(tok)
+
+    # Get body
+    words.prepend(tok)  # put back the left brace
+    body = get_arg(words)
+
+    # Parse the parameter list
+    if len(parameter_tokens) > 0 and parameter_tokens[-1] == "#":
+        # A trailing "#" is weird and special
+        parameter_tokens[-1] = "{"
+        body.append("{")
+
+    # Get parameters
+    # Parameter list with n arguments is of the form
+    #    [[..], [..], [..], [..], [..]]
+    # where the (n+1) [..] parts are lists of delimiter tokens,
+    # which might be empty
+    parameters: List[List[str]] = [[]]
+    # num_params = 0
+    # print(f"{parameter_tokens=}")
+    for tok in parameter_tokens:
+        if tok[0] == "#" and len(tok) == 2:
+            # parameter number
+            # parameter_number = ord(tok[2]) - ord("0")
+            # assert num_params == parameter_number  # nosec
+            parameters += [[]]
+        else:
+            # delimiter
+            parameters[-1].append(tok)  # type: ignore
+
+    if debug:
+        print(f"Saw def {parameters} {body}")
+    return name, parameters, body
+
+
+def get_newcommand(words):
+    r"""Process what follows \newcommand & similar."""
+    # Skip optional asterisk
+    if words.peek() == "*":
+        next(words)
+        skip_ws(words)
+    # Get name
+    names = get_arg(words)
+    if len(names) != 1 or names[0] in IGNORED_REDEFINES:
+        skip_optional_arg(words, {})
+        get_arg(words)
+        return None, 0, 0, None
+    name = names[0]
+
+    skip_ws(words)
+    # print(f" definition {name=}")
+    # Not true for active characters
+    # assert name.startswith("\\")  # nosec
+    # Get parameters
+    num_params = 0
+    if words.peek() == "[":
+        next(words)
+        while True:
+            d = next(words)
+            if d.isdigit():
+                num_params = num_params * 10 + int(d)
+            elif d.isspace():
+                pass
+            else:
+                assert d == "]"  # nosec
+                break
+
+    skip_ws(words)
+    # print(f" definition {num_params=}")
+    # Get optional parameter
+    optional_param: Optional[List[str]] = None
+    if words.peek() == "[":
+        optional_param = get_optional_arg(words)
+
+    # Save parameters
+    # Non-optional parameter list with n arguments is of the form
+    #    [[], [], [], [], []]
+    # where the (n+1) [] parts are lists of delimiter tokens,
+    # which might be empty.
+    #   Warning: if there is an optional parameter, then
+    #   there are only n [] parts, because there's one
+    #   fewer "normal" parameter than the count indicates
+    parameters = [[] for _ in range(num_params + 1)]
+    if optional_param is not None:
+        parameters.pop()
+
+    # Get body
+    skip_ws(words)
+    # print(" definition getting body from", "".join(words[:100]))
+    body = get_arg(words)
+    # print(f"Saw ndef {name} {num_params} {optional_param} {body}")
+    return name, parameters, optional_param, body
+
+
+def try_expand(words, parameters, optional_param, body):
+    """
+    Try to expand a macro.
+
+    We're given information on the definition for a macro
+    we just saw, plus the stream of upcoming words. If we
+    can find enough arguments, we take them off the
+    stream and return the tokens of the substituted macro-body
+
+    If we can't find enough arguments, we consume everything
+    we could find, and return an empty list. (We probably
+    weren't supposed to expand the macro at this point anyway.)
+    """
+    # print("try_expand 1")
+    param_dict = {}
+    # handle optional arg
+    if optional_param is not None:
+        skip_ws(words)
+        if words.peek("!") == "[":
+            param_dict["#1"] = get_optional_arg(words)
+        else:
+            param_dict["#1"] = optional_param
+    # handle required args
+    # primitive tex initial delimeter
+    for expected_tok in parameters[0]:
+        found_tok = next(words)
+        if expected_tok != found_tok:
+            return []
+    for arg_num, delim in enumerate(parameters[1:], start=1):
+        parameter_token = "#" + str(arg_num)
+        if delim:
+            param_dict[parameter_token] = []
+            groups_found = 0
+            nongroups_found = 0
+
+            while words[: len(delim)] != delim:
+                # print(f"looking for {delim=}")
+                # print(f"upcoming: {''.join(words[: len(delim)])}")
+                # curly braces entirely around a delimited
+                if words.peek() == "{":
+                    param_dict[parameter_token].append("{")
+                    param_dict[parameter_token].extend(get_arg(words))
+                    param_dict[parameter_token].append("}")
+                    groups_found += 1
+                else:
+                    param_dict[parameter_token].append(next(words))
+                    nongroups_found += 1
+            # Remove curly braces if it's a single
+            # group, per §400
+            if groups_found == 1 and nongroups_found == 0:
+                param_dict[parameter_token] = param_dict[parameter_token][1:-1]
+            for _ in delim:
+                next(words)
+        else:
+            param_dict[parameter_token] = get_arg(words)
+
+        if param_dict[parameter_token] in [["}"], ["$"]]:
+            # Something went wrong; missing argument?
+            words.prepend(*param_dict[parameter_token])
+            return []
+
+    # print(f"{param_dict=}")
+    substituted_body = []
+    for tok in body:
+        if tok in param_dict:
+            substituted_body.extend(param_dict[tok])
+        else:
+            substituted_body.append(tok)
+    # print(f"{body=} {substituted_body=}")
+    # Hack: If macro ends with $ and there's a $ immediately following,
+    #  it's probably smarter not to treat this as $$.
+    #  E.g., 0301/math0301115/waldspurger.tex
+    if substituted_body[-1:] == ["$"]:
+        substituted_body.append(" ")
+    return substituted_body
+
+
+def skip_rest_math(
+    words, macros, single_dollar: bool, debug=False, verbose=False
+) -> bool:
+    r"""
+    Skip past the close of the current math sequence.
+
+    Returns whether the last printable character of the sequence
+    is a period (heuristically).
+    """
+    nwords_seen = 0
+    final_period = False
+    while True:
+        if words.peek() == "{":
+            arg = get_arg(words)
+            while arg and (arg[-1].isspace() or arg[-1].startswith("\\")):
+                arg.pop()
+            if arg:
+                final_period = arg[-1] == "."
+        else:
+            w = next(words)
+            nwords_seen += 1
+            if nwords_seen >= 100_000:
+                print("skip_rest_math", nwords_seen)
+                raise SkipThisProof
+
+            if debug:
+                print(f"math-skip {single_dollar=} saw: {w} {w in macros}")
+                print("   ", "".join(words[:20]))
+                if verbose:
+                    print("    ", words[:10])
+            if w == "$":
+                if single_dollar:
+                    # Done.
+                    break
+                else:
+                    # Grab the second $ in the $$
+                    if words.peek("!") == "$":
+                        next(words)
+                        break
+                    # Hmmm... somehow we reached a $ inside $$ or \[ or ...
+                    # Skip the rest of the $...$, and hope for the best
+                    if debug:
+                        print("entering recursive skip-math")
+                    skip_rest_math(words, macros, single_dollar=True)
+                    if debug:
+                        print("leaving recursive skip-math")
+                    continue
+            if (w == "\\)" or w == "\\]") and w not in macros:
+                break
+            elif (w == "\\(" or w == "\\[") and w not in macros:
+                skip_rest_math(
+                    words,
+                    macros,
+                    single_dollar=(w == "\\("),
+                    debug=debug,
+                    verbose=verbose,
+                )
+            elif w == ".":
+                final_period = True
+            elif w == "\\end":
+                if words:
+                    env_name_words = get_arg(words)
+                    env_name = "".join(env_name_words)
+                    if env_name.startswith("proof"):
+                        # oops...hit the end of the proof while we're still
+                        # in math mode. abort! abort!
+                        words.prepend("\\end", "{", *env_name_words, "}")
+                        break
+            elif w == "\\label":
+                skip_optional_arg(words, macros)
+                get_arg(words)
+            elif w == "\\eqno" or w == "\\leqno":
+                # Make eq. no. doesn't confuse our "final period" flag.
+                skip_rest_math(
+                    words,
+                    macros,
+                    single_dollar=False,
+                    debug=debug,
+                    verbose=verbose,
+                )
+                break
+            elif w == "\\begin":
+                get_arg(words)
+                skip_optional_arg(words, macros)
+                final_period = skip_rest_env(words, macros)
+            elif w == "}":
+                # Something weird; too many right braces.
+                # Maybe this was {$} in an argument
+                # to something?  Pretend we didn't see math.
+                return False
+
+            elif not w.isspace() and not w.startswith("\\"):
+                final_period = False
+
+            elif w == "\\ifmmode":
+                # Usually we assume all conditionals except \iftrue
+                # are false, but if we're skipping math,
+                # we're probably in math mode.
+                pass
+
+            elif w.startswith("\\") or w in macros:
+                execute(w, words, macros, nomath=False, debug=debug)
+
+    return final_period
+
+
+def skip_rest_env(words, macros, stop_at=None) -> bool:
+    r"""
+    Skip to past the \end{...} of the environment we are in.
+
+    Returns whether the last printable character of the enviroment
+    is a period (heuristically).
+    """
+    nwords_seen = 0
+    final_period = False
+    env_nesting = 1
+    tag = random.random()
+    while words:
+        w = next(words)
+        # print("ske", w, tag, stop_at)
+        # if stop_at:
+        #   print("".join(words[:80]))
+        nwords_seen += 1
+        if nwords_seen >= 400_000 and stop_at is None:
+            print("skip_rest_env", nwords_seen)
+            raise SkipThisProof
+
+        if w == "\\begin" and stop_at is None:
+            get_arg(words)
+            skip_optional_arg(words, macros)
+            env_nesting += 1
+        elif w == "\\end":
+            env_name = "".join(get_arg(words))
+            env_nesting -= 1
+            if (env_nesting == 0 and stop_at is None) or env_name == stop_at:
+                break
+
+        elif w == ".":
+            final_period = True
+        elif w == "\\label" and stop_at is None:
+            get_arg(words)
+        elif not w.isspace() and not w.startswith("\\"):
+            final_period = False
+        elif (w.startswith("\\") or w in macros) and stop_at is None:
+            execute(w, words, macros, nomath=False, debug=False)
+
+    return final_period
+
+
+def get_filename(words) -> str:
+    """Look for something that might be a filename."""
+    if words.peek() == "{":
+        return "".join(get_arg(words))
+    elif words.peek() == '"':
+        words.next()
+        components: List[str] = []
+        while True:
+            w = next(words)
+            if w == '"':
+                return "".join(components)
+            components.append(w)
+    else:
+        components = []
+        while not words.peek("!").isspace():
+            components.append(next(words))
+        return "".join(components)
+
+
+def try_skip_keywords(words, keywords) -> bool:
+    """Look for 0 or more alphanumeric keywords from a list of keywords."""
+    # Don't skip whitespace unless we find the keyword
+    kws = list(keywords) + [" " + kw for kw in keywords]
+    # print("tsw", " ".join(words[:15]), keywords)
+    for kw in kws:
+        if "".join(words[: len(kw)]) == kw:
+            for _ in kw:
+                next(words)
+            return True
+    return False
+
+
+def skip_int(words):
+    """Skip an integer."""
+    if words.peek("x") == " ":
+        next(words)
+    if words.peek("x") == "-":
+        next(words)
+    while words.peek("x").isdigit():
+        next(words)
+    return
+
+
+def try_assign(words, allow_space: bool = False) -> bool:
+    """
+    Look for potential assignment statement RHS.
+
+    See if this is something that syntactically
+    seems like part of a TeX assignment statement. If so,
+    skip it (i.e., don't let the RHS show up in output).
+    """
+    # print("try_assign: ", " ".join(words[:15]))
+    if words.peek("") in (["=", " "] if allow_space else ["="]):
+        w2 = words[:2]
+        if len(w2) < 2:
+            return False
+        elif w2[1].isdigit() or w2[1] in ["-", "."]:
+            next(words)  # Drop the '=' (or ' ')
+        elif w2[1] == "{":
+            next(words)  # Drop the '=' (or ' ')
+            get_arg(words)
+            return True
+        else:
+            return False
+    if words.peek("x").isdigit() or words.peek("x") in ["-", "."]:
+        if words.peek("x") != ".":
+            skip_int(words)
+        # decimal?
+        if words.peek("x") in [".", ","]:
+            next(words)  # skip the '.'
+            skip_int(words)
+        # Skip units
+        try_skip_units(words)
+        # print("  try_assign", " ".join(words[:15]))
+        return True
+    else:
+        return False
+
+
+def try_skip_units(words):
+    """Skip optional dimensional units, e.g., pt or true cm."""
+    try_skip_keywords(words, ["true"])
+    try_skip_keywords(
+        words,
+        {
+            "pt",
+            "in",
+            "mm",
+            "cm",
+            "pc",
+            "sp",
+            "em",
+            "ex",
+            "truept",
+            "truein",
+            "truecm",
+            "truecm",
+            "truepc",
+            "truesp",
+            "trueem",
+            "trueex",
+        },
+    )
+
+
+def execute(cmd, words, macros, nomath=True, debug=False):
+    """Naively attempt to interpret TeX and LaTeX commands."""
+    if cmd == "\\ensuremath":
+        get_arg(words)
+        return ["MATH"]
+
+    # Override Paul Taylor's macros
+    if cmd == "\\prooftree":
+        while next(words) != "\\endprooftree":
+            pass
+        return [" "]
+
+    # Override xy macros
+    if cmd == "\\xy" and "\\endxy" in words[:]:
+        while next(words) != "\\endxy":
+            pass
+        return [" "]
+
+    if cmd == "\\pspicture":
+        while next(words) != "\\endpspicture":
+            pass
+        return [" "]
+
+    # pictex
+    if cmd == "\\beginpicture":
+        while next(words) != "\\endpicture":
+            pass
+        return [" "]
+
+    # Override pinlabel
+    if cmd == "\\labellist":
+        while next(words) != "\\endlabellist":
+            pass
+        return [" "]
+
+    if cmd not in macros:
+        # Allow user to override these.
+        if cmd == "\\`":
+            return ["".join(get_arg(words)) + "\u0300"]
+        if cmd == "\\'":
+            return ["".join(get_arg(words)) + "\u0301"]
+        if cmd == "\\^":
+            return ["".join(get_arg(words)) + "\u0302"]
+        if cmd == "\\~":
+            return ["".join(get_arg(words)) + "\u0303"]
+        if cmd == "\\=":
+            return ["".join(get_arg(words)) + "\u0304"]
+        if cmd == "\\u" and cmd not in macros:
+            return ["".join(get_arg(words)) + "\u0306"]
+        if cmd == "\\.":
+            return ["".join(get_arg(words)) + "\u0307"]
+        if cmd == '\\"':
+            return ["".join(get_arg(words)) + "\u0308"]
+        if cmd == "\\r":
+            return ["".join(get_arg(words)) + "\u030a"]
+        if cmd == "\\H":
+            return ["".join(get_arg(words)) + "\u030c"]
+        if cmd == "\\v":
+            return ["".join(get_arg(words)) + "\u030c"]
+        if cmd == "\\c":
+            return ["".join(get_arg(words)) + "\u0327"]
+        if cmd == "\\d":
+            return ["".join(get_arg(words)) + "\u0323"]
+        if cmd == "\\k":
+            return ["".join(get_arg(words)) + "\u0328"]
+        if cmd == "\\b":
+            return ["".join(get_arg(words)) + "\u0331"]
+
+    if cmd in {
+        r"\ ",
+        r"\,",
+        r"\:",
+        r"\>",
+        "\\enspace",
+        "\\quad",
+        "\\qquad",
+        "\\bigskip",
+        "\\medskip",
+        "\\smallskip",
+        "\\eject",
+        "\\clearpage",
+        "\\cleardoublepage",
+    }:
+        return [" "]
+
+    if cmd in {
+        "\\label",
+        "\\index",
+        "\\message",
+        "\\errmessage",
+        "\\ClassInfo",
+        "\\ClassWarning",
+        "\\ClassWarningNoLine",
+        "\\ClassError",
+        "\\TBInfo",  # tugboat class
+        "\\TBWarning",
+        "\\TBError",
+        "\\TBWarningNL",
+        "\\string",  # valid but unlikely to produce anything helpful.
+        "\\linethickness",
+        "\\newsavebox",
+        "\\enlargethispage",
+        "\\special",
+        "\\rlap",
+        "\\llap",
+        "\\ding",
+        "\\nocite",
+        # mathtools
+        "\\noeqref",
+    }:
+        # ignore argument
+        get_arg(words)
+        return []
+
+    if cmd in ["\\asciiabstract", "\\epsfig", "\\psfig", "\\epsffile"]:
+        get_arg(words)
+        return [" "]
+
+    if cmd in ["\\DeclareMathSymbol", "\\mathchoice"]:
+        get_arg(words)
+        get_arg(words)
+        get_arg(words)
+        get_arg(words)
+        return []
+
+    if cmd in {"\\mathpalette", "\\fontsize"}:
+        get_arg(words)
+        get_arg(words)
+        return []
+
+    if cmd == "\\kern":
+        if words.peek() == "{":
+            get_arg(words)
+        else:
+            skip_dimen(words)
+        return [" "]
+
+    if cmd in ["\\hskip", "\\vskip"]:
+        skip_glue(words)
+        return [" "]
+
+    if cmd in {"\\hspace", "\\vspace", "\\addvspace"}:
+        # Skip optional asterisk
+        if words.peek("!") == "*":
+            next(words)
+        get_arg(words)
+        return [" "]
+
+    if cmd == "\\iftrue":
+        return []
+
+    if cmd == "\\ifdefined" and words.peek("") == "\\hyperref":
+        # Hack: make "\ifdefined\hyperref" true, to handle 1404/1404.2618
+        next(words)
+        return []
+
+    if cmd in TEX_IFS:
+        # Treat all built-in conditionals as false.
+        # (except iftrue, which we handled above)
+        skip_rest_conditional(words, macros, stop_on_else=True)
+        return []
+
+    if cmd == "\\else":
+        skip_rest_conditional(words, macros, stop_on_else=False)
+        return []
+
+    if cmd == "\\fi":
+        return []
+
+    if cmd == "\\loop":
+        # Ignore primitive loops
+        while next(words) != "\\repeat":
+            pass
+        return []
+
+    if cmd == "\\penalty":
+        # Skip an integer
+        skip_int(words)
+        return []
+
+    if cmd in ["\\hbox", "\\vbox", "\\vtop", "\\hrule", "\\vrule"]:
+        while try_skip_keywords(
+            words, ["width", "height", "depth", "to", "spread"]
+        ):
+            try_assign(words, allow_space=True)
+        return []
+
+    if cmd == "\\rule":
+        skip_optional_arg(words, macros)
+        get_arg(words)
+        get_arg(words)
+        return [" "]
+
+    if cmd == "\\raisebox":
+        get_arg(words)
+        skip_optional_arg(words, macros)
+        skip_optional_arg(words, macros)
+        return []
+
+    if cmd == "\\parbox":
+        skip_optional_arg(words, macros)
+        get_arg(words)
+        return []
+
+    if cmd in {"\\makebox", "\\framebox"}:
+        skip_optional_arg(words, macros)
+        skip_optional_arg(words, macros)
+        return []
+
+    if cmd in ["\\resizebox"]:
+        if words.peek("!") == "*":
+            next(words)
+        get_arg(words)
+        get_arg(words)
+        return []
+
+    if cmd in [
+        "\\setlength",
+        "\\addtolength",
+        "\\setcounter",
+        "\\addtocounter",
+    ]:
+        get_arg(words)
+        get_arg(words)
+        return []
+
+    if cmd in [
+        "\\advance",
+        "\\multiply",
+        "\\divide",
+    ]:
+        get_arg(words)
+        try_skip_keywords(words, ["by"])
+        skip_num(words)
+        try_skip_units(words)
+
+    if cmd == "\\setbox":
+        # Ignore "\setbox17="
+        # Ignore "\setbox\mybox="
+        # Ignore "\setbox\endbox{...}"
+        skip_ws(words)
+        if words.peek().isdigit():
+            while words.peek().isdigit():
+                next(words)
+        else:
+            next(words)
+        skip_optional_eq(words)
+        return []
+
+    if cmd in ["\\stepcounter", "\\refstepcounter"]:
+        get_arg(words)
+        return []
+
+    if cmd == "\\item":
+        skip_optional_arg(words, macros)
+        return ["CASE: "]
+
+    if cmd in ["\\paragraph", "\\subparagraph"]:
+        get_arg(words)
+        return ["CASE: "]
+
+    if cmd == "\\includegraphics":
+        skip_optional_arg(words, macros)
+        get_arg(words)
+        return [" "]
+
+    if cmd == "\\@ifnextchar":
+        # \define@key is in 1603/1603.00294
+        get_arg(words)
+        get_arg(words)
+        get_arg(words)
+        return []
+
+    if cmd == "\\define@key":
+        # 1603/1603.00294
+        get_arg(words)
+        get_arg(words)
+        skip_optional_arg(words, macros)
+        get_arg(words)
+        return []
+
+    if cmd in VERB_COMMANDS:
+        end_ch = next(words)
+        while next(words) != end_ch:
+            pass
+        return [" VERBATIM "]
+
+        # end_ch = next(words)
+        # arg: List[str] = []
+        # while True:
+        #     w = next(words)
+        #     if w == end_ch:
+        #         return "".join(arg)
+        #     else:
+        #         arg.append(w)
+
+    if cmd == "\\footnote":
+        # Footnotes can interrupt sentences, and do not necessarily
+        # contain normal "proof-like" wording.
+        get_arg(words)
+        return []
+
+    if cmd in ["\\phantom", "\\hphantom", "\\vphantom"]:
+        # Ignore invisible text
+        get_arg(words)
+        return []
+
+    if cmd in ["\\\\", "\\\\*"]:
+        skip_optional_arg(words, macros)
+        return [" "]
+
+    if cmd == "\\savebox":
+        get_arg(words)
+        if words.peek() == "(":
+            while next(words) != ")":
+                pass
+        skip_optional_arg(words, macros)
+        skip_optional_arg(words, macros)
+        get_arg(words)  # If we're saving it, it shouldn't be emitted here.
+        return []
+
+    if cmd == "\\roman":
+        get_arg(words)
+        return ["v"]
+    if cmd == "\\Roman":
+        get_arg(words)
+        return ["V"]
+    if cmd == "\\arabic":
+        get_arg(words)
+        return ["4", "2"]
+    if cmd == "\\alph":
+        get_arg(words)
+        return ["q"]
+    if cmd == "\\Alph":
+        get_arg(words)
+        return ["Q"]
+    if cmd == "\\fnsymbol":
+        get_arg(words)
+        return []
+    if cmd == "\\S":
+        return ["Section "]
+
+    if cmd == "\\ifthenelse" or cmd == "\\IfFileExists":
+        # Assume the conditional is false;
+        # remove braces around the result
+        get_arg(words)
+        get_arg(words)
+        words.prepend(*get_arg(words))
+        return []
+
+    if cmd == "\\@ifstar":
+        # Assume the conditional is _true_ (1708/1708.06228)
+        # remove braces around the result
+        w1 = get_arg(words)
+        get_arg(words)
+        words.prepend(*w1)
+        return []
+
+    if cmd == "\\write":
+        if words.peek("q").isdigit():
+            while words.peek("q").isdigit():
+                next(words)
+        else:
+            get_arg(words)
+        skip_ws(words)
+        get_arg(words)
+        return []
+
+    if cmd == "\\protected@write":
+        if words.peek("q").isdigit():
+            while words.peek("q").isdigit():
+                next(words)
+        else:
+            get_arg(words)
+        skip_ws(words)
+        get_arg(words)
+        get_arg(words)
+        return []
+
+    if cmd in macros:
+        if cmd == "\\BoxedEPSF":
+            # Hack for 0002/math0002136/zinno.tex
+            get_arg(words)
+            return []
+
+        if macros[cmd] != "frozen":
+            # print(f"calling try_expand on {cmd}")
+            expansion = try_expand(words, *macros[cmd])
+            # Filter out recursion!
+            expansion = [
+                w if w != cmd else "\\nopenopenope " for w in expansion
+            ]
+            words.prepend(*expansion)
+            # print(words[:10])
+            return []
+
+    if nomath and cmd in MATHONLY_COMMANDS:
+        print(
+            f"Oops: encountered {cmd} before "
+            f'{" ".join(words[:20])} ({os.getpid()})',
+            file=sys.stdout if debug else sys.stderr,
+        )
+        raise SkipThisProof(f"oops: encountered {cmd}")
+
+    if try_assign(words):
+        return []
+
+    return []
+
+
+def skip_to_lbrace(words):
+    """Discard tokens up to (but not including) the next left brace."""
+    while words.peek() != "{":
+        next(words)
+
+
+def get_all_proofs(
+    words,
+    directory,
+    macros,
+    verbose=False,
+    debug=False,
+    strip=True,
+    input_nesting=0,
+):
+    """
+    Collect the proofs in the paper.
+
+    Unlike the simple get_proofs, can recover from errors inside a proof;
+    we just ignore that proof and see if we can get anything from
+    the rest of the paper.
+    """
+    proofs: List[str] = []
+    while words:
+        try:
+            proofs.extend(
+                get_proofs(
+                    words,
+                    directory,
+                    macros,
+                    verbose,
+                    debug,
+                    strip,
+                    input_nesting,
+                )
+            )
+            # If get_proofs finished normally, we don't
+            # want to loop.
+            break
+        except SkipThisProof:
+            # Go to \end{proof} (which we're just guessing is the
+            # name of the enclosing environment) and loop
+            # to see if there are any more acceptable proofs?
+            print("WARNING: proof skipped")
+            skip_rest_env(words, {}, stop_at="proof")
+    return proofs
+
+
+def get_proofs(
+    words,
+    directory,
+    macros,
+    verbose=False,
+    debug=False,
+    strip=True,
+    input_nesting=0,
+):
+    """Try to get proofs from this stream of TeX tokens."""
+    if input_nesting > 5:
+        return []
+
+    tokens_at_this_level = 0
+
+    proof_nesting = 0
+    current_proof_words: List[str] = []
+    proofs: List[str] = []
+
+    tag = random.random()
+
+    while words:
+        w = next(words)
+        tokens_at_this_level += 1
+        # print(tokens_at_this_level)
+        if tokens_at_this_level > 1_000_000:
+            break
+        # print(f"{w=} {current_proof_words=} {macros=}")
+        if debug:
+            print("get_proofs: ", w, w in macros, tag, tokens_at_this_level)
+            # print(
+            #     f"get proofs: {w=} {w in macros}"
+            #     f" UPCOMING: {''.join(words[:60])}"
+            # )
+            # print(",".join(list(macros.keys())))
+
+        if w in [
+            "\\def",
+            "\\edef",
+            "\\gdef",
+            "\\xdef",
+        ]:
+            name, parameters, body = get_primitive_def(words, debug, verbose)
+            if body is not None and name is not None:
+                optional_arg = None
+                if name in macros and macros[name] == "frozen":
+                    pass
+                elif (
+                    name in TEX_REFS and TEX_REFS[name] == len(parameters) - 1
+                ):
+                    pass
+                else:
+                    macros[name] = (parameters, optional_arg, body)
+                # print("defined ", name, macros[name])
+
+        elif w in ["\\input", "\\include"]:
+            # I saw one file that just had a bare \input with no filename.
+            #  (0103/math0103176/paper.tex)
+            # Try not to crash.
+            fn = Path(get_filename(words).lower())
+            if fn.stem not in IGNORED_INCLUDES and not in_TeX_path(fn.name):
+                subfname: Path = directory / fn
+                try:
+                    try:
+                        subwords = get_words(subfname.as_posix() + ".tex")
+                        if verbose or debug or True:
+                            print(f"  loading {subfname}.tex", file=sys.stderr)
+                    except FileNotFoundError:
+                        subwords = get_words(subfname.as_posix())
+                        if verbose or debug or True:
+                            print(f"  loading {subfname}", file=sys.stderr)
+
+                    # print("macros in", list(sorted(macros.keys())))
+                    subproofs = get_all_proofs(
+                        subwords,
+                        directory,
+                        macros,
+                        verbose,
+                        debug,
+                        strip,
+                        input_nesting + 1,
+                    )
+                    # print("macros out", list(sorted(macros.keys())))
+                    proofs.extend(subproofs)
+                except FileNotFoundError:
+                    if verbose or debug:
+                        print(
+                            f" can't process {subfname} or {subfname}.tex",
+                            file=sys.stderr,
+                        )
+
+        elif w in ["\\usepackage", "\\RequirePackage"]:
+            skip_optional_arg(words, macros)
+            filenames = "".join(get_arg(words)).split(",")
+            for filename in filenames:
+                fn = Path(filename.lower())
+                if fn.suffix == "":
+                    fn = fn.with_suffix(".sty")
+                if fn.stem in IGNORED_INCLUDES or in_TeX_path(fn.name):
+                    continue
+                subfname: Path = directory / (fn.with_suffix(".sty"))
+                try:
+                    subwords = get_words(subfname.as_posix())
+                    if verbose or debug or True:
+                        print(f"  loading {subfname}", file=sys.stderr)
+                    subproofs = get_all_proofs(
+                        subwords,
+                        directory,
+                        macros,
+                        verbose,
+                        debug,
+                        strip,
+                        input_nesting + 1,
+                    )
+                    proofs.extend(subproofs)
+                except FileNotFoundError:
+                    # Probably a standard library package
+                    # For now, we won't try to find these.
+                    pass
+
+        elif w in [
+            "\\newcommand",
+            "\\renewcommand",
+            "\\DeclareRobustCommand",
+            "\\DeclareMathOperator",
+            "\\providecommand",
+            "\\@namedef",
+        ]:
+            # Skip optional asterisk
+            if words.peek("!") == "*":
+                next(words)
+            name, parameters, optional_args, body = get_newcommand(words)
+            if body is not None:
+                if name in macros and macros[name] == "frozen":
+                    pass
+                else:
+                    macros[name] = (parameters, optional_args, body)
+
+        elif w in ["\\newcounter"]:
+            counterName = "".join(get_arg(words))
+            skip_optional_arg(words, macros)
+            macros["\\the" + counterName] = ([[]], [], ["4", "2"])
+
+        elif w in ["\\newenvironment", "\\renewenvironment"]:
+            # Skip optional asterisk
+            if words.peek("!") == "*":
+                next(words)
+            get_arg(words)  # env name
+            skip_to_lbrace(words)
+            get_arg(words)  # begin part
+            get_arg(words)  # end part
+
+        elif w in ["\\newif"]:
+            newif = next(words)
+            macros["new ifs"].append(newif)
+
+        elif w == "\\begin":
+            env_name = "".join(get_arg(words))
+            # print(f"{env_name=}", "".join(words[:20]))
+            # Skip optional argument, e.g.,
+            #   "Proof of Proposition 4.2"
+            #   or "by induction"
+            skip_optional_arg(words, macros)
+            if debug:
+                print("   ", env_name, env_name.rstrip("*"))
+                print(words[:80])
+            if env_name.startswith(("proof", "Proof")):
+                if proof_nesting == 0:
+                    current_proof_words = []
+                proof_nesting += 1
+                skip_ws(words)
+                # Some nonstandard proof environments
+                # take an extra argument instead of
+                # an noptional argument. We assume that
+                # if the \begin{proofsect} is *immediately*
+                # followed by an argument (on the same line,
+                # with no whitespace), it's skippable.
+                #
+                # I don't know if any environment needs more
+                # than one such argument, but just in case...
+                while words.peek() == "{":
+                    get_arg(words)
+
+            elif env_name.rstrip("*") in MATH_ENVS:
+                fp = skip_rest_env(words, macros)
+                if proof_nesting > 0:
+                    current_proof_words.append(" MATH ")
+                    if fp:
+                        current_proof_words.append(" . ")
+            elif env_name.rstrip("*") in DELETE_ENVS:
+                skip_rest_env(words, macros)
+            elif env_name.rstrip("*") in DELETE_UNINTERPRETED_ENVS:
+                skip_rest_env(words, {}, stop_at=env_name)
+
+        elif w == "\\end":
+            skip_ws(words)
+            if not words:
+                # plain tex \end ?
+                break
+            env_name = "".join(get_arg(words))
+            if debug:
+                print("   ", env_name)
+            if env_name.startswith(("proof", "Proof")):
+                proof_nesting -= 1
+                if proof_nesting == 0:
+                    proof = "".join(current_proof_words).strip()
+                    if proof[-1:].isalpha():
+                        proof += " ."
+                    proof = re.sub("\\s+", " ", proof)
+                    proofs.append(proof)
+                    if verbose:
+                        print("***", proof)
+            elif env_name == "document":
+                break
+
+        elif w == "\\enddocument":
+            break
+
+        elif w == "$":
+            if words.peek("!") == "$":
+                next(words)
+                single_dollar = False
+            else:
+                single_dollar = True
+            fp = skip_rest_math(
+                words, macros, single_dollar, debug=debug, verbose=verbose
+            )
+            if proof_nesting > 0:
+                current_proof_words.append("MATH")
+                if fp:
+                    current_proof_words.append(" . ")
+
+        elif (w == "\\(" or w == "\\[") and w not in macros:
+            fp = skip_rest_math(
+                words,
+                macros,
+                single_dollar=(w == "\\("),
+                debug=debug,
+                verbose=verbose,
+            )
+            if proof_nesting > 0:
+                if w == "\\(":
+                    current_proof_words.append("MATH")
+                else:
+                    current_proof_words.append(" MATH ")
+                if fp:
+                    current_proof_words.append(" . ")
+
+        elif w in TEX_REFS and w not in macros:
+            # Skip optional asterisk
+            if words.peek("!") == "*":
+                next(words)
+            skip_optional_arg(words, macros)
+            for _ in range(TEX_REFS[w]):
+                get_arg(words)
+            if proof_nesting > 0:
+                current_proof_words.append("REF")
+
+        elif w == "\\cite":
+            # Special handling for acmref variant of \cite
+            # \cite{foo}*{lemma 5}
+            # Skip optional asterisk
+            if words.peek("!") == "*":
+                next(words)
+            skip_optional_arg(words, macros)
+            get_arg(words)
+            if words.peek("!") == "*":
+                get_arg(words)
+                get_arg(words)
+            if proof_nesting > 0:
+                current_proof_words.append("CITE")
+
+        elif w in TEX_CITES:
+            # Skip optional asterisk
+            if words.peek("!") == "*":
+                next(words)
+            skip_optional_arg(words, macros)
+            get_arg(words)
+            if proof_nesting > 0:
+                current_proof_words.append("CITE")
+
+        # Since we fake "if", we might run into spurious aborts
+        # elif w == "\\endinput":
+        #     break
+
+        elif w == "\\let":
+            lhs = next(words)
+            if lhs == "\\csname":
+                lhs = ""
+                while (w := next(words)) != "\\endcsname":
+                    lhs += w
+            if debug:
+                print("  trying to define", lhs)
+            skip_optional_eq(words)
+            rhs = next(words)
+            if lhs in macros and macros[lhs] == "frozen":
+                pass
+                if debug:
+                    print("  ... definition ignored")
+            elif rhs in macros and lhs.startswith("\\"):
+                macros[lhs] = macros[rhs]
+                if debug:
+                    print(f"  ... as copy of macro {rhs}")
+            elif lhs.startswith("\\"):
+                # Hack
+                # If we rename a built-in primitive, and then redefine
+                #  that primitive, there's an awfully good chance that the
+                #  new definition will refer to the old meaning,
+                #  which (due to our naive treatment of "let" as "def"
+                #  in this case) will cause loops.
+                # So mark the renamed primitive as "frozen" to forbid
+                #  any attempt to redefine it. With luck, it won't matter
+                #  (particularly if the redefinition takes the same
+                #  number of arguments, which is common).
+                macros[rhs] = "frozen"
+                macros[lhs] = ([[]], None, [rhs])
+                if debug:
+                    print(f"  ... as macro for {rhs}")
+            else:
+                # Something weird like   \let~=\space
+                pass
+
+        elif w == "{" and words[:3] == ["e", "q", ":"]:
+            # A common mistake is to say "{eq:quadratic}"
+            # instead of "\ref{eq:quadratic}"
+            while next(words) != "}":
+                pass
+            if proof_nesting > 0:
+                current_proof_words.append("REF")
+
+        elif (w == "{" or w == "}") and strip:
+            pass
+
+        elif w.startswith("\\xymatrix"):
+            skip_to_lbrace(words)
+            get_arg(words)
+
+        # elif w == "[" and words[:2] == ["$$", "]"]:
+        #     next(words)
+        #     next(words)
+        #     pass
+
+        else:
+            if w.startswith("\\") or w in macros:
+                # There shouldn't be any math commands here, but some
+                # of the arXiv .tex files have errors, and
+                # if there's an omitted $...$ outside of any
+                # proof we're extracting, there's no need to
+                # crash.
+                potential_output = execute(
+                    w, words, macros, nomath=(proof_nesting > 0), debug=debug
+                )
+            else:
+                potential_output = [w]
+            if proof_nesting > 0:
+                if debug and potential_output:
+                    print("EMIT:", potential_output)
+                current_proof_words.extend(potential_output)
+                # Heuristic: look for MATH/DMATH followed by a
+                # capitalized word. If so, insert a period.
+                if (
+                    len(current_proof_words) >= 3
+                    and current_proof_words[-3].endswith("MATH")
+                    and current_proof_words[-2].isspace()
+                    and current_proof_words[-1][0].isalpha()
+                    and current_proof_words[-1][0].isupper()
+                    and words
+                    and words[0]
+                    and words[0][0].isalpha()
+                    and words[0][0].islower()
+                ):
+                    if debug:
+                        print("EMIT IMPLICIT: .")
+                    current_proof_words.insert(-1, ". ")
+
+    return proofs
+
+
+def process_file(
+    filename, debug=False, verbose=False, in_parallel=True, only_new=False
+):
+    """Get proofs from the named file, writing to an external file."""
+    orig_dir = Path(filename).parent
+    path = Path(re.sub(".*texes/", "proofs/", filename, count=1))
+    path.parent.mkdir(parents=True, exist_ok=True)
+    out_path = path.with_suffix(".txt")
+    err_path = path.with_suffix(".err")
+    # Optionally skip this file if the corresponding output exists
+    if only_new and (os.path.exists(out_path) or os.path.exists(err_path)):
+        return
+    print(" ", os.getpid(), filename, file=sys.stderr)
+    try:
+        words = get_words(filename)
+        macros = {"new ifs": []}
+        proofs = get_all_proofs(
+            words, orig_dir, macros, verbose=verbose, debug=debug
+        )
+
+        with out_path.open("w") as fd:
+            # print("Writing to ", out_path)
+            for proof in proofs:
+                print(proof, file=fd)
+
+    except Exception as e:
+        print("ERROR: ", filename, file=sys.stderr)
+        with err_path.open("w") as fd:
+            print("writing ", err_path)
+            print(filename, file=fd)
+            traceback.print_exc(file=fd)
+        if debug:
+            traceback.print_exc()
+        if not in_parallel and not only_new:
+            raise e
+
+
+if __name__ == "__main__":
+    nicer.make_nice()
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-d", "--debug", help="Show tracing output", action="store_true"
+    )
+    # parser.add_argument(
+    #     "-e", "--elide", help="Elide math", action="store_true"
+    # )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        help="Echo emitted characters to terminal",
+        action="store_true",
+    )
+    parser.add_argument(
+        "-m", "--matches", help="Take a list of files", action="store_true"
+    )
+    parser.add_argument(
+        "-s", "--serial", help="Run serially", action="store_true"
+    )
+    parser.add_argument(
+        "-n", "--new", help="Skip input if output exists", action="store_true"
+    )
+
+    parser.add_argument("files", nargs="+")
+    args = parser.parse_args()
+
+    if args.matches:
+        tex_files: List[str] = []
+        for match_file in args.files:
+            with open(match_file) as f:
+                tex_files.extend(
+                    s.strip() for s in f.readlines() if not s.startswith("#")
+                )
+    else:
+        tex_files = args.files
+
+    os.makedirs("proofs", exist_ok=True)
+
+    if args.new:
+        print(f"prescanning {len(tex_files)} files")
+        new_tex_files = []
+        for filename in tex_files:
+            path = Path(re.sub(".*texes/", "proofs/", filename, count=1))
+            out_path = path.with_suffix(".txt")
+            err_path = path.with_suffix(".err")
+            if not (os.path.exists(out_path) or os.path.exists(err_path)):
+                new_tex_files.append(filename)
+        tex_files = new_tex_files
+        print(f"found {len(tex_files)} new files")
+        with open("matches", "w") as fd:
+            for filename in tex_files:
+                print(filename, file=fd)
+
+    if len(tex_files) > 1 and not args.serial:
+        with Pool(processes=4) as p:
+            # p.map(pf, tex_files, 1)
+            p.starmap(
+                process_file,
+                zip(
+                    tex_files,
+                    repeat(args.debug),
+                    repeat(args.verbose),
+                    repeat(True),
+                    repeat(args.new),
+                ),
+            )
+    else:
+        for tex_file in tex_files:
+            process_file(
+                tex_file,
+                debug=args.debug,
+                verbose=args.verbose,
+                in_parallel=False,
+                only_new=args.new,
+            )
+        # except SystemExit as exn:
+        #     print(f"\nError: {exn}")
+        #     print("-----")
+        #     for f, l, c in zip(
+        #         state.current_files,
+        #         state.line_numbers,
+        #         state.token_numbers,
+        #     ):
+        #         print(f"file {f}, line {l}, token {c}")
