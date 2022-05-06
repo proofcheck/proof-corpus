@@ -103,8 +103,39 @@
    
    And if you just want to do 2008,
 
-       ./cleanup.py proofs00.raw > proofs00.txt
+       time ./cleanup.py proofs00.raw > proofs00.txt
 
-       ./cleanup.py proofs08.raw > proofs08.txt
+       time ./cleanup.py proofs08.raw > proofs08.txt
    
+## Splitting into Sentences
+
+1. There are a couple scripts with different ways of splitting proofs into individual sentences
+   (one per line). At the moment, I think sentize2.py does a reasonable job, and processes around 8 or 9 thousand 
+   proofs per second.
+   
+   For one year's (cleaned) proofs:
+   
+        time ./sentize2.py proofs08.txt > sent08.txt
+        
+   Or to do all years:
+   
+        foreach y (`seq 92 99` `seq -w 0 20`)
+          ./sentize2.py proofs$y.txt > sent$y.txt &
+        end
+        wait
+   
+2. One thing we can do with sentences is to sort them (shuffling parts of different proofs together),
+   and then use `uniq` to count how many times each sentence occurs, e.g.,
+   
+        sort sent08.txt | uniq -c | head -100
+        
+   so see counts for the first 100 sentences alphabetically.
+   
+   More interestingly, we can take that output and 
+   sort by number of occurrences to find the top-200 most 
+   common sentence forms:
+   
+        sort sent08.txt | uniq -c | sort -rn | head -200
+   
+        
 
