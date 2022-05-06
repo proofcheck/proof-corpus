@@ -1,0 +1,8 @@
+bs4
+charset-normalizer
+langdetect
+more-itertools
+nltk
+psutil
+spacy
+
