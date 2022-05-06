@@ -2,13 +2,15 @@
 
 ## Setup
 
-0. On a CS machine, create a personal directory inside `/research/proofcheck'. Clone this repository into that folder.
+0. On a CS machine, create a personal directory inside `/research/proofcheck`. Clone this repository into that folder.
 
-1. Create a virtual environment for this project.  `cd` inside the cloned repository and run
+1. Create a virtual environment `.venv` for this project in the cloned repository:
 
+        cd proof-corpus
         python -m venv .venv
-
-    to create a Python "virtual environment" in the `.venv` subdirectory.
+        
+   The virtual environment is a "local" version of Python; we can install whatever packages 
+   into this environment without affecting any other users.
 
 2. Activate the Python virtual environment by running
 
