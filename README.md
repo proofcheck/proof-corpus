@@ -74,19 +74,37 @@
 
 1. Here's a quick and dirty way to get the proofs from each year into a single file (assuming `zsh` is your shell):
 
+        rm -f proofs*.raw
         foreach y (`seq 92 99` `seq -w 0 20`)
-          find proofs/$y* -type f -name "*.txt" -print0 | sort -z | xargs -0 cat >! proofs$y.raw.txt
+          find proofs/$y* -type f -name "*.txt" -print0 | xargs -0 cat >! proofs$y.raw
         end
 
-   This creates files `proofs92.raw.txt`, `proofs93.raw.txt`, ..., `proofs20.raw.txt' for the years 1992-2020,
+   This creates text files `proofs92.raw`, `proofs93.raw`, ..., `proofs20.raw' for the years 1992-2020,
    with one proof per line.
-   
-2. To run the ad-hoc cleanup script on each of these files, we can do 
 
+   If you just want to do 2000 or 2008, though
+
+        find proofs/00* -type f -name "*.txt" -print0 | xargs -0 cat >! proofs00.raw
+
+        find proofs/08* -type f -name "*.txt" -print0 | xargs -0 cat >! proofs08.raw
+   
+
+2. To run the ad-hoc cleanup script on each of these files (in parallel), we can do 
+
+        rm -f proofs*.txt
         foreach y (`seq 92 99` `seq -w 0 20`)
-          ./cleanup.py proofs$y.raw > proofs$y.txt
+          ./cleanup.py proofs$y.raw > proofs$y.txt &
         end
+        wait
 
    This creates files `proofs92.txt`, `proofs93.txt`, ..., `proofs20.txt' for the years 1992-2020,
-   with one proof per line.
+   with one proof per line. (It can take up to an hour, but fortunately `cleanup.py` also nices itself
+   so it's OK as a long-running process.)
+   
+   And if you just want to do 2008,
+
+       ./cleanup.py proofs00.raw > proofs00.txt
+
+       ./cleanup.py proofs08.raw > proofs08.txt
+   
 
