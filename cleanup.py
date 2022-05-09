@@ -1,17 +1,6 @@
 #!/usr/bin/env python
-"""Extracts proofs from .tex files, naively."""
+"""Cleans up extracted proofs."""
 
-## Preliminary step: find the English proofs.
-#
-# foreach y (`seq 92 99` `seq -w 0 20`)
-# find proofs/$y* -type f -name "*.txt" -print0 | sort -z | xargs -0 ./en_cat.py >! proofs$y.raw 2> noneng$y.txt
-# end
-
-## Delete the others
-#
-# grep -h proofs noneng*.txt | tr \\n \\0 | xargs -0 rm
-
-## Optional: rebuild the combined proofs (faster)_
 # foreach y (`seq 92 99` `seq -w 0 20`)
 # find proofs/$y* -type f -name "*.txt" -print0 | sort -z | xargs -0 cat >! proofs$y.raw.txt
 # end
@@ -30,6 +19,7 @@ import re
 import sys
 import unicodedata
 
+import nicer
 
 # Uppercase letters (including non-ASCII)
 upperLetter = "[{}]".format(
@@ -701,6 +691,8 @@ def cleanup(filename, proof, debug=False):
 
 
 if __name__ == "__main__":
+    nicer.make_nice()
+
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-d", "--debug", help="Show tracing output", action="store_true"
