@@ -3,17 +3,15 @@
 """Extracts proofs from .tex files, naively."""
 
 import argparse
-import functools
 from itertools import repeat
 from multiprocessing import Pool
 import os
 from pathlib import Path
 import random
 import re
-import subprocess  # nosec
 import sys
 import traceback
-from typing import List, cast, Optional
+from typing import List, Optional
 
 import bs4
 import more_itertools
@@ -44,9 +42,6 @@ class SkipThisProof(Exception):
 
     pass
 
-
-# Regular expression for a LaTeX comment.
-TEX_COMMENT = re.compile(r"(?<!\\)%.*?\n[ \t]*")
 
 # Set of LaTeX environments that implicitly switch to math mode.
 MATH_ENVS = {
@@ -202,6 +197,7 @@ DELETE_UNINTERPRETED_ENVS = {
     "picture",
     "tikzpicture",
     "pspicture",
+    "overpic",
     # Other
     "comment",
     "filecontents",
@@ -209,6 +205,9 @@ DELETE_UNINTERPRETED_ENVS = {
     "xy",
     # 1811/1811.04372
     "DGCpicture",
+    # 1007.4266
+    # 1005.5278
+    "haskell",
 }
 
 
@@ -376,14 +375,45 @@ IGNORED_INCLUDES = {
     "sw20bams",  # 0102/math-ph0102018
     "warmread",  # 0601/math0601187
     "wick",  # 0109/hep-th0109182
+    "haskell",  # 1007.4266 1005.5278
 }
+
+
+# Regular expression for a LaTeX comment.
+# The comment runs from the percent sign to the end of line
+#   (and the following whitespace on the next line).
+#
+# But escaped percents (preceeded by a backslash) aren't comments.
+# But comments following two backslashes (or an even number of backslashes)
+#   are still comments.
+# So:
+#    % comment
+#    \% not a comment
+#    \\% comment
+#    \\\% not a comment
+#    \\\\% comment
+# but
+#    \\\ \% not a comment
+#    \ \\\% not a comment
+#
+# Assumes every line in this multiline string ends with a newline!
+TEX_COMMENT = re.compile(r"((?<!\\)(\\\\)+|(?<!\\))%.*?\n[ \t]*")
+
+
+def decomment(tex_source: str) -> str:
+    """
+    Delete all TeX comments from multiline source code.
+
+    Assumes every line (including the last) ends with \n.
+    """
+    return re.sub(TEX_COMMENT, "", tex_source)
 
 
 def tokenize_string(tex_source: str):
     """
     Turn a string (representing an entire file) into a stream of TeX-ish words.
 
-    This is a generator function returning strings.
+    This is a generator function returning strings (tokens).
     """
     # Remove a few known-bad lines
 
@@ -401,7 +431,7 @@ def tokenize_string(tex_source: str):
     tex_source = tex_source.replace("\r", "\n")
 
     # Remove all the comments
-    tex_source = re.sub(TEX_COMMENT, "", tex_source)
+    tex_source = decomment(tex_source)
 
     # Insert "\par" where there were blank lines
     tex_source = re.sub("^[ \\t]*$", "\\\\par", tex_source, flags=re.MULTILINE)
@@ -412,7 +442,7 @@ def tokenize_string(tex_source: str):
     while chars:
         # Start building the next input word by grabbing
         # a single charcter.
-        word: str = cast(str, next(chars))
+        word: str = next(chars)
         if word == "\\":
             word += next(chars)
             # It's a command
@@ -462,9 +492,9 @@ def tokenize_string(tex_source: str):
                 next(chars)
                 if chars.peek("!") == "-":
                     next(chars)
-                    word == "—"  # em-dash
+                    word = "—"  # em-dash
                 else:
-                    word == "–"  # en-dash
+                    word = "–"  # en-dash
         yield word
     return
 
@@ -473,7 +503,7 @@ def get_words(filename: str):
     """Get a stream of words from the given file."""
     with open(filename, "r") as fh:
         try:
-            tex_source = fh.read()
+            tex_source: str = fh.read()
         except UnicodeDecodeError:
             with open(filename, "rb") as f:
                 tex_bytes = f.read()
@@ -485,13 +515,13 @@ def get_words(filename: str):
     return more_itertools.peekable(tokenize_string(tex_source))
 
 
-def skip_ws(words):
+def skip_ws(words: "more_itertools.peekable[str]"):
     """Skip whitespace characters."""
     while words.peek("!").isspace():
         next(words)
 
 
-def get_arg(words) -> List[str]:
+def get_arg(words: "more_itertools.peekable[str]") -> List[str]:
     """Get a single macro argument."""
     skip_ws(words)
     w = next(words)
@@ -516,7 +546,7 @@ def get_arg(words) -> List[str]:
     return arg
 
 
-def skip_optional_eq(words):
+def skip_optional_eq(words: "more_itertools.peekable[str]"):
     """Skip whitespace, plus an equals-sign & more whitespace if present."""
     skip_ws(words)
     if words.peek("!") == "=":
@@ -524,7 +554,7 @@ def skip_optional_eq(words):
         skip_ws(words)
 
 
-def skip_optional_arg(words, macros):
+def skip_optional_arg(words: "more_itertools.peekable[str]", macros):
     """Skip an optional (bracketed) argument, if present."""
     if words.peek("!") == "[":
         next(words)
@@ -536,7 +566,7 @@ def skip_optional_arg(words, macros):
         skip_rest_optional_arg(words, macros)
 
 
-def skip_rest_optional_arg(words, macros):
+def skip_rest_optional_arg(words: "more_itertools.peekable[str]", macros):
     """Skip to the end of the bracketed argument we're currently in."""
     while True:
         w = next(words)
@@ -558,7 +588,7 @@ def skip_rest_optional_arg(words, macros):
             break
 
 
-def get_optional_arg(words):
+def get_optional_arg(words: "more_itertools.peekable[str]"):
     """Get one optional macro argument."""
     w = next(words)
     assert w == "["  # nosec
@@ -577,7 +607,9 @@ def get_optional_arg(words):
     return arg
 
 
-def skip_rest_conditional(words, macros, stop_on_else=True):
+def skip_rest_conditional(
+    words: "more_itertools.peekable[str]", macros, stop_on_else: bool = True
+):
     r"""
     Skip the rest of the conditional arm we are currently inside.
 
@@ -597,7 +629,7 @@ def skip_rest_conditional(words, macros, stop_on_else=True):
             skip_rest_conditional(words, macros, stop_on_else=False)
 
 
-def skip_num(words):
+def skip_num(words: "more_itertools.peekable[str]"):
     """Skip a (decimal) integer or float number."""
     skip_ws(words)
     # Funny numbers like `\@
@@ -619,7 +651,7 @@ def skip_num(words):
         next(words)
 
 
-def skip_dimen(words):
+def skip_dimen(words: "more_itertools.peekable[str]"):
     """Skip a TeX dimension (with unit)."""
     skip_num(words)
     skip_ws(words)
@@ -649,14 +681,18 @@ def skip_dimen(words):
     return
 
 
-def skip_glue(words):
+def skip_glue(words: "more_itertools.peekable[str]"):
     """Skip TeX glue (dimension with optional stretch/shrink)."""
     skip_dimen(words)
     while try_skip_keywords(words, ["plus", "minus"]):
         skip_dimen(words)
 
 
-def get_primitive_def(words, debug=False, verbose=False):
+def get_primitive_def(
+    words: "more_itertools.peekable[str]",
+    debug: bool = False,
+    verbose: bool = False,
+):
     r"""
     Process the contents of a \def.
 
@@ -777,7 +813,7 @@ def get_newcommand(words):
     skip_ws(words)
     # print(" definition getting body from", "".join(words[:100]))
     body = get_arg(words)
-    # print(f"Saw ndef {name} {num_params} {optional_param} {body}")
+    # print(f"Saw ndef {name} {num_params} {parameters} {optional_param} {body}")
     return name, parameters, optional_param, body
 
 
@@ -803,13 +839,16 @@ def try_expand(words, parameters, optional_param, body):
             param_dict["#1"] = get_optional_arg(words)
         else:
             param_dict["#1"] = optional_param
+        first_required = 2
+    else:
+        first_required = 1
     # handle required args
     # primitive tex initial delimeter
     for expected_tok in parameters[0]:
         found_tok = next(words)
         if expected_tok != found_tok:
             return []
-    for arg_num, delim in enumerate(parameters[1:], start=1):
+    for arg_num, delim in enumerate(parameters[1:], start=first_required):
         parameter_token = "#" + str(arg_num)
         if delim:
             param_dict[parameter_token] = []
@@ -842,7 +881,6 @@ def try_expand(words, parameters, optional_param, body):
             words.prepend(*param_dict[parameter_token])
             return []
 
-    # print(f"{param_dict=}")
     substituted_body = []
     for tok in body:
         if tok in param_dict:
@@ -1268,6 +1306,10 @@ def execute(cmd, words, macros, nomath=True, debug=False):
         next(words)
         return []
 
+    if cmd in ["\\hyperlink", "\\hypertarget"]:
+        get_arg(words)  # skip a label
+        return []
+
     if cmd in TEX_IFS:
         # Treat all built-in conditionals as false.
         # (except iftrue, which we handled above)
@@ -1373,9 +1415,15 @@ def execute(cmd, words, macros, nomath=True, debug=False):
         get_arg(words)
         return ["CASE: "]
 
-    if cmd == "\\includegraphics":
+    if cmd in ["\\includegraphics", "\\marginpar"]:
         skip_optional_arg(words, macros)
         get_arg(words)
+        return [" "]
+
+    if cmd == "\\marginnote":
+        skip_optional_arg(words, macros)
+        get_arg(words)
+        skip_optional_arg(words, macros)
         return [" "]
 
     if cmd == "\\@ifnextchar":
@@ -2056,6 +2104,9 @@ if __name__ == "__main__":
                     repeat(True),
                     repeat(args.new),
                 ),
+                100  # let's try handing out files to CPUs
+                # in chunks of 100 (rather than the default
+                # which is approximately num-files / CPUS / 4)
             )
     else:
         for tex_file in tex_files:
