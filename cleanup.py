@@ -5,7 +5,7 @@
 # find proofs/$y* -type f -name "*.txt" -print0 | sort -z | xargs -0 cat >! proofs$y.raw.txt
 # end
 
-## Cleanup each of the years of English proofs
+# Cleanup each of the years of English proofs
 # foreach y (`seq 92 99` `seq -w 0 20`)
 # ./cleanup.py proofs$y.raw > proofs$y.txt
 # end
@@ -17,6 +17,7 @@
 import argparse
 import re
 import sys
+from typing import List, Match
 import unicodedata
 
 import nicer
@@ -117,7 +118,7 @@ with open("known_names.txt") as fd:
     known_names.add("gau")
 
 
-def splitMATH(proof, debug=False):
+def splitMATH(proof: str, debug: bool = False):
     """Break MATHsystem into MATH system, etc."""
     # GF$(2)$ -> GFMATH -> MATH
     # sinceMATH -> since MATH
@@ -134,7 +135,7 @@ def splitMATH(proof, debug=False):
     return proof
 
 
-def ner(proof, debug=False):
+def ner(proof: str, debug: bool = False):
     """Replace names with NAME."""
     # Joe, Joe's, Joes', Riesz'
     # Allow trailing ' only if there' no matching ` scare-quote
@@ -146,8 +147,8 @@ def ner(proof, debug=False):
         "((?:\\w'\\w|\\w)+\\w(?:'s\\b|'h\\b|'e\\b)?)"
     )
 
-    def lookup(g):
-        w = g.group(0)
+    def lookup(g: Match):
+        w: str = g.group(0)
         # print("NER?", w)
         # Check that it's capitalized,
         # but not because of MATH token
@@ -531,7 +532,9 @@ def cleanup(filename, proof, debug=False):
     )
     # We proceed in steps. 1. Let x be -> ...steps. CASE: Let x be
     proof = re.sub(
-        f"(^|[.;:\\])] ){atomicID}\\. ({upperLetter})", "\\1CASE: \\2", proof,
+        f"(^|[.;:\\])] ){atomicID}\\. ({upperLetter})",
+        "\\1CASE: \\2",
+        proof,
     )
     if debug:
         print(1400, proof)
@@ -690,6 +693,19 @@ def cleanup(filename, proof, debug=False):
     return proof
 
 
+def clean_proofs(orig: List[str], debug=False, filename="<unknown>"):
+    clean = unicodedata.normalize("NFKC", orig)
+    if debug:
+        print("0000", clean)
+    clean = splitMATH(clean, debug)
+    clean = ner(clean, debug)
+    if debug:
+        print("0200", clean)
+    clean = cleanup(filename, clean, debug)
+    # clean = remove_extra_rparens(clean)
+    return clean
+
+
 if __name__ == "__main__":
     nicer.make_nice()
 
@@ -703,15 +719,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     for orig in args.file.readlines():
-        clean = unicodedata.normalize("NFKC", orig)
-        if args.debug:
-            print("0000", clean)
-        clean = splitMATH(clean, debug=args.debug)
-        clean = ner(clean, debug=args.debug)
-        if args.debug:
-            print("0200", clean)
-        clean = cleanup(args.file, clean, debug=args.debug)
-        # clean = remove_extra_rparens(clean)
+        clean = clean_proofs(orig, args.debug, args.file)
         if args.debug:
             print()
             print(orig.strip())
