@@ -24,6 +24,7 @@ import nicer
 STUCK_ITERS = 20  # how many display iterations before we declare a file stuck"
 SLOW_ITERS = 8  # how many display iterations before we declare a file slow
 SECONDS_PER_ITERATION = 1
+REFRESH_INTERVAL = 60   # completely redraw the screen every this many iterations
 
 
 def display_loop(stdscr, fd):
@@ -39,30 +40,42 @@ def display_loop(stdscr, fd):
     # encountered.
     worklog: dict[str, Tuple[str, int]] = {}
 
+    maxy, maxx = stdscr.getmaxyx()
+
     while True:
         # Read the next line of the file
         line: str = fd.readline()
         if line:
             # A process has started a new file if we find a line
             # that contains just a number and a filename (with whitespace)
-            m = re.fullmatch(r"\s*(\d+)\s*(.*?)\s*", line)
+            m = re.fullmatch(r"\s*(\d{1,5})\s+(.*?)\s*", line)
             if m:
                 # Process is working on a new file; update the worklog
                 pid = m.group(1)
                 file = m.group(2)
                 worklog[pid] = (file, display_iter)
         else:
+            if curses.is_term_resized(maxy, maxx):
+                stdscr.clear()
+                maxy, maxx = stdscr.getmaxyx()
+                curses.resizeterm(maxy, maxx)
+                resized_term = True
+            else:
+                resized_term = False
             # We've reached the end of the log file (for the moment!)
             # so it's a good time to update the display.
             row = 2
             for pid, (current_file, n) in sorted(worklog.items()):
                 # To facilitate copying-and-pasting filenames while the
                 # screen is updating, only redraw the lines that have
-                # changed since the last updated
-                updated_line = False
+                # changed since the last updated (or if we're redrawing
+                # everything)
+                updated_line = (resized_term or
+                    display_iter % REFRESH_INTERVAL == 0)
+                flag = "  "
                 if display_iter - n == 0:
                     # new file for this process
-                    flag = "  "
+                    # flag = "  "
                     updated_line = True
                 elif display_iter - n == SLOW_ITERS:
                     # mark process as slow
@@ -72,11 +85,12 @@ def display_loop(stdscr, fd):
                     # mark process as (potentially) stuck
                     flag = "!!"
                     updated_line = True
-                if updated_line:
+
+                if updated_line and row < maxy:
                     # Update this line
                     stdscr.addstr(row, 2, f"{flag} {pid:5} {current_file}")
-                    # In case this filename is shorter than the previous filename,
-                    # clear the rest of the line
+                    # In case this filename is shorter than the previous
+                    # filename, clear the rest of the line
                     stdscr.clrtoeol()
                 row += 1
 
