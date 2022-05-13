@@ -24,11 +24,39 @@ if __name__ == "__main__":
                 #     continue
                 text = line.strip()
                 sents: List[str] = list(sent_tokenizer.tokenize(text))
-                # Remove parentheses around parenthesized sentences
+                sent_tokens: List[List[str]] = []
                 for sent in sents:
-                    if sent[0] == "(" and sent[-1] == ")":
-                        interior = sent[1:-1]
-                        if "(" not in interior and ")" not in interior:
-                            sent = interior
-                    words = word_tokenizer.tokenize(sent)
+                    if sent[0] == "(":
+                        if sent[-1] == ")":
+                            interior = sent[1:-1]
+                            if "(" not in interior and ")" not in interior:
+                                sent = interior
+                        elif sent[-2:] == ").":
+                            interior = sent[1:-2]
+                            if "(" not in interior and ")" not in interior:
+                                sent = interior.strip() + " ."
+                        elif sent[-3:] == ") .":
+                            interior = sent[1:-3]
+                            if "(" not in interior and ")" not in interior:
+                                sent = interior.strip() + " ."
+
+                    words: List[str] = word_tokenizer.tokenize(sent)
+
+                    # So, the NLTK tokenizer spents sentences too eagerly in
+                    # phrases like "there are no r.v.'s in the range, ..."
+                    # giving us "there are no r.v." and "'s in the range..."
+                    #
+                    # Look for these sorts of splits and un-merge them.
+                    if not words:
+                        continue
+                    if words[0] == "'s" and sent_tokens:
+                        sent_tokens[-1] = (
+                            sent_tokens[-1][:-1]
+                            + [sent_tokens[-1][-1] + words[0]]
+                            + words[1:]
+                        )
+
+                    else:
+                        sent_tokens += [words]
+                for sent in sents:
                     print(" ".join(words))
