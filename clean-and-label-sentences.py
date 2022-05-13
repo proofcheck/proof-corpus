@@ -36,7 +36,7 @@ if __name__ == "__main__":
                     # if re.search(suspicious, line):
                     #     continue
                     text = line.strip()
-                    text = cleanup.clean_proofs(text)
+                    text = cleanup.clean_proof(text)
                     sents: List[str] = list(sent_tokenizer.tokenize(text))
                     # Remove parentheses around parenthesized sentences
                     for sent in sents:

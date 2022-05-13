@@ -10,7 +10,7 @@
 # ./cleanup.py proofs$y.raw > proofs$y.txt
 # end
 
-## With GNU Parallel
+# If you have GNU Parallel installed,
 # parallel "./cleanup.py proofs{}.raw >! proofs{}.txt" ::: `seq 92 99` `seq -w 0 20`
 
 
@@ -22,29 +22,34 @@ import unicodedata
 
 import nicer
 
-# Uppercase letters (including non-ASCII)
+# Regular expression for uppercase letters (as a string)n
+#   equivalent to "[A-Z]" but also including non-ASCII
 upperLetter = "[{}]".format(
     "".join([chr(i) for i in range(sys.maxunicode) if chr(i).isupper()])
 )
 
-# Uppercase letters (including non-ASCII)
+# Regular expression for lowercase letters (as a string)n
+#   equivalent to "[a-z]" but also including non-ASCII
 lowerLetter = "[{}]".format(
     "".join([chr(i) for i in range(sys.maxunicode) if chr(i).islower()])
 )
 
-# 42, 5a, 4.1bc, 1.C. 3-5
+# Regular expression (as a string) for anything of the form
+#     42, 5a, 4.1bc, 1.C. 3-5, ...
 numAlpha = "(?:(?![.])[a-zA-Z0-9.]*\\d[a-zA-Z0-9.-]*(?<![.]))"
 
-# 3,  5a, IV, i, xii, ..., A, a, 1.C  eq:symmetric
+# Regular expression (as a string) for anything of the form
+#    3,  5a, IV, i, xii, ..., A, a, 1.C  eq:symmetric
 atomicID = (
     f"(?:(?<![.])(?:{numAlpha}|[IVX]+|[ivx]+|"
     f"\\b[A-Z][A-Z]?\\b|\\b[a-z]\\b|\\bREF\\b|\\(REF\\))(?![.]\\S)|"
     f"\\b(?:eq|thm|fig):[A-Za-z0-9][A-Za-z0-9:]*)"
 )
 
-# (3), (3.5), (3.5.2), (3.5a), (I), (IV), (i), (iv), (IV.4), (a), (A),...
-# (E MATH) (L-MATH)
-# also [3], [iii], [iv.4], etc.  And [(3)], etc.
+# Regular expression (as a string) for anytinng of the form
+#    (3), (3.5), (3.5.2), (3.5a), (I), (IV), (i), (iv), (IV.4), (a), (A),...
+#    (E MATH), (L-MATH)
+#    [3], [iii], [iv.4], etc.  And [(3)], etc.
 parenID = (
     f"(?:(?:\\({atomicID}(?:\\.{atomicID})*\\))|"
     f"(?:\\[{atomicID}(?:\\.{atomicID})*\\])|"
@@ -73,36 +78,16 @@ theorem_word = (
 )
 
 
-"""
-def remove_extra_rparens(proof):
-    nesting = 0
-    chs = []
-    for ch in proof:
-        if ch == "(":
-            nesting += 1
-        elif ch == ")":
-            if re.match(r" [a-zA-Z]", "".join(chs[-2:])):
-                # extra right paren; drop it
-                continue
-            elif nesting == 0:
-                # Extra right paren; drop it
-                # (and a preceding period, if any)
-                if chs[-1:] == ["."]:
-                    chs.pop()
-                continue
-            nesting -= 1
-        chs.append(ch)
-    return "".join(chs)
-"""
-
-known_words = set()
+# A set of words that probably are words, and not someone's name.
+known_words: set[str] = set()
 with open("words_alpha.txt") as fd:
     for word in fd.readlines():
         word = word.strip()
         known_words.add(word)
     known_words.add("profinite")
 
-known_names = set()
+# A set of names that might arise in Mathy text.
+known_names: set[str] = set()
 with open("known_names.txt") as fd:
     for word in fd.readlines():
         word = word.strip()
@@ -115,20 +100,29 @@ with open("known_names.txt") as fd:
     known_names.remove("its")
     known_names.remove("small")
     known_names.remove("pick")
+    # Hack, though really we should add this to known_names.txt
     known_names.add("gau")
+
+#############
+# Functions #
+#############
 
 
 def splitMATH(proof: str, debug: bool = False):
-    """Break MATHsystem into MATH system, etc."""
-    # GF$(2)$ -> GFMATH -> MATH
-    # sinceMATH -> since MATH
-    # ( $\alpha-$decomposition -> ) MATHdecomposition -> MATH
-    # $n$-th element -> MATH th element -> MATH element
+    r"""
+    Break 'MATHsystem' (one word) into MATH system, etc.
 
-    # Same for CITE and REF, actually
+    E.g.,
+        ( GF$(2)$ -> ) GFMATH -> MATH
+        sinceMATH -> since MATH
+        ( $\alpha-$decomposition -> ) MATHdecomposition -> MATH
+        ($n$-th element -> ) MATH th element -> MATH element
+
+    Plus, do the same for CITE and REF.
+    """
     proof = re.sub("(\\w+)-?(MATH|CITE|REF)", "\\1 \\2", proof)
-    proof = re.sub("(MATH|CITE-REF)-?(\\w+)", "\\1 \\2", proof)
-    proof = re.sub("MATH (th|st|nd|rd)\\b", "MATH", proof)
+    proof = re.sub("(MATH|CITE|REF)-?(\\w+)", "\\1 \\2", proof)
+    proof = re.sub("MATH\\s*(th|st|nd|rd)\\b", "MATH", proof)
 
     if debug:
         print("0010", proof)
@@ -136,10 +130,20 @@ def splitMATH(proof: str, debug: bool = False):
 
 
 def ner(proof: str, debug: bool = False):
-    """Replace names with NAME."""
-    # Joe, Joe's, Joes', Riesz'
-    # Allow trailing ' only if there' no matching ` scare-quote
+    """
+    Replace names with 'NAME'.
+
+    E.g.,
+       Smith -> NAME
+       Smith's -> NAME 's
+       Riesz' -> NAME 's
+    """
+    # Regular expression (as string) for something that might
+    # be a name.
+    #
+    # Allows a trailing ' only if there' no matching ` scare-quote
     #    at front, and the word ends with an s sound.
+    #
     # Guivarc'h is a name.
     # I've also seen Poincar'e
     potential_name = (
@@ -147,7 +151,14 @@ def ner(proof: str, debug: bool = False):
         "((?:\\w'\\w|\\w)+\\w(?:'s\\b|'h\\b|'e\\b)?)"
     )
 
-    def lookup(g: Match):
+    def lookup(g: Match[str]) -> str:
+        """
+        Given a match that might be a string, check it out.
+
+        Returns either the string unchanged (not a name)
+        or the string "NAME". (Or, if there was a possessive
+        like "Smith's", return "NAME 's")
+        """
         w: str = g.group(0)
         # print("NER?", w)
         # Check that it's capitalized,
@@ -176,12 +187,14 @@ def ner(proof: str, debug: bool = False):
                 return g.group(0)
         return w
 
+    # Apply the lookup function to every possible name in the proof.
     proof = re.sub(potential_name, lookup, proof)
 
     if debug:
         print("0110", proof)
 
     # (van Trapp -> ) van NAME -> NAME
+    # Similarly von NAME, van de NAME, el NAME, st. NAME, ibn NAME, ...
     proof = re.sub(
         "(\\b(?i:v[oa]n|d[eo]s|de[nr]?|la|el|st\\.|ibn)\\s+)+NAME",
         "NAME",
@@ -204,7 +217,7 @@ def ner(proof: str, debug: bool = False):
         print("0125", proof)
 
     # van-Trapp -> NAME
-    def remove_upto_dash(s):
+    def remove_upto_dash(s: str) -> str:
         after_dash = s.index("-") + 1
         return s[after_dash:]
 
@@ -265,7 +278,7 @@ def ner(proof: str, debug: bool = False):
     return proof
 
 
-def treat_unbalanced_parens(filename, proof, debug=False):
+def treat_unbalanced_parens(filename: str, proof: str, debug: bool = False):
     """Look for common reasons for unbalanced ('s and )'s."""
     # Case 1) This follows by -> CASE: This follows by
     # 1) This follows by -> CASE: This follows by
@@ -312,7 +325,7 @@ def treat_unbalanced_parens(filename, proof, debug=False):
     # print(proof, file=sys.stderr, flush=True)
 
     # Delete unbalanced open parens
-    cs = []
+    cs: List[str] = []
     nesting = 0
     for c in proof:
         if c == "(":
@@ -327,7 +340,7 @@ def treat_unbalanced_parens(filename, proof, debug=False):
 
     # Delete unbalanced open parens
     # By traversing characters from the end to the beginning.
-    cs2 = []
+    cs2: List[str] = []
     nesting = 0
     for c in reversed(cs):
         if c == ")":
@@ -344,7 +357,7 @@ def treat_unbalanced_parens(filename, proof, debug=False):
     return proof
 
 
-def cleanup(filename, proof, debug=False):
+def cleanup(filename: str, proof: str, debug: bool = False):
     """Simplify proof outputs."""
     if debug:
         print("0999", proof)
@@ -391,7 +404,7 @@ def cleanup(filename, proof, debug=False):
     # QED Q.E.D. qed q.e.d -> QED .
     # QED. -> QED .
     # QED . -> QED .
-    proof = re.sub("\\b[Qq]\.?[Ee]\.?[Dd]\.?(\s\.)?", "QED .", proof)
+    proof = re.sub("\\b[Qq]\\.?[Ee]\\.?[Dd]\\.?(\\s\\.)?", "QED .", proof)
 
     # resp. -> respectively,
     proof = re.sub(
@@ -693,7 +706,7 @@ def cleanup(filename, proof, debug=False):
     return proof
 
 
-def clean_proofs(orig: List[str], debug=False, filename="<unknown>"):
+def clean_proof(orig: str, debug: bool = False, filename: str = "<unknown>"):
     clean = unicodedata.normalize("NFKC", orig)
     if debug:
         print("0000", clean)
@@ -719,7 +732,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     for orig in args.file.readlines():
-        clean = clean_proofs(orig, args.debug, args.file)
+        clean = clean_proof(orig, args.debug, args.file)
         if args.debug:
             print()
             print(orig.strip())
