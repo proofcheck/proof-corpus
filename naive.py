@@ -67,7 +67,7 @@ MATH_ENVS = {
     "myequation",
 }
 
-# Maps the LaTeX \ref-like command to its number of arguments
+# Maps each LaTeX \ref-like command to its number of arguments
 # See also https://tinyurl.com/tbj99fsp
 TEX_REFS = {
     "\\Autoref": 1,
@@ -522,10 +522,14 @@ def skip_ws(words: "more_itertools.peekable[str]"):
 
 
 def get_arg(words: "more_itertools.peekable[str]") -> List[str]:
-    """Get a single macro argument."""
+    """Get contents (words) of a single macro argument."""
     skip_ws(words)
+    # by default the argument is a single token/word
     w = next(words)
     if w == "{":
+        # but if there are curly braces, keep reading
+        # words until we find the matching close-brace
+        # (allowing for nesting brackets)
         nesting = 1
         arg = []
         while True:
@@ -541,6 +545,11 @@ def get_arg(words: "more_itertools.peekable[str]") -> List[str]:
     else:
         arg = [w]
     if arg in [["}"], ["$"], ["\\begin"], ["\\end"]]:
+        # Something went wrong (probably because we're not really
+        # implementing the full LaTeX language, and the next word
+        # can't possibly be a valid argument. Put back whatever we
+        # found onto the input stream, and pretend the
+        # argument was {} (no words).
         words.prepend(*arg)
         arg = []
     return arg
@@ -556,6 +565,7 @@ def skip_optional_eq(words: "more_itertools.peekable[str]"):
 
 def skip_optional_arg(words: "more_itertools.peekable[str]", macros):
     """Skip an optional (bracketed) argument, if present."""
+    skip_ws(words)
     if words.peek("!") == "[":
         next(words)
         if words[:3] == ["$", "$", "]"]:
@@ -626,6 +636,9 @@ def skip_rest_conditional(
             while next(words) != "\\repeat":
                 pass
         elif w in TEX_IFS or w in macros["new ifs"]:
+            # If we're skipping past a nested conditional, we want to go
+            # all the way to the \fi (not just to the \else), even if
+            #  we'd be OK stopping at the \else of the outermost conditional.
             skip_rest_conditional(words, macros, stop_on_else=False)
 
 
@@ -821,7 +834,7 @@ def try_expand(words, parameters, optional_param, body):
     """
     Try to expand a macro.
 
-    We're given information on the definition for a macro
+    We're given information from the definition for a macro
     we just saw, plus the stream of upcoming words. If we
     can find enough arguments, we take them off the
     stream and return the tokens of the substituted macro-body
@@ -1048,8 +1061,10 @@ def skip_rest_env(words, macros, stop_at=None) -> bool:
 def get_filename(words) -> str:
     """Look for something that might be a filename."""
     if words.peek() == "{":
+        # it's in curly braces
         return "".join(get_arg(words))
     elif words.peek() == '"':
+        # it's in double quotes
         words.next()
         components: List[str] = []
         while True:
@@ -1058,6 +1073,7 @@ def get_filename(words) -> str:
                 return "".join(components)
             components.append(w)
     else:
+        # it's a sequence of characters without spaces
         components = []
         while not words.peek("!").isspace():
             components.append(next(words))
@@ -1150,6 +1166,11 @@ def try_skip_units(words):
     )
 
 
+#
+# Key function - the fake LaTeX interpreter
+#
+
+
 def execute(cmd, words, macros, nomath=True, debug=False):
     """Naively attempt to interpret TeX and LaTeX commands."""
     if cmd == "\\ensuremath":
@@ -1186,7 +1207,8 @@ def execute(cmd, words, macros, nomath=True, debug=False):
         return [" "]
 
     if cmd not in macros:
-        # Allow user to override these.
+        # Allow user to override these, but otherwise
+        # translate accent commands to unicode
         if cmd == "\\`":
             return ["".join(get_arg(words)) + "\u0300"]
         if cmd == "\\'":
@@ -1233,6 +1255,7 @@ def execute(cmd, words, macros, nomath=True, debug=False):
         "\\clearpage",
         "\\cleardoublepage",
     }:
+        # ignore these (no argument)
         return [" "]
 
     if cmd in {
@@ -1260,7 +1283,7 @@ def execute(cmd, words, macros, nomath=True, debug=False):
         # mathtools
         "\\noeqref",
     }:
-        # ignore argument
+        # ignore these (and their argument)
         get_arg(words)
         return []
 
