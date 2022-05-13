@@ -1,8 +1,8 @@
 bs4
 charset-normalizer
+diff_match_patch
 langdetect
 more-itertools
 nltk
 psutil
 spacy
-
