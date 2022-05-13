@@ -173,6 +173,7 @@ DELETE_ENVS = {
     "diagram",
     "minipage",
     "prooftree",
+    "tikzpicture",
 }
 
 DELETE_UNINTERPRETED_ENVS = {
@@ -195,7 +196,6 @@ DELETE_UNINTERPRETED_ENVS = {
     "floatingfigure",
     # Picture
     "picture",
-    "tikzpicture",
     "pspicture",
     "overpic",
     # Other
@@ -376,6 +376,7 @@ IGNORED_INCLUDES = {
     "warmread",  # 0601/math0601187
     "wick",  # 0109/hep-th0109182
     "haskell",  # 1007.4266 1005.5278
+    "mathlig",  # 1908.03268
 }
 
 
