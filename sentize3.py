@@ -8,6 +8,8 @@ import sys
 import spacy
 
 if __name__ == "__main__":
+    exit("You probably meant to use sentize2.py.")
+
     nlp = spacy.load("en_core_web_sm")
     for filename in sys.argv[1:]:
         with open(filename, "r") as fd:

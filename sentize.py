@@ -12,7 +12,9 @@ import sys
 
 suspicious = re.compile("[&_^\x00-\x1f\x80-\xff]")
 
-if __name__ == "__main__":
+if __name__ == "__main__":\
+    exit("You probably meant to use sentize2.py.")
+
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--train", help="Punkt training input", type=str)
     parser.add_argument("files", nargs="+")
