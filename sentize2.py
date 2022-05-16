@@ -23,8 +23,16 @@ if __name__ == "__main__":
                 # if re.search(suspicious, line):
                 #     continue
                 text = line.strip()
+
+                # sents is the list of sentences in this single proofs.
                 sents: List[str] = list(sent_tokenizer.tokenize(text))
+
+                # sent_tokens is basically a copy of the list sents, but with
+                # each sentence broken up into individual "words".
                 sent_tokens: List[List[str]] = []
+
+                # Loop throught the sentences, clean them slightly,
+                # break them into words, and store them in sent_tokens.
                 for sent in sents:
                     if sent[0] == "(":
                         if sent[-1] == ")":
@@ -58,5 +66,5 @@ if __name__ == "__main__":
 
                     else:
                         sent_tokens += [words]
-                for sent in sents:
-                    print(" ".join(words))
+                for tokens in sent_tokens:
+                    print(" ".join(tokens))
