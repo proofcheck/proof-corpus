@@ -2128,7 +2128,8 @@ if __name__ == "__main__":
                     repeat(True),
                     repeat(args.new),
                 ),
-                100  # let's try handing out files to CPUs
+            max(4, min(100, len(tex_files) / args.cores / 4))
+                # let's try handing out files to CPUs
                 # in chunks of 100 (rather than the default
                 # which is approximately num-files / CPUS / 4)
             )
