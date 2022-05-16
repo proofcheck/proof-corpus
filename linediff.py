@@ -32,7 +32,7 @@ def print_diff(diff: List[Tuple[int, str]], show_del: bool = False):
     for i in range(num_diffs):
         n, s = diff[i]
         if n == 0:
-            words = re.split("\s+", s)
+            words = re.split(r"\s+", s)
             num_words = len(words)
 
             # Abbreviate text with lots of words
