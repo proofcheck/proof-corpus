@@ -54,7 +54,8 @@ parenID = (
     f"(?:(?:\\({atomicID}(?:\\.{atomicID})*\\))|"
     f"(?:\\[{atomicID}(?:\\.{atomicID})*\\])|"
     f"(?:\\[\\({atomicID}(?:\\.{atomicID})*\\)\\])|"
-    f"(?:\\([A-Za-z][- ]?MATH\\)))"
+    f"(?:\\([A-Za-z][- ]?MATH\\))|"
+    f"(?:\\([A-Za-z][- ][0-9]\\)))"
 )
 
 # REF, REF(3.2), REF.a, 3, 3.5a, (IV), (IV.2), 2(a), 4.1bc
@@ -554,6 +555,10 @@ def cleanup(filename: str, proof: str, debug: bool = False):
         "\\1CASE: \\2",
         proof,
     )
+
+    proof = re.sub("CASE\\s*:(\\s*CASE\\s*:)+", "CASE:", proof)
+
+
     if debug:
         print(1400, proof)
 
@@ -561,6 +566,8 @@ def cleanup(filename: str, proof: str, debug: bool = False):
     proof = re.sub("[ ]+", " ", proof)
     if debug:
         print(1500, proof)
+    
+    proof = re.sub("\\([ ]*\\)", " ", proof)
 
     if proof.count("(") != proof.count(")"):
         proof = treat_unbalanced_parens(filename, proof, debug)
