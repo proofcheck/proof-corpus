@@ -47,6 +47,16 @@ if __name__ == "__main__":
                             interior = sent[1:-3]
                             if "(" not in interior and ")" not in interior:
                                 sent = interior.strip() + " ."
+                    # If we have multiple sentences inside parentheses
+                    # they will show up as (sent and sent)
+                    # This should fix that
+                    if sent[0] == "(":
+                        if sent.count("(") - 1 == sent.count(")"):
+                            sent = sent[1:]
+                    elif sent[-1] == ")":
+                        if sent.count("(") + 1 == sent.count(")"):
+                            sent = sent[:-1]
+
 
                     words: List[str] = word_tokenizer.tokenize(sent)
 
@@ -63,6 +73,9 @@ if __name__ == "__main__":
                             + [sent_tokens[-1][-1] + words[0]]
                             + words[1:]
                         )
+                    
+
+
 
                     else:
                         sent_tokens += [words]

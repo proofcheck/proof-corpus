@@ -1588,6 +1588,8 @@ def execute(cmd, words, macros, nomath=True, debug=False):
         )
         raise SkipThisProof(f"oops: encountered {cmd}")
 
+    
+
     if try_assign(words):
         return []
 
