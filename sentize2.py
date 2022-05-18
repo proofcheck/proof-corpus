@@ -12,7 +12,7 @@ import nicer
 
 # suspicious = re.compile("[&_^\x00-\x1f\x80-\xff]")
 def inner_parens(s):
-    d = {'(':1, ')':-1}
+    d = {"(": 1, ")": -1}
     tot = 0
     for x in s:
         if x in d.keys():
@@ -21,19 +21,113 @@ def inner_parens(s):
             return False
     return True
 
+
+MATH_ABBREVS = set(
+    [
+        "a.a",
+        "a.c.i.m",
+        "a.c",
+        "a.e",
+        "a.k.a",
+        "a.m.s",
+        "a.m",
+        "a.s",
+        "a.u",
+        "al",
+        "b.c.i",
+        "c.a.i",
+        "c.b",
+        "c.c.c.t",
+        "c.c",
+        "c.d.f",
+        "c.e",
+        "c.f",
+        "c.i",
+        "c.p.c",
+        "c.p",
+        "c.u.c",
+        "c.u.p",
+        "d.g",
+        "d.o.f",
+        "d.t.s",
+        "dr",
+        "e.g",
+        "et",  # not really, but it's a very common mistake.
+        "f.e",
+        "f.g.p.m",
+        "f.g",
+        "g.c.d",
+        "g.l.n",
+        "g.l.s",
+        "i.e",
+        "i.h",
+        "i.i.d.r.v",
+        "i.i.d",
+        "i.o",
+        "I.T.",
+        "i.u.r",
+        "inc",
+        "l.c.a.i",
+        "l.c.m",
+        "l.c",
+        "l.h.s",
+        "L.H.S",
+        "l.m.g.f",
+        "l.o.t",
+        "l.s.c",
+        "m.p",
+        "mr",
+        "mrs",
+        "n.b",
+        "N.B",
+        "n.c",
+        "o.d.e",
+        "O.D.E",
+        "p.h",
+        "p.h",
+        "p.l",
+        "p.m",
+        "p.o",
+        "p.s.h",
+        "p.s.h",
+        "prof",
+        "q.c.i",
+        "q.c",
+        "q.e",
+        "q.p",
+        "q.s",
+        "q.v",
+        "r.c.a.i",
+        "r.e",
+        "r.h.s",
+        "R.H.S",
+        "r.l.s.c",
+        "r.r.v",
+        "r.v",
+        "s.m.u",
+        "u.c.p",
+        "u.e",
+        "u.i",
+        "u.s.c",
+        "vs",
+        "w.h.e",
+        "w.h.p",
+        "w.l.o.g",
+        "w.p",
+        "w.r.t",
+        "w.r",
+    ]
+)
+
 if __name__ == "__main__":
     nicer.make_nice()
 
     for filename in sys.argv[1:]:
         with open(filename, "r") as fd:
             sent_tokenizer = PunktSentenceTokenizer()
-            sent_tokenizer._params.abbrev_types = set(["dr", "vs", "mr", "mrs", "prof", "inc",
-            "i.e", "e.g", "al", "a.m", "p.m",
-            "c.p", "c.p.c", "u.c.p", "a.e", "a.s",
-            "o.d.e", "l.h.s", "r.h.s", "O.D.E", "L.H.S", "R.H.S", "l.c.m", "g.c.d",
-            "p.h", "q.e", "r.c.a.i", "f.e", "c.b", "c.c", "c.u.p", "r.e", "d.g", "i.i.d",
-            "n.b", "N.B", "f.g", "i.h", "s.m.u", "c.i", "I.T."
-            ])
+            # collected by running
+            #   grep '[a-z]\.[a-z] \.$' all-sentences.txt
+            sent_tokenizer._params.abbrev_types = MATH_ABBREVS
 
             word_tokenizer = NLTKWordTokenizer()
             for line in fd.readlines():
@@ -74,7 +168,6 @@ if __name__ == "__main__":
                         if sent.count("(") + 1 == sent.count(")"):
                             sent = sent[:-1]
 
-
                     words: List[str] = word_tokenizer.tokenize(sent)
 
                     # So, the NLTK tokenizer spents sentences too eagerly in
@@ -91,12 +184,7 @@ if __name__ == "__main__":
                             + words[1:]
                         )
 
-
-
-
                     else:
                         sent_tokens += [words]
                 for tokens in sent_tokens:
                     print(" ".join(tokens))
-
-
