@@ -55,14 +55,14 @@ def get_unigrams(list_of_elements):
 # Returns unigrams counter
     cnt = Counter()
     for e in list_of_elements:
-        cnt += Counter(['<s>'] + e + ['</s>'])
+        cnt += Counter(e)
     return cnt
 
 def get_bigrams(list_of_elements):
     # Returns bigrams counter
     cnt = Counter()
     for e in list_of_elements:
-        e = ['<ss>', '<s>'] + e + ['</s>', '</ss>']
+        e = ['<s>'] + e + ['</s>']
         bigram_list = list(zip(e[:-1], e[1:]))
         cnt += Counter(bigram_list)
     
@@ -72,21 +72,31 @@ def get_trigrams(list_of_elements):
     # Returns trigrams counter
     cnt = Counter()
     for e in list_of_elements:
-        e = ['<sss>', '<ss>', '<s>'] + e + ['</s>', '</ss>', '</sss>']
+        e = ['<ss>', '<s>'] + e + ['</s>', '</ss>']
         trigram_list = list(zip(e[:-2], e[1:-1], e[2:]))
         cnt += Counter(trigram_list)
     
     return cnt
 
-def get_n_grams(list_of_elements, n):
+def get_ngrams(list_of_elements, n, head=False):
     cnt = Counter()
-
+    #print(list_of_elements)
     for e in list_of_elements:
-        e = generate_startline_character(n) + e + generate_endline_character(n)
+        if head==False:
+            e = generate_startline_character(n-1) + e + generate_endline_character(n-1)
         zip_list = []
+        #print(e)
         for i in range(n):
-            zip_list += e[i:i-n+1]
-        n_gram_list = list(zip(zip_list))
+            #print(i)
+            if i == n-1:
+                zip_list += [e[i:]]
+            else:
+                #print(i-n+1)
+                zip_list += [e[i:i-n+1]]
+            #print("\n")
+        # print(zip_list)
+        n_gram_list = list(zip(*zip_list))
+        #print(n_gram_list)
         cnt += Counter(n_gram_list)
         
     return cnt
@@ -108,24 +118,25 @@ def generate_endline_character(n):
         l += [char]
     return l
 
+
 def main(args): 
     list_of_words = read_one(args.file, args.size, args.remove_punctuation)
     cnt_uni = get_unigrams(list_of_words)
     cnt_bi = get_bigrams(list_of_words)
     cnt_tri = get_trigrams(list_of_words)
-    cnt_ngrams = get_n_grams(list_of_words, args.ngrams)
+    cnt_ngrams = get_ngrams(list_of_words, args.ngrams, args.remove_marker)
 
-    print("Top 10 most frequent unigrams:")
-    print(cnt_uni.most_common(args.top_n))
-    print("\n")
+    # print("Top 10 most frequent unigrams:")
+    # print(cnt_uni.most_common(args.top_n))
+    # print("\n")
     
-    print("Top 10 most frequent bigrams:")
-    print(cnt_bi.most_common(args.top_n))
-    print("\n")
+    # print("Top 10 most frequent bigrams:")
+    # print(cnt_bi.most_common(args.top_n))
+    # print("\n")
 
-    print("Top 10 most frequent trigrams:")
-    print(cnt_tri.most_common(args.top_n))
-    print("\n")
+    # print("Top 10 most frequent trigrams:")
+    # print(cnt_tri.most_common(args.top_n))
+    # print("\n")
 
     ngrams_text = "Top 10 most frequent {}-grams:"
     print(ngrams_text.format(args.ngrams))
@@ -141,18 +152,22 @@ if __name__ == '__main__':
     parser.add_argument("--directory", "-d",
                             help="directory to extract files from")
 
-    parser.add_argument("--size", "-s", type=int, default= -1,
+    parser.add_argument("--size", "-s", type=int, nargs='?', const=1000, default=-1,
                             help="specifies first x sentences to extract")
 
-    parser.add_argument("--top_n", "-t", type=int, default=10,
+    parser.add_argument("--top_n", "-t", type=int, nargs='?', const=10,
                             help="specifies top n most common ngrams")
 
     parser.add_argument("--remove_punctuation", "-p", action='store_true',
                             help="remove punctuation")
+    
+    parser.add_argument("--remove_marker", "-m", action='store_true',
+                            help="remove sentence boundary markers")
 
-    parser.add_argument("--ngrams", "-n", type=int, default=4,
+    parser.add_argument("--ngrams", "-n", type=int, nargs='?', const=4,
                             help="specifies the number for ngrams")
 
+                         
     args = parser.parse_args()
 
     main(args)
