@@ -140,10 +140,10 @@ if __name__ == '__main__':
                             help="directory to extract files from")
 
     parser.add_argument("--size", "-s", type=int, nargs='?', const=1000, default=-1,
-                            help="specifies first x sentences to extract")
+                            help="specifies first (s) sentences to extract")
 
     parser.add_argument("--top_n", "-t", type=int, nargs='?', const=10,
-                            help="specifies top n most common ngrams")
+                            help="specifies top (n) most common _grams")
 
     parser.add_argument("--remove_punctuation", "-p", action='store_true',
                             help="remove punctuation")
@@ -152,9 +152,8 @@ if __name__ == '__main__':
                             help="remove sentence boundary markers")
 
     parser.add_argument("--ngrams", "-n", type=int, nargs='?', const=4,
-                            help="specifies the number for ngrams")
+                            help="specifies (n)grams")
 
-                         
     args = parser.parse_args()
 
     main(args)
