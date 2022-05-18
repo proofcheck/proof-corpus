@@ -1881,6 +1881,11 @@ def get_proofs(
                 skip_rest_env(words, macros)
             elif env_name.rstrip("*") in DELETE_UNINTERPRETED_ENVS:
                 skip_rest_env(words, {}, stop_at=env_name)
+            elif env_name == "step+":
+                # 0109/math0109152/walks
+                # (step+ environment takes an extra label argument that
+                #  shouldn't appear in the output)
+                get_arg(words)
 
         elif w == "\\end":
             skip_ws(words)

@@ -366,22 +366,17 @@ def cleanup(filename: str, proof: str, debug: bool = False):
         print("0999", proof)
 
     # Normalize Abbreviations
-    # i.e. ie  i.e., ie., etc. -> i.e.,
-    # e.g. eg  e.g., eg., etc. -> e.g.,
-    proof = re.sub(r"\si[. ]?e[.]?,?\s", " that is, ", proof)
-    proof = re.sub(r"\sI[. ]?e[.]?,?\s", " That is, ", proof)
-    proof = re.sub(r"\se[. ]?g[.]?,?\s", " for example, ", proof)
-    proof = re.sub(r"\sE[. ]?g[.]?,?\s", " For example, ", proof)
+    # i.e. ie  i.e., ie., ... -> that is,
+    # e.g. eg  e.g., eg., ... -> for example,
+    proof = re.sub(r"\bi[. ]?e[.]?,?\s", "that is, ", proof)
+    proof = re.sub(r"\bI[. ]?e[.]?,?\s", "That is, ", proof)
+    proof = re.sub(r"\be[. ]?g[.]?,?\s", "for example, ", proof)
+    proof = re.sub(r"\bE[. ]?g[.]?,?\s", "For example, ", proof)
 
-    # a.e. ae. a.e ae -> almost everywhere
-    proof = re.sub(r"\ba[.]?e\.?([^A-Za-z])", r"almost everywhere\1", proof)
-    
-    # q.e. qe. q.e qe -> quasi-everywhere
-    proof = re.sub(r"\bq\.e\.(?!d)([^A-Za-z])", r"quasi-everywhere\1", proof)
-
-    # a.s. a.s -> almost surely
-    # but the word as stays as
-    proof = re.sub(r"\ba[.]s\.?([^A-Za-z])", r"almost surely\1", proof)
+    proof = re.sub(r"\bi[. ]?e[.]?,?(?!\w)", "that is ", proof)
+    proof = re.sub(r"\bI[. ]?e[.]?,?(?!\w)", "That is ", proof)
+    proof = re.sub(r"\be[. ]?g[.]?,?(?!\w)", "for example ", proof)
+    proof = re.sub(r"\bE[. ]?g[.]?,?(?!\w)", "For example ", proof)
 
     # w.l.o.g  wlog ... -> without loss of generality
     # WLOG  W.l.o.g ... -> Without loss of generality
@@ -412,7 +407,6 @@ def cleanup(filename: str, proof: str, debug: bool = False):
     # QED. -> QED .
     # QED . -> QED .
     proof = re.sub("\\b[Qq]\\.?[Ee]\\.?[Dd]\\.?(\\s\\.)?", "QED .", proof)
-
 
     # resp. -> respectively,
     proof = re.sub(
@@ -574,7 +568,6 @@ def cleanup(filename: str, proof: str, debug: bool = False):
 
     proof = re.sub("CASE\\s*:(\\s*CASE\\s*:)+", "CASE:", proof)
 
-
     if debug:
         print(1400, proof)
 
@@ -582,7 +575,7 @@ def cleanup(filename: str, proof: str, debug: bool = False):
     proof = re.sub("[ ]+", " ", proof)
     if debug:
         print(1500, proof)
-    
+
     proof = re.sub("\\([ ]*\\)", " ", proof)
 
     if proof.count("(") != proof.count(")"):
