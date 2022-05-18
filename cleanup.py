@@ -366,12 +366,17 @@ def cleanup(filename: str, proof: str, debug: bool = False):
         print("0999", proof)
 
     # Normalize Abbreviations
-    # i.e. ie  i.e., ie., etc. -> i.e.,
-    # e.g. eg  e.g., eg., etc. -> e.g.,
-    proof = re.sub(r"\si[. ]?e[.]?,?\s", " that is, ", proof)
-    proof = re.sub(r"\sI[. ]?e[.]?,?\s", " That is, ", proof)
-    proof = re.sub(r"\se[. ]?g[.]?,?\s", " for example, ", proof)
-    proof = re.sub(r"\sE[. ]?g[.]?,?\s", " For example, ", proof)
+    # i.e. ie  i.e., ie., ... -> that is,
+    # e.g. eg  e.g., eg., ... -> for example,
+    proof = re.sub(r"\bi[. ]?e[.]?,?\s", "that is, ", proof)
+    proof = re.sub(r"\bI[. ]?e[.]?,?\s", "That is, ", proof)
+    proof = re.sub(r"\be[. ]?g[.]?,?\s", "for example, ", proof)
+    proof = re.sub(r"\bE[. ]?g[.]?,?\s", "For example, ", proof)
+
+    proof = re.sub(r"\bi[. ]?e[.]?,?(?!\w)", "that is ", proof)
+    proof = re.sub(r"\bI[. ]?e[.]?,?(?!\w)", "That is ", proof)
+    proof = re.sub(r"\be[. ]?g[.]?,?(?!\w)", "for example ", proof)
+    proof = re.sub(r"\bE[. ]?g[.]?,?(?!\w)", "For example ", proof)
 
     # a.e. ae. a.e ae -> almost everywhere
     proof = re.sub(r"\ba[.]?e\.?([^A-Za-z])", r"almost everywhere\1", proof)
@@ -574,7 +579,7 @@ def cleanup(filename: str, proof: str, debug: bool = False):
     proof = re.sub("[ ]+", " ", proof)
     if debug:
         print(1500, proof)
-    
+
     proof = re.sub("\\([ ]*\\)", " ", proof)
 
     if proof.count("(") != proof.count(")"):
