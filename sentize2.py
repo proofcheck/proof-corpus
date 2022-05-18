@@ -27,6 +27,14 @@ if __name__ == "__main__":
     for filename in sys.argv[1:]:
         with open(filename, "r") as fd:
             sent_tokenizer = PunktSentenceTokenizer()
+            sent_tokenizer._params.abbrev_types = set(["dr", "vs", "mr", "mrs", "prof", "inc",
+            "i.e", "e.g", "al", "a.m", "p.m",
+            "c.p", "c.p.c", "u.c.p", "a.e", "a.s",
+            "o.d.e", "l.h.s", "r.h.s", "O.D.E", "L.H.S", "R.H.S", "l.c.m", "g.c.d",
+            "p.h", "q.e", "r.c.a.i", "f.e", "c.b", "c.c", "c.u.p", "r.e", "d.g", "i.i.d",
+            "n.b", "N.B", "f.g", "i.h", "s.m.u", "c.i", "I.T."
+            ])
+
             word_tokenizer = NLTKWordTokenizer()
             for line in fd.readlines():
                 # if re.search(suspicious, line):
@@ -82,7 +90,7 @@ if __name__ == "__main__":
                             + [sent_tokens[-1][-1] + words[0]]
                             + words[1:]
                         )
-                    
+
 
 
 
