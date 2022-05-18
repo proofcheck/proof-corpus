@@ -530,12 +530,20 @@ def cleanup(filename: str, proof: str, debug: bool = False):
         "\\1CASE:",
         proof,
     )
-    # Case 1 -> CASE
+    # (Case 1) -> REF
     proof = re.sub(
-        f"\\((?i:case)[ ]*{atomicID}+\\)",
+        f"\\((?i:case)\\s*{atomicID}+\\)",
         "REF ",
         proof,
     )
+
+    # dfajfdkls Case 1 dfhaslsfdlk -> dfajfdkls REF dfhaslsfdlk
+    proof = re.sub(
+        f"({lowerLetter}+\\s*)(?i:case)\\s*{atomicID}*(\\s+{lowerLetter}+)",
+        "\\1REF\\2",
+        proof,
+    )
+
 
     # (i) We have -> REF We have -> CASE: We have
     # BUT NOT:  T's Theorem CITE implies -> REF CITE implies -> CASE: implies
@@ -676,8 +684,7 @@ def cleanup(filename: str, proof: str, debug: bool = False):
     # Remove spurious extra periods (empty sentences)
     proof = re.sub("\\. (\\. )+", ". ", proof)
 
-    # Remove any duplicate spaces we introduced
-    proof = re.sub("[ ]+", " ", proof)
+
 
     # Remove unintelligible MATH MATH MATH sequences
     proof = re.sub("\\bMATH( MATH)*", "MATH", proof)
@@ -717,6 +724,13 @@ def cleanup(filename: str, proof: str, debug: bool = False):
 
     # an MATH -> a MATH
     proof = re.sub("\\b([Aa])n[ ]MATH\\b", r"\1 MATH", proof)
+
+    # Remove any duplicate spaces we introduced
+    proof = re.sub("[ ]+", " ", proof)
+
+    #figure REF ii -> REF
+
+    proof = re.sub("(\\(\\s*(?i:figure)\\s*REF\\s*i*\\s*\\)|(?i:figure)\\s*REF\\s*i*\\s*)", " REF ", proof)
 
     proof = proof.strip()
 
