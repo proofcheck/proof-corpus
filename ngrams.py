@@ -38,8 +38,8 @@ def tokenize(s):
 # Returns tokenized sentences
     s = s.strip()
     split_list = re.split(r'(\W)', s)
-    filtered_list = list(filter(lambda x: (x != ""), split_list))
-    tokenized_list = list(filter(lambda x: (x != " "), filtered_list))
+    filtered_list = filter(lambda x: (x != ""), split_list)
+    tokenized_list = filter(lambda x: (x != " "), filtered_list)
 
     # Makes all tokens lowercase except tokens in alias_list
     tokenized_list = [ x if x in alias_list else x.lower() for x in tokenized_list  ]
@@ -49,13 +49,13 @@ def tokenize(s):
 def filter_nonwords(list_of_tokens):
     return [x for x in list_of_tokens if x not in punctuation_list ]
     # TODO is this the best way...?
-    # list(filter(lambda x: (x.isalpha()), list_of_tokens))
+    # filter(lambda x: (x.isalpha()), list_of_tokens)
     
 def get_unigrams(list_of_elements):
 # Returns unigrams counter
     cnt = Counter()
     for e in list_of_elements:
-        cnt += Counter(e)
+        cnt.update(e)
     return cnt
 
 def get_bigrams(list_of_elements):
@@ -63,8 +63,8 @@ def get_bigrams(list_of_elements):
     cnt = Counter()
     for e in list_of_elements:
         e = ['<s>'] + e + ['</s>']
-        bigram_list = list(zip(e[:-1], e[1:]))
-        cnt += Counter(bigram_list)
+        bigram_list = zip(e[:-1], e[1:])
+        cnt.update(bigram_list)
     
     return cnt
 
@@ -73,8 +73,8 @@ def get_trigrams(list_of_elements):
     cnt = Counter()
     for e in list_of_elements:
         e = ['<ss>', '<s>'] + e + ['</s>', '</ss>']
-        trigram_list = list(zip(e[:-2], e[1:-1], e[2:]))
-        cnt += Counter(trigram_list)
+        trigram_list = zip(e[:-2], e[1:-1], e[2:])
+        cnt.update(trigram_list)
     
     return cnt
 
@@ -95,9 +95,9 @@ def get_ngrams(list_of_elements, n, head=False):
                 zip_list += [e[i:i-n+1]]
             #print("\n")
         # print(zip_list)
-        n_gram_list = list(zip(*zip_list))
+        n_gram_list = zip(*zip_list)
         #print(n_gram_list)
-        cnt += Counter(n_gram_list)
+        cnt.update(n_gram_list)
         
     return cnt
 
@@ -121,9 +121,9 @@ def generate_endline_character(n):
 
 def main(args): 
     list_of_words = read_one(args.file, args.size, args.remove_punctuation)
-    cnt_uni = get_unigrams(list_of_words)
-    cnt_bi = get_bigrams(list_of_words)
-    cnt_tri = get_trigrams(list_of_words)
+    # cnt_uni = get_unigrams(list_of_words)
+    # cnt_bi = get_bigrams(list_of_words)
+    # cnt_tri = get_trigrams(list_of_words)
     cnt_ngrams = get_ngrams(list_of_words, args.ngrams, args.remove_marker)
 
     # print("Top 10 most frequent unigrams:")
