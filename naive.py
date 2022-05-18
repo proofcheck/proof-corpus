@@ -339,6 +339,43 @@ MATHONLY_COMMANDS = {
     "^",
 }
 
+NO_ARGUMENT_NOOPS = {
+    "\\maketitle",
+    "\\frontmatter",
+    "\\tableofcontents",
+    "\\tiny",
+    "\\scriptsize",
+    "\\footnotesize",
+    "\\small",
+    "\\normal",
+    "\\large",
+    "\\Large",
+    "\\LARGE",
+    "\\huge",
+    "\\Huge",
+    "\\rm",
+    "\\sl",
+    "\\bf",
+    "\\tt",
+    "\\it",
+    "\\sf",
+    "\\sc",
+    "\\cal",
+    "\\rmfamily",
+    "\\slfamily",
+    "\\bfseries",
+    "\\itshape",
+    "\\mdseries",
+    "\\sffamily",
+    "\\ttfamily",
+    "\\normalfont",
+    "\\cal",
+    "\\narrower",
+    "\\indent",
+    "\\noindent",
+    "\\magstephalf",
+}
+
 IGNORED_REDEFINES = (
     set(TEX_IFS)
     .union(TEX_CITES)
@@ -1240,6 +1277,13 @@ def execute(cmd, words, macros, nomath=True, debug=False):
             return ["".join(get_arg(words)) + "\u0328"]
         if cmd == "\\b":
             return ["".join(get_arg(words)) + "\u0331"]
+
+        if cmd in NO_ARGUMENT_NOOPS:
+            # If the user hasn't redefined this command, it does nothing
+            # and takes no arguments.(We'd expect them to do nothing anyway,
+            # but the extractor gets confused by {\bf 2}, which gets
+            # interpreted as an abbreviation for the assignment {\bf=2}.)
+            return []
 
     if cmd in {
         r"\ ",

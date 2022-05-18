@@ -20,6 +20,8 @@ import sys
 from typing import List, Match
 import unicodedata
 
+from pyparsing import alphanums
+
 import nicer
 
 # Regular expression for uppercase letters (as a string)n
@@ -526,6 +528,12 @@ def cleanup(filename: str, proof: str, debug: bool = False):
     proof = re.sub(
         "(^|[.;:] )\\b(?i:case)\\s+MATH(([-, ]|and|or)*MATH)*[:.]",
         "\\1CASE:",
+        proof,
+    )
+    # Case 1 -> CASE
+    proof = re.sub(
+        f"(?i:case)[ ]*{numAlpha}*",
+        "CASE",
         proof,
     )
 
