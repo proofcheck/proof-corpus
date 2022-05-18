@@ -28,9 +28,6 @@ def read_one(fname, size=-1, remove_punctuation=False):
             element = filter_nonwords(element)
         processed_element += element
         processed_elements += [processed_element]
-    #     print(processed_element)
-    # print("last")
-    # print(processed_elements)
     return processed_elements
 
 def tokenize(s):
@@ -42,7 +39,6 @@ def tokenize(s):
 
     # Makes all tokens lowercase except tokens in alias_list
     tokenized_list = [ x if x in alias_list else x.lower() for x in tokenized_list  ]
-
     return tokenized_list
 
 def filter_nonwords(list_of_tokens):
@@ -64,7 +60,6 @@ def get_bigrams(list_of_elements):
         e = ['<s>'] + e + ['</s>']
         bigram_list = zip(e[:-1], e[1:])
         cnt.update(bigram_list)
-    
     return cnt
 
 def get_trigrams(list_of_elements):
@@ -74,7 +69,6 @@ def get_trigrams(list_of_elements):
         e = ['<ss>', '<s>'] + e + ['</s>', '</ss>']
         trigram_list = zip(e[:-2], e[1:-1], e[2:])
         cnt.update(trigram_list)
-    
     return cnt
 
 def get_ngrams(list_of_elements, n, head=False):
