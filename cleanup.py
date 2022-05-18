@@ -378,16 +378,6 @@ def cleanup(filename: str, proof: str, debug: bool = False):
     proof = re.sub(r"\be[. ]?g[.]?,?(?!\w)", "for example ", proof)
     proof = re.sub(r"\bE[. ]?g[.]?,?(?!\w)", "For example ", proof)
 
-    # a.e. ae. a.e ae -> almost everywhere
-    proof = re.sub(r"\ba[.]?e\.?([^A-Za-z])", r"almost everywhere\1", proof)
-    
-    # q.e. qe. q.e qe -> quasi-everywhere
-    proof = re.sub(r"\bq\.e\.(?!d)([^A-Za-z])", r"quasi-everywhere\1", proof)
-
-    # a.s. a.s -> almost surely
-    # but the word as stays as
-    proof = re.sub(r"\ba[.]s\.?([^A-Za-z])", r"almost surely\1", proof)
-
     # w.l.o.g  wlog ... -> without loss of generality
     # WLOG  W.l.o.g ... -> Without loss of generality
     proof = re.sub(
@@ -417,7 +407,6 @@ def cleanup(filename: str, proof: str, debug: bool = False):
     # QED. -> QED .
     # QED . -> QED .
     proof = re.sub("\\b[Qq]\\.?[Ee]\\.?[Dd]\\.?(\\s\\.)?", "QED .", proof)
-
 
     # resp. -> respectively,
     proof = re.sub(
@@ -570,7 +559,6 @@ def cleanup(filename: str, proof: str, debug: bool = False):
     )
 
     proof = re.sub("CASE\\s*:(\\s*CASE\\s*:)+", "CASE:", proof)
-
 
     if debug:
         print(1400, proof)
