@@ -8,10 +8,13 @@ proofs%.raw: matches/matches% naive.py
 proofs%.txt: proofs%.raw cleanup.py
 	./cleanup.py $< > $@
 
-sent%.txt: proofs%.txt
+sent%.txt: proofs%.txt sentize2.py
 	./sentize2.py $< > $@
 
 sorted%.txt: sent%.txt
 	sort $< | uniq -c | sort -nr > $@
+
+backup%:
+	cp sorted$*.txt
 
 .PRECIOUS: matches/matches% proofs%.raw proofs%.txt sent%.txt sorted%.txt
