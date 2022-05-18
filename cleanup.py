@@ -527,8 +527,8 @@ def cleanup(filename: str, proof: str, debug: bool = False):
     )
     # Case 1 -> CASE
     proof = re.sub(
-        f"(?i:case)[ ]*{numAlpha}*",
-        "CASE",
+        f"\\((?i:case)[ ]*{atomicID}+\\)",
+        "REF ",
         proof,
     )
 
