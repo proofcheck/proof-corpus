@@ -21,7 +21,6 @@ def read_one(fname, size=-1, remove_punctuation=False):
         elements = fname.readlines()
 
     # Tokenizes and removes punctuation if specified
-    
     for element in elements:
         processed_element = []
         element = tokenize(element)
@@ -35,7 +34,7 @@ def read_one(fname, size=-1, remove_punctuation=False):
     return processed_elements
 
 def tokenize(s):
-# Returns tokenized sentences
+    # Returns tokenized sentences
     s = s.strip()
     split_list = re.split(r'(\W)', s)
     filtered_list = filter(lambda x: (x != ""), split_list)
@@ -52,7 +51,7 @@ def filter_nonwords(list_of_tokens):
     # filter(lambda x: (x.isalpha()), list_of_tokens)
     
 def get_unigrams(list_of_elements):
-# Returns unigrams counter
+    # Returns unigrams counter
     cnt = Counter()
     for e in list_of_elements:
         cnt.update(e)
@@ -79,26 +78,21 @@ def get_trigrams(list_of_elements):
     return cnt
 
 def get_ngrams(list_of_elements, n, head=False):
+    # Reurns ngrams counter
     cnt = Counter()
-    #print(list_of_elements)
     for e in list_of_elements:
+        # Add sentence boundary markers if specified
         if head==False:
             e = generate_startline_character(n-1) + e + generate_endline_character(n-1)
         zip_list = []
-        #print(e)
+        # Create list of lists to zip for creating ngrams
         for i in range(n):
-            #print(i)
             if i == n-1:
                 zip_list += [e[i:]]
             else:
-                #print(i-n+1)
                 zip_list += [e[i:i-n+1]]
-            #print("\n")
-        # print(zip_list)
         n_gram_list = zip(*zip_list)
-        #print(n_gram_list)
         cnt.update(n_gram_list)
-        
     return cnt
 
 def generate_startline_character(n):
@@ -108,7 +102,6 @@ def generate_startline_character(n):
         char = '<' + 's'*i +'>'
         l += [char]
     return l
-
 
 def generate_endline_character(n):
     # Generates end character
