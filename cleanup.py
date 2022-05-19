@@ -574,6 +574,8 @@ def cleanup(filename: str, proof: str, debug: bool = False):
 
     proof = re.sub(f"\\(\\s*([iI]|{atomicID})*\\s*MATH\\s*([iI]|{atomicID})*\\s*\\)\\s*({upperLetter}|{lowerLetter})", " CASE \\3", proof)
 
+    proof = re.sub(f"\\(\\s*{atomicID}\\s*\\)", "REF", proof)
+
     proof = re.sub("CASE\\s*:(\\s*CASE\\s*:)+", "CASE:", proof)
 
     # base and inductive step labeling to CASE only when followed by capital letter
@@ -725,6 +727,9 @@ def cleanup(filename: str, proof: str, debug: bool = False):
 
     # The REF determines -> REF determines
     proof = re.sub("\\b[Tt]he REF\\b", "REF", proof)
+
+    # (of REF) -> Proof of REF.
+    proof = re.sub("\\(\\s*(?i:of)\\s*REF\\s*\\)", "Proof of REF ", proof)
 
     # an MATH -> a MATH
     proof = re.sub("\\b([Aa])n[ ]MATH\\b", r"\1 MATH", proof)
