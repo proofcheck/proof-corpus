@@ -1899,12 +1899,13 @@ def get_proofs(
                 proof_nesting -= 1
                 if proof_nesting == 0:
                     proof = "".join(current_proof_words).strip()
-                    if proof[-1:].isalpha():
-                        proof += " ."
-                    proof = re.sub("\\s+", " ", proof)
-                    proofs.append(proof)
-                    if verbose:
-                        print("***", proof)
+                    if proof:
+                        if proof[-1:].isalpha():
+                            proof += " ."
+                        proof = re.sub("\\s+", " ", proof)
+                        proofs.append(proof)
+                        if verbose:
+                            print("***", proof)
             elif env_name == "document":
                 break
 
@@ -2164,7 +2165,7 @@ if __name__ == "__main__":
         # with open("matches_new", "w") as fd:
         #     for filename in tex_files:
         #         print(filename, file=fd)
- 
+
     if len(tex_files) > 1 and not (args.cores == 1):
         with Pool(processes=args.cores) as p:
             # p.map(pf, tex_files, 1)
