@@ -544,7 +544,6 @@ def cleanup(filename: str, proof: str, debug: bool = False):
         proof,
     )
 
-
     # (i) We have -> REF We have -> CASE: We have
     # BUT NOT:  T's Theorem CITE implies -> REF CITE implies -> CASE: implies
     proof = re.sub(
@@ -572,7 +571,11 @@ def cleanup(filename: str, proof: str, debug: bool = False):
         proof,
     )
 
+    proof = re.sub(f"(?i:stage)\\s*{atomicID}\\s*(.)", "", proof)
+
     proof = re.sub(f"\\(\\s*([iI]|{atomicID})*\\s*MATH\\s*([iI]|{atomicID})*\\s*\\)\\s*({upperLetter}|{lowerLetter})", " CASE \\3", proof)
+
+    proof = re.sub(f"\\(\\s*{atomicID}\\s*\\)", "REF", proof)
 
     proof = re.sub("CASE\\s*:(\\s*CASE\\s*:)+", "CASE:", proof)
 
@@ -688,8 +691,6 @@ def cleanup(filename: str, proof: str, debug: bool = False):
     # Remove spurious extra periods (empty sentences)
     proof = re.sub("\\. (\\. )+", ". ", proof)
 
-
-
     # Remove unintelligible MATH MATH MATH sequences
     proof = re.sub("\\bMATH( MATH)*", "MATH", proof)
 
@@ -726,15 +727,22 @@ def cleanup(filename: str, proof: str, debug: bool = False):
     # The REF determines -> REF determines
     proof = re.sub("\\b[Tt]he REF\\b", "REF", proof)
 
+    # (of REF) -> Proof of REF.
+    proof = re.sub("\\(\\s*(?i:of)\\s*REF\\s*\\)", "", proof)
+
     # an MATH -> a MATH
     proof = re.sub("\\b([Aa])n[ ]MATH\\b", r"\1 MATH", proof)
 
     # Remove any duplicate spaces we introduced
     proof = re.sub("[ ]+", " ", proof)
 
-    #figure REF ii -> REF
+    # figure REF ii -> REF
 
-    proof = re.sub("(\\(\\s*(?i:figure)\\s*REF\\s*i*\\s*\\)|(?i:figure)\\s*REF\\s*i*\\s*)", " REF ", proof)
+    proof = re.sub(
+        "(\\(\\s*(?i:figure)\\s*REF\\s*i*\\s*\\)|(?i:figure)\\s*REF\\s*i*\\s*)",
+        " REF ",
+        proof,
+    )
 
     proof = proof.strip()
 
@@ -745,7 +753,13 @@ def cleanup(filename: str, proof: str, debug: bool = False):
 
 
 def clean_proof(orig: str, debug: bool = False, filename: str = "<unknown>"):
-    clean = unicodedata.normalize("NFKC", orig)
+    if "\t" in orig:
+        (prefix, line) = orig.split("\t")
+        prefix += "\t"
+    else:
+        (prefix, line) = ("", orig)
+
+    clean = unicodedata.normalize("NFKC", line)
     if debug:
         print("0000", clean)
     clean = splitMATH(clean, debug)
@@ -754,7 +768,7 @@ def clean_proof(orig: str, debug: bool = False, filename: str = "<unknown>"):
         print("0200", clean)
     clean = cleanup(filename, clean, debug)
     # clean = remove_extra_rparens(clean)
-    return clean
+    return prefix + clean
 
 
 if __name__ == "__main__":
