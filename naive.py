@@ -2164,7 +2164,7 @@ if __name__ == "__main__":
         # with open("matches_new", "w") as fd:
         #     for filename in tex_files:
         #         print(filename, file=fd)
-
+ 
     if len(tex_files) > 1 and not (args.cores == 1):
         with Pool(processes=args.cores) as p:
             # p.map(pf, tex_files, 1)

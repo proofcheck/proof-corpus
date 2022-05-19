@@ -413,6 +413,12 @@ def cleanup(filename: str, proof: str, debug: bool = False):
         "(?i:\\b(?<![.])(r)esp(?:[.]|\\b)[,]?)", r"\1espectively,", proof
     )
 
+    # (sketch) -> ""
+    proof = re.sub("\\(\\s*(?i:sketch)\\s*\\)", " ", proof)
+
+    # ad 1 -> CASE
+    proof = re.sub(f"(?i:ad)\\s*{numAlpha}(.)?", " CASE ", proof)
+
     # rhs r.h.s. RHS R.H.S. r. h. s.  r h s -> rhs   R.H.S RHS -> Rhs
     proof = re.sub(
         "(?i:\\b(?<![.])(r)[.]?[ ]?h[.]?[ ]?s(?:[.]|\\b))",
@@ -566,7 +572,12 @@ def cleanup(filename: str, proof: str, debug: bool = False):
         proof,
     )
 
+    proof = re.sub(f"\\(\\s*([iI]|{atomicID})*\\s*MATH\\s*([iI]|{atomicID})*\\s*\\)\\s*({upperLetter}|{lowerLetter})", " CASE \\3", proof)
+
     proof = re.sub("CASE\\s*:(\\s*CASE\\s*:)+", "CASE:", proof)
+
+    # base and inductive step labeling to CASE only when followed by capital letter
+    proof = re.sub(f"((\\()?\\s*(?i:basis)\\s*(\\))?|(\\()?\\s*(?i:induction)\\s*(\\))?)\\s*({upperLetter})", " CASE \\6", proof)
 
     if debug:
         print(1400, proof)
