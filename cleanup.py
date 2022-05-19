@@ -726,7 +726,7 @@ def cleanup(filename: str, proof: str, debug: bool = False):
     proof = re.sub("\\b[Tt]he REF\\b", "REF", proof)
 
     # (of REF) -> Proof of REF.
-    proof = re.sub("\\(\\s*(?i:of)\\s*REF\\s*\\)", "Proof of REF ", proof)
+    proof = re.sub("\\(\\s*(?i:of)\\s*REF\\s*\\)", "", proof)
 
     # an MATH -> a MATH
     proof = re.sub("\\b([Aa])n[ ]MATH\\b", r"\1 MATH", proof)
