@@ -5,7 +5,7 @@ from concurrent.futures import process
 import os, re
 from xmlrpc.client import Boolean
 
-alias_list = ["CITE", "MATH", "NAME", "REF"]
+alias_list = ["CASE", "CITE", "MATH", "NAME", "REF"]
 punctuation_list = [".", ",", ":", ";", "'", '"', "-", "?", "!", "(", ")", "{", "}", "[", "]", "`", "–"]
 
 def read_one(fname, size=-1, remove_punctuation=False):
@@ -38,7 +38,7 @@ def tokenize(s):
     tokenized_list = filter(lambda x: (x != " "), filtered_list)
 
     # Makes all tokens lowercase except tokens in alias_list
-    tokenized_list = [ x if x in alias_list else x.lower() for x in tokenized_list  ]
+    #tokenized_list = [ x if x in alias_list else x.lower() for x in tokenized_list  ]
     return tokenized_list
 
 def filter_nonwords(list_of_tokens):
@@ -77,7 +77,8 @@ def get_ngrams(list_of_elements, n, head=False):
     for e in list_of_elements:
         # Add sentence boundary markers if specified
         if head==False:
-            e = generate_startline_character(n-1) + e + generate_endline_character(n-1)
+            # e = generate_startline_character(n-1) + e + generate_endline_character(n-1)
+            e = ['<s>'] + e + ['</s>']
         zip_list = []
         # Create list of lists to zip for creating ngrams
         for i in range(n):
@@ -105,30 +106,52 @@ def generate_endline_character(n):
         l += [char]
     return l
 
+def results(args):
+    list_of_words = read_one(args.file, args.size, args.remove_punctuation)
+    output = args.output
+    for i in range(1, args.ngrams+1):
+        cnt_ngrams = get_ngrams(list_of_words, i, args.remove_marker)
+        ngrams_text = "\nTop 10 most frequent {}-grams:\n"
+        output.write(ngrams_text.format(i))
+        for x in cnt_ngrams.most_common(args.top_n):
+            output.write(str(x[0]) + '  ' + str(x[1]))
+            output.write("\n")
+        output.write("\n")
 
 def main(args): 
-    list_of_words = read_one(args.file, args.size, args.remove_punctuation)
-    # cnt_uni = get_unigrams(list_of_words)
-    # cnt_bi = get_bigrams(list_of_words)
-    # cnt_tri = get_trigrams(list_of_words)
-    cnt_ngrams = get_ngrams(list_of_words, args.ngrams, args.remove_marker)
-
-    # print("Top 10 most frequent unigrams:")
-    # print(cnt_uni.most_common(args.top_n))
-    # print("\n")
+    if args.output != None:
+        results(args)
     
-    # print("Top 10 most frequent bigrams:")
-    # print(cnt_bi.most_common(args.top_n))
-    # print("\n")
+    else:
+        list_of_words = read_one(args.file, args.size, args.remove_punctuation)
+    
+        cnt_uni = get_unigrams(list_of_words)
+        cnt_bi = get_bigrams(list_of_words)
+        cnt_tri = get_trigrams(list_of_words)
+        
+        cnt_ngrams = get_ngrams(list_of_words, args.ngrams, args.remove_marker)
 
-    # print("Top 10 most frequent trigrams:")
-    # print(cnt_tri.most_common(args.top_n))
-    # print("\n")
+        print("Top 10 most frequent unigrams:")
+        print(cnt_uni.most_common(args.top_n))
+        print("\n")
+        
+        print("Top 10 most frequent bigrams:")
+        print(cnt_bi.most_common(args.top_n))
+        print("\n")
 
-    ngrams_text = "Top 10 most frequent {}-grams:"
-    print(ngrams_text.format(args.ngrams))
-    print(cnt_ngrams.most_common(args.top_n))
-    print("\n")
+        print("Top 10 most frequent trigrams:")
+        print(cnt_tri.most_common(args.top_n))
+        print("\n")
+
+        ngrams_text = "Top 10 most frequent {}-grams:"
+        print(ngrams_text.format(args.ngrams))
+        print(cnt_ngrams.most_common(args.top_n))
+        print("\n")
+
+        ngrams_text = "Top 10 most frequent {}-grams:"
+        print(ngrams_text.format(args.ngrams))
+        print(cnt_ngrams.most_common(args.top_n))
+        print("\n")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -153,6 +176,9 @@ if __name__ == '__main__':
 
     parser.add_argument("--ngrams", "-n", type=int, nargs='?', const=4,
                             help="specifies (n)grams")
+
+    parser.add_argument("--output", "-o", type=argparse.FileType('w'),
+                            help="txt file to write results to")
 
     args = parser.parse_args()
 
