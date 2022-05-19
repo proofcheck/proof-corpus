@@ -4,7 +4,7 @@ matches/matches%: matches/eng-matches
 	grep "/texes/$*" matches/eng-matches | grep -v "^#" > $@
 
 proofs%.raw: matches/matches% naive.py
-	#./naive.py -p8 -m $<
+	./naive.py -p8 -m $<
 	# find proofs/${*}* -type f -name "*.txt" -print0 | xargs -0 cat > proofs$*.raw
 	foreach file (`find proofs/01* -type f -name "*.txt"`); sed s:^:$${file:r:t3:h2}'\t': $$file; end > proofs$*.raw
 
