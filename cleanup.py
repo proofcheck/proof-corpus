@@ -80,7 +80,6 @@ theorem_word = (
     r"Methods?|Facts?|Parts?|Rules?)\b)))"
 )
 
-
 # A set of words that probably are words, and not someone's name.
 known_words: set[str] = set()
 with open("words_alpha.txt") as fd:
@@ -264,6 +263,8 @@ def ner(proof: str, debug: bool = False):
         proof,
     )
 
+    proof = re.sub(r"\((\s*(SII|[iI]+)([0-9]|[A-Za-z]|['.,-–]|\s){0,10}\s*)+\)", "REF ", proof)
+
     # the theorem of NAME -> REF
     # an elementary theorem of Mori -> REF
     # NOT:   the definition of Gröbner bases -> REF bases
@@ -274,6 +275,9 @@ def ner(proof: str, debug: bool = False):
         else m.group(0),
         proof,
     )
+
+    proof = re.sub(r"\s*(?i:case)\s*[0-9]\s*(:)", "REF", proof)
+    proof = re.sub(f">\\s*({upperLetter})", "\\1", proof)
 
     if debug:
         print("0170", proof)
@@ -727,8 +731,11 @@ def cleanup(filename: str, proof: str, debug: bool = False):
     # The REF determines -> REF determines
     proof = re.sub("\\b[Tt]he REF\\b", "REF", proof)
 
-    # (of REF) -> Proof of REF.
-    proof = re.sub("\\(\\s*(?i:of)\\s*REF\\s*\\)", "", proof)
+    # (of REF) -> ""
+    # (proof of REF) -> ""
+    # (end of the proof of the claim) -> ""
+    proof = re.sub("\\(\\s*(?i:proof)?\\s*((?i:of\\s*(the)?\\s*theorem)|(?i:of\\s*REF(\\s*,\\s*REF)?)|(?i:of\\s*(the)?\\s*claim)|(?i:outline)|(?i:of\\s*proposition)|(?i:of\\s*lemma))\\s*\\)", "", proof)
+
 
     # an MATH -> a MATH
     proof = re.sub("\\b([Aa])n[ ]MATH\\b", r"\1 MATH", proof)
