@@ -571,6 +571,8 @@ def cleanup(filename: str, proof: str, debug: bool = False):
         proof,
     )
 
+    proof = re.sub(f"(?i:stage)\\s*{atomicID}\\s*(.)", "", proof)
+
     proof = re.sub(f"\\(\\s*([iI]|{atomicID})*\\s*MATH\\s*([iI]|{atomicID})*\\s*\\)\\s*({upperLetter}|{lowerLetter})", " CASE \\3", proof)
 
     proof = re.sub(f"\\(\\s*{atomicID}\\s*\\)", "REF", proof)
