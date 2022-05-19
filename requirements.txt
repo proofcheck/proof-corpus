@@ -6,3 +6,4 @@ more-itertools
 nltk
 psutil
 spacy
+dill
