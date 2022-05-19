@@ -1,0 +1,195 @@
+
+Top 10 most frequent 1-grams:
+('MATH',)  476597
+('.',)  187790
+('the',)  154343
+(',',)  152183
+('of',)  95734
+('is',)  87134
+('and',)  76990
+('that',)  69700
+('REF',)  61542
+('a',)  54068
+
+
+Top 10 most frequent 2-grams:
+('MATH', '.')  114465
+('MATH', ',')  64767
+('MATH', 'is')  51028
+('MATH', 'and')  40271
+('of', 'MATH')  40216
+('that', 'MATH')  39551
+('and', 'MATH')  31605
+(',', 'MATH')  27772
+('of', 'the')  19683
+(',', 'we')  16679
+
+
+Top 10 most frequent 3-grams:
+('MATH', 'and', 'MATH')  25253
+('MATH', ',', 'MATH')  12587
+('MATH', 'is', 'a')  11049
+('that', 'MATH', '.')  10972
+('MATH', ',', 'and')  10078
+('that', 'MATH', 'is')  9667
+('of', 'MATH', '.')  8693
+('and', 'MATH', '.')  8572
+('such', 'that', 'MATH')  7526
+('MATH', 'such', 'that')  6987
+
+
+Top 10 most frequent 4-grams:
+('MATH', 'and', 'MATH', '.')  7065
+('MATH', 'such', 'that', 'MATH')  5663
+('MATH', ',', 'MATH', ',')  4192
+('MATH', 'and', 'MATH', ',')  3443
+('MATH', 'for', 'all', 'MATH')  3028
+('MATH', 'and', 'MATH', 'are')  2946
+('MATH', ',', 'and', 'MATH')  2870
+('we', 'have', 'MATH', '.')  2805
+('such', 'that', 'MATH', '.')  2785
+(',', 'we', 'have', 'MATH')  2783
+
+
+Top 10 most frequent 5-grams:
+('MATH', 'such', 'that', 'MATH', '.')  2111
+('MATH', ',', 'MATH', ',', 'MATH')  1704
+('MATH', 'for', 'all', 'MATH', '.')  1559
+(',', 'we', 'have', 'MATH', '.')  1387
+('MATH', ',', 'MATH', 'and', 'MATH')  1384
+('MATH', ',', 'we', 'have', 'MATH')  1316
+('MATH', ',', 'MATH', ',', 'and')  1202
+('MATH', ',', 'where', 'MATH', 'is')  1077
+('On', 'the', 'other', 'hand', ',')  1038
+(',', 'MATH', ',', 'and', 'MATH')  1007
+
+
+Top 10 most frequent 6-grams:
+('MATH', ',', 'MATH', ',', 'and', 'MATH')  900
+('MATH', ',', 'MATH', ',', 'MATH', ',')  850
+('MATH', 'such', 'that', 'MATH', 'and', 'MATH')  669
+('MATH', ',', 'we', 'have', 'MATH', '.')  664
+('that', 'MATH', 'for', 'all', 'MATH', '.')  536
+(',', 'MATH', ',', 'MATH', ',', 'MATH')  517
+('MATH', ',', 'where', 'MATH', 'is', 'the')  495
+('MATH', ',', 'MATH', 'and', 'MATH', '.')  491
+('MATH', 'if', 'and', 'only', 'if', 'MATH')  488
+('MATH', ',', 'that', 'is', ',', 'MATH')  468
+
+
+Top 10 most frequent 7-grams:
+('MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH')  482
+('MATH', ',', 'MATH', ',', 'and', 'MATH', '.')  352
+('MATH', 'such', 'that', 'MATH', 'and', 'MATH', '.')  333
+(',', 'MATH', ',', 'MATH', ',', 'MATH', ',')  265
+('MATH', 'such', 'that', 'MATH', 'for', 'all', 'MATH')  247
+('MATH', ',', 'MATH', ',', 'MATH', 'and', 'MATH')  220
+('MATH', ',', 'MATH', ',', 'MATH', ',', 'and')  212
+(',', 'MATH', ',', 'MATH', ',', 'and', 'MATH')  202
+('MATH', ',', 'and', 'let', 'MATH', 'be', 'the')  199
+('MATH', ',', 'that', 'is', ',', 'MATH', '.')  188
+
+
+Top 10 most frequent 8-grams:
+('MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',')  242
+('MATH', ',', 'MATH', ',', 'MATH', ',', 'and', 'MATH')  175
+(',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH')  175
+('MATH', 'such', 'that', 'MATH', 'for', 'all', 'MATH', '.')  145
+('MATH', ',', 'MATH', ',', 'MATH', 'and', 'MATH', '.')  86
+(',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH')  78
+('MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':')  76
+(',', 'MATH', ',', 'MATH', ',', 'and', 'MATH', '.')  71
+(',', 'there', 'exists', 'MATH', 'such', 'that', 'MATH', '.')  71
+('MATH', 'for', 'MATH', 'and', 'MATH', 'for', 'MATH', '.')  70
+
+
+Top 10 most frequent 9-grams:
+('MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH')  164
+(',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',')  101
+('MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH')  71
+('MATH', ',', 'MATH', ',', 'MATH', ',', 'and', 'MATH', '.')  61
+('CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE')  55
+(':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':')  55
+('MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'and')  45
+(',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'and', 'MATH')  44
+('MATH', 'such', 'that', 'MATH', 'for', 'all', 'MATH', 'and', 'MATH')  42
+('MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', 'and', 'MATH')  42
+
+
+Top 10 most frequent 10-grams:
+('MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',')  96
+(',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH')  79
+('CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':')  55
+(':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH')  53
+('MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'and', 'MATH')  40
+('MATH', 'such', 'that', 'MATH', 'for', 'all', 'MATH', 'and', 'MATH', '.')  32
+('MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',')  32
+(',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE')  30
+('MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', '.')  29
+('CASE', ':', 'MATH', ';', 'CASE', ':', 'MATH', ';', 'CASE', ':')  29
+
+
+Top 10 most frequent 11-grams:
+('MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH')  77
+('CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH')  53
+(',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',')  48
+('MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE')  30
+(',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':')  30
+('CASE', ':', 'MATH', ';', 'CASE', ':', 'MATH', ';', 'CASE', ':', 'MATH')  28
+(':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',')  27
+('MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', 'and', 'MATH')  22
+(':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', '.')  20
+('1', ')', 'f', ':', '0', 'r', ':', '.', '15', '(', '0')  20
+
+
+Top 10 most frequent 12-grams:
+('MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',')  46
+(',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH')  41
+('MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':')  30
+(',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH')  30
+('CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',')  27
+(':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE')  25
+('CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', '.')  20
+('CASE', ':', 'MATH', ';', 'CASE', ':', 'MATH', ';', 'CASE', ':', 'MATH', ';')  17
+(':', 'MATH', ';', 'CASE', ':', 'MATH', ';', 'CASE', ':', 'MATH', ';', 'CASE')  16
+('MATH', ';', 'CASE', ':', 'MATH', ';', 'CASE', ':', 'MATH', ';', 'CASE', ':')  16
+
+
+Top 10 most frequent 13-grams:
+('MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH')  40
+('MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH')  30
+(',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',')  29
+('CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE')  25
+(':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':')  25
+('CASE', ':', 'MATH', ';', 'CASE', ':', 'MATH', ';', 'CASE', ':', 'MATH', ';', 'CASE')  16
+(':', 'MATH', ';', 'CASE', ':', 'MATH', ';', 'CASE', ':', 'MATH', ';', 'CASE', ':')  16
+('MATH', ';', 'CASE', ':', 'MATH', ';', 'CASE', ':', 'MATH', ';', 'CASE', ':', 'MATH')  16
+(',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', '.')  14
+(',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',')  14
+
+
+Top 10 most frequent 14-grams:
+('MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',')  29
+(',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH')  25
+('CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':')  25
+(':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH')  25
+('CASE', ':', 'MATH', ';', 'CASE', ':', 'MATH', ';', 'CASE', ':', 'MATH', ';', 'CASE', ':')  16
+(':', 'MATH', ';', 'CASE', ':', 'MATH', ';', 'CASE', ':', 'MATH', ';', 'CASE', ':', 'MATH')  16
+('MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', '.')  14
+('MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',')  14
+('the', 'number', 'of', 'SRW', '-', 'paths', 'with', 'MATH', 'whose', 'point', 'process', 'MATH', 'is', 'MATH')  14
+('number', 'of', 'SRW', '-', 'paths', 'with', 'MATH', 'whose', 'point', 'process', 'MATH', 'is', 'MATH', 'shaped')  14
+
+
+Top 10 most frequent 15-grams:
+('MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH')  25
+('CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH')  25
+(',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',', 'MATH', ',')  22
+('CASE', ':', 'MATH', ';', 'CASE', ':', 'MATH', ';', 'CASE', ':', 'MATH', ';', 'CASE', ':', 'MATH')  16
+('the', 'number', 'of', 'SRW', '-', 'paths', 'with', 'MATH', 'whose', 'point', 'process', 'MATH', 'is', 'MATH', 'shaped')  14
+(':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', '.')  13
+('MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE')  13
+(',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':', 'MATH', ',', 'CASE', ':')  13
+(':', 'MATH', ';', 'CASE', ':', 'MATH', ';', 'CASE', ':', 'MATH', ';', 'CASE', ':', 'MATH', ';')  11
+('MATH', ';', 'CASE', ':', 'MATH', ';', 'CASE', ':', 'MATH', ';', 'CASE', ':', 'MATH', ';', 'CASE')  11
+
