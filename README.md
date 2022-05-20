@@ -131,10 +131,7 @@
 2.  To run the ad-hoc cleanup script on each of these files (in parallel), we can do
 
          rm -f proofs*.txt
-         foreach y (`seq 92 99` `seq -w 0 20`)
-           nohup ./cleanup.py proofs$y.raw > proofs$y.txt &
-         end
-         wait
+         nohup foreach y (`seq 92 99` `seq -w 0 20`); ./cleanup.py -p16 proofs$y.raw > proofs$y.txt; end
 
     This creates files `proofs92.txt`, `proofs93.txt`, ..., `proofs20.txt' for the years 1992-2020, with one proof per line. (It can take up to an hour, but fortunately `cleanup.py`also nices itself so it's OK as a long-running process. The`nohup` keeps the cleanup running even if you close the terminal window or ssh session.)
 

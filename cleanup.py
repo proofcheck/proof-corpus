@@ -15,6 +15,8 @@
 
 
 import argparse
+from itertools import repeat
+from multiprocessing import Pool, Lock
 import re
 import sys
 from typing import List, Match
@@ -23,6 +25,7 @@ import unicodedata
 from pyparsing import alphanums
 
 import nicer
+
 
 # Regular expression for uppercase letters (as a string)n
 #   equivalent to "[A-Z]" but also including non-ASCII
@@ -263,7 +266,11 @@ def ner(proof: str, debug: bool = False):
         proof,
     )
 
-    proof = re.sub(r"\((\s*(SII|[iI]+)([0-9]|[A-Za-z]|['.,-–]|\s){0,10}\s*)+\)", "REF ", proof)
+    proof = re.sub(
+        r"\((\s*(SII|[iI]+)([0-9]|[A-Za-z]|['.,-–]|\s){0,10}\s*)+\)",
+        "REF ",
+        proof,
+    )
 
     # the theorem of NAME -> REF
     # an elementary theorem of Mori -> REF
@@ -577,14 +584,22 @@ def cleanup(filename: str, proof: str, debug: bool = False):
 
     proof = re.sub(f"(?i:stage)\\s*{atomicID}\\s*(.)", "", proof)
 
-    proof = re.sub(f"\\(\\s*([iI]|{atomicID})*\\s*MATH\\s*([iI]|{atomicID})*\\s*\\)\\s*({upperLetter}|{lowerLetter})", " CASE: \\3", proof)
+    proof = re.sub(
+        f"\\(\\s*([iI]|{atomicID})*\\s*MATH\\s*([iI]|{atomicID})*\\s*\\)\\s*({upperLetter}|{lowerLetter})",
+        " CASE \\3",
+        proof,
+    )
 
     proof = re.sub(f"\\(\\s*{atomicID}\\s*\\)", "REF", proof)
 
     proof = re.sub("CASE\\s*:(\\s*CASE\\s*:)+", "CASE:", proof)
 
     # base and inductive step labeling to CASE only when followed by capital letter
-    proof = re.sub(f"((\\()?\\s*(?i:basis)\\s*(\\))?|(\\()?\\s*(?i:induction)\\s*(\\))?)\\s*({upperLetter})", " CASE \\6", proof)
+    proof = re.sub(
+        f"((\\()?\\s*(?i:basis)\\s*(\\))?|(\\()?\\s*(?i:induction)\\s*(\\))?)\\s*({upperLetter})",
+        " CASE \\6",
+        proof,
+    )
 
     if debug:
         print(1400, proof)
@@ -734,8 +749,11 @@ def cleanup(filename: str, proof: str, debug: bool = False):
     # (of REF) -> ""
     # (proof of REF) -> ""
     # (end of the proof of the claim) -> ""
-    proof = re.sub("\\(\\s*(?i:proof)?\\s*((?i:of\\s*(the)?\\s*theorem)|(?i:of\\s*REF(\\s*,\\s*REF)?)|(?i:of\\s*(the)?\\s*claim)|(?i:outline)|(?i:of\\s*proposition)|(?i:of\\s*lemma))\\s*\\)", "", proof)
-
+    proof = re.sub(
+        "\\(\\s*(?i:proof)?\\s*((?i:of\\s*(the)?\\s*theorem)|(?i:of\\s*REF(\\s*,\\s*REF)?)|(?i:of\\s*(the)?\\s*claim)|(?i:outline)|(?i:of\\s*proposition)|(?i:of\\s*lemma))\\s*\\)",
+        "",
+        proof,
+    )
 
     # an MATH -> a MATH
     proof = re.sub("\\b([Aa])n[ ]MATH\\b", r"\1 MATH", proof)
@@ -778,6 +796,20 @@ def clean_proof(orig: str, debug: bool = False, filename: str = "<unknown>"):
     return prefix + clean
 
 
+# Ensure that printing is atomic, even if we're using multiprocessing
+
+# https://stackoverflow.com/questions/25557686/python-sharing-a-lock-between-processes
+def init_pool(l):
+    global print_lock
+    print_lock = l
+
+
+def quietly_clean_and_print_proof(orig: str, filename: str):
+    clean = clean_proof(orig, False, filename) + "\n"
+    with print_lock:
+        sys.stdout.write(clean)
+
+
 if __name__ == "__main__":
     nicer.make_nice()
 
@@ -786,19 +818,44 @@ if __name__ == "__main__":
         "-d", "--debug", help="Show tracing output", action="store_true"
     )
     parser.add_argument(
+        "-p", "--cores", help="Number of cores to use", type=int, default=8
+    )
+    parser.add_argument(
         "file", nargs="?", type=argparse.FileType("r"), default=sys.stdin
     )
     args = parser.parse_args()
 
-    for orig in args.file.readlines():
-        clean = clean_proof(orig, args.debug, args.file)
-        if args.debug:
-            print()
-            print(orig.strip())
-            print("   --->")
-            print(clean)
-            print()
-        else:
-            print(clean)
+    if args.debug:
+        print("Debugging enabled; will not use multiple cores")
+        args.cores = 1
+        args.p = 1
+
+    if args.cores == 1:
+        for orig in args.file.readlines():
+            clean = clean_proof(orig, args.debug, args.file)
+            if args.debug:
+                print()
+                print(orig.strip())
+                print("   --->")
+                print(clean)
+                print()
+            else:
+                print(clean)
+    else:
+        assert not args.debug
+        lines = list(args.file.readlines())
+        lock = Lock()
+        with Pool(
+            processes=args.cores, initializer=init_pool, initargs=(lock,)
+        ) as p:
+            # p.map(pf, tex_files, 1)
+            p.starmap(
+                quietly_clean_and_print_proof,
+                zip(lines, repeat(args.file.name)),
+                # let's try handing out files to CPUs
+                # in chunks of 500 (rather than the default
+                # which is approximately num-lines / CPUS / 4)
+                # 500,
+            )
 
     args.file.close()
