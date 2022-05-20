@@ -276,7 +276,7 @@ def ner(proof: str, debug: bool = False):
         proof,
     )
 
-    proof = re.sub(r"\s*(?i:case)\s*[0-9]\s*(:)", "REF", proof)
+    proof = re.sub(r"\s*(?i:case)\s*[0-9]\s*(:)", " REF", proof)
     proof = re.sub(f">\\s*({upperLetter})", "\\1", proof)
 
     if debug:
@@ -421,7 +421,7 @@ def cleanup(filename: str, proof: str, debug: bool = False):
     proof = re.sub("\\(\\s*(?i:sketch)\\s*\\)", " ", proof)
 
     # ad 1 -> CASE
-    proof = re.sub(f"(?i:ad)\\s*{numAlpha}(.)?", " CASE ", proof)
+    proof = re.sub(f"(?i:ad)\\s*{numAlpha}(.)?", " CASE:", proof)
 
     # rhs r.h.s. RHS R.H.S. r. h. s.  r h s -> rhs   R.H.S RHS -> Rhs
     proof = re.sub(
@@ -577,7 +577,7 @@ def cleanup(filename: str, proof: str, debug: bool = False):
 
     proof = re.sub(f"(?i:stage)\\s*{atomicID}\\s*(.)", "", proof)
 
-    proof = re.sub(f"\\(\\s*([iI]|{atomicID})*\\s*MATH\\s*([iI]|{atomicID})*\\s*\\)\\s*({upperLetter}|{lowerLetter})", " CASE \\3", proof)
+    proof = re.sub(f"\\(\\s*([iI]|{atomicID})*\\s*MATH\\s*([iI]|{atomicID})*\\s*\\)\\s*({upperLetter}|{lowerLetter})", " CASE: \\3", proof)
 
     proof = re.sub(f"\\(\\s*{atomicID}\\s*\\)", "REF", proof)
 
