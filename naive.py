@@ -1607,6 +1607,24 @@ def execute(cmd, words, macros, nomath=True, debug=False):
         get_arg(words)
         return []
 
+    if cmd in [
+        "\\section",
+        "\\subsection",
+        "\\subsubsection",
+        "\\paragraph",
+        "\\subparagraph",
+    ]:
+        # Skip optional asterisk
+        if words.peek("!") == "*":
+            next(words)
+        # OK, this is debatable, but we will completely ignore the
+        #    contents of section/paragraph/etc. headers.
+        # They're rarely full sentences, and often lack periods
+        #    so they get glommed on to the first sentence of the
+        #    section/paragraph itself.
+        get_arg(words)
+        return ["CASE: "]
+
     if cmd in macros:
         if cmd == "\\BoxedEPSF":
             # Hack for 0002/math0002136/zinno.tex

@@ -15,6 +15,8 @@
 
 
 import argparse
+from itertools import repeat
+from multiprocessing import Pool, Lock
 import re
 import sys
 from typing import List, Match
@@ -23,6 +25,7 @@ import unicodedata
 from pyparsing import alphanums
 
 import nicer
+
 
 # Regular expression for uppercase letters (as a string)n
 #   equivalent to "[A-Z]" but also including non-ASCII
@@ -87,6 +90,7 @@ with open("words_alpha.txt") as fd:
         word = word.strip()
         known_words.add(word)
     known_words.add("profinite")
+    known_words.add("interpolants")
 
 # A set of names that might arise in Mathy text.
 known_names: set[str] = set()
@@ -110,7 +114,7 @@ with open("known_names.txt") as fd:
 #############
 
 
-def splitMATH(proof: str, debug: bool = False):
+def splitMATH(proof: str, debug: bool = False, aggressive: bool = True):
     r"""
     Break 'MATHsystem' (one word) into MATH system, etc.
 
@@ -131,7 +135,7 @@ def splitMATH(proof: str, debug: bool = False):
     return proof
 
 
-def ner(proof: str, debug: bool = False):
+def ner(proof: str, debug: bool = False, aggressive: bool = True):
     """
     Replace names with 'NAME'.
 
@@ -263,8 +267,6 @@ def ner(proof: str, debug: bool = False):
         proof,
     )
 
-    proof = re.sub(r"\((\s*(SII|[iI]+)([0-9]|[A-Za-z]|['.,-–]|\s){0,10}\s*)+\)", "REF ", proof)
-
     # the theorem of NAME -> REF
     # an elementary theorem of Mori -> REF
     # NOT:   the definition of Gröbner bases -> REF bases
@@ -276,7 +278,7 @@ def ner(proof: str, debug: bool = False):
         proof,
     )
 
-    proof = re.sub(r"\s*(?i:case)\s*[0-9]\s*(:)", "REF", proof)
+    proof = re.sub(r"\s*(?i:case)\s*[0-9]\s*(:)", " REF", proof)
     proof = re.sub(f">\\s*({upperLetter})", "\\1", proof)
 
     if debug:
@@ -285,8 +287,9 @@ def ner(proof: str, debug: bool = False):
     return proof
 
 
-def treat_unbalanced_parens(filename: str, proof: str, debug: bool = False):
+def treat_unbalanced_parens(filename: str, proof: str, debug: bool = False, aggressive: bool = True):
     """Look for common reasons for unbalanced ('s and )'s."""
+    
     # Case 1) This follows by -> CASE: This follows by
     # 1) This follows by -> CASE: This follows by
     # complete. 2) We consider -> complete. CASE: We consider
@@ -302,18 +305,20 @@ def treat_unbalanced_parens(filename: str, proof: str, debug: bool = False):
     if proof.count("(") == proof.count(")"):
         return proof
 
-    # by part b) we have -> by we have
-    # by part b) MATH -> by REF MATH
-    # by part b). -> by REF.
-    # by part ii) we have -> by REF we have
-    # by part ii) MATH -> by REF MATH
-    # by Theorem 2.1) -> by REF) -> by REF
-    proof = re.sub(
-        f"{theorem_word}\\s?{atomicID}[.]?\\)"
-        f"((?:[ ]{lowerLetter}|[ ]MATH|[,.:]))",
-        "REF \\1",
-        proof,
-    )
+
+    if aggressive:
+        # by part b) we have -> by we have
+        # by part b) MATH -> by REF MATH
+        # by part b). -> by REF.
+        # by part ii) we have -> by REF we have
+        # by part ii) MATH -> by REF MATH
+        # by Theorem 2.1) -> by REF) -> by REF
+        proof = re.sub(
+            f"{theorem_word}\\s?{atomicID}[.]?\\)"
+            f"((?:[ ]{lowerLetter}|[ ]MATH|[,.:]))",
+            "REF \\1",
+            proof,
+        )
     if debug:
         print(1520, proof)
 
@@ -364,79 +369,90 @@ def treat_unbalanced_parens(filename: str, proof: str, debug: bool = False):
     return proof
 
 
-def cleanup(filename: str, proof: str, debug: bool = False):
+def cleanup(filename: str, proof: str, debug: bool = False, aggressive: bool = True):
     """Simplify proof outputs."""
     if debug:
         print("0999", proof)
+    if aggressive:
+        # Normalize Abbreviations
+        # i.e. ie  i.e., ie., ... -> that is,
+        # e.g. eg  e.g., eg., ... -> for example,
+        proof = re.sub(r"\bi[. ]?e[.]?,?\s", "that is, ", proof)
+        proof = re.sub(r"\bI[. ]?e[.]?,?\s", "That is, ", proof)
+        proof = re.sub(r"\be[. ]?g[.]?,?\s", "for example, ", proof)
+        proof = re.sub(r"\bE[. ]?g[.]?,?\s", "For example, ", proof)
 
-    # Normalize Abbreviations
-    # i.e. ie  i.e., ie., ... -> that is,
-    # e.g. eg  e.g., eg., ... -> for example,
-    proof = re.sub(r"\bi[. ]?e[.]?,?\s", "that is, ", proof)
-    proof = re.sub(r"\bI[. ]?e[.]?,?\s", "That is, ", proof)
-    proof = re.sub(r"\be[. ]?g[.]?,?\s", "for example, ", proof)
-    proof = re.sub(r"\bE[. ]?g[.]?,?\s", "For example, ", proof)
+        proof = re.sub(r"\bi[. ]?e[.]?,?(?!\w)", "that is ", proof)
+        proof = re.sub(r"\bI[. ]?e[.]?,?(?!\w)", "That is ", proof)
+        proof = re.sub(r"\be[. ]?g[.]?,?(?!\w)", "for example ", proof)
+        proof = re.sub(r"\bE[. ]?g[.]?,?(?!\w)", "For example ", proof)
 
-    proof = re.sub(r"\bi[. ]?e[.]?,?(?!\w)", "that is ", proof)
-    proof = re.sub(r"\bI[. ]?e[.]?,?(?!\w)", "That is ", proof)
-    proof = re.sub(r"\be[. ]?g[.]?,?(?!\w)", "for example ", proof)
-    proof = re.sub(r"\bE[. ]?g[.]?,?(?!\w)", "For example ", proof)
+        # w.l.o.g  wlog ... -> without loss of generality
+        # WLOG  W.l.o.g ... -> Without loss of generality
+        proof = re.sub(
+            r"\b([Ww])[.]?[Ll][.]?[Oo][.]?[Gg][.]?(\W)",
+            r"\1ithout loss of generality\2",
+            proof,
+        )
+        # wolog WOLOG -> [Ww]ithout loss of generality
+        proof = re.sub(
+            "\b([Ww])[Oo][Ll][Oo][Gg]\b", r"\1ithout loss of generality", proof
+        )
 
-    # w.l.o.g  wlog ... -> without loss of generality
-    # WLOG  W.l.o.g ... -> Without loss of generality
-    proof = re.sub(
-        r"\b([Ww])[.]?[Ll][.]?[Oo][.]?[Gg][.]?(\W)",
-        r"\1ithout loss of generality\2",
-        proof,
-    )
-    # wolog WOLOG -> [Ww]ithout loss of generality
-    proof = re.sub(
-        "\b([Ww])[Oo][Ll][Oo][Gg]\b", r"\1ithout loss of generality", proof
-    )
+        # i.i.d iid ... -> iid    I.I.D.  I.i.d IID  ... -> Iid
+        proof = re.sub(
+            r"\b([Ii])[.]?i[Ii][.]?[Dd][.]?(\W)",
+            r"\1ndependent and identically distributed\2",
+            proof,
+        )
 
-    # i.i.d iid ... -> iid    I.I.D.  I.i.d IID  ... -> Iid
-    proof = re.sub(
-        r"\b([Ii])[.]?i[Ii][.]?[Dd][.]?(\W)",
-        r"\1ndependent and identically distributed\2",
-        proof,
-    )
+        # cf. -> compare
+        proof = re.sub("\\b([Cc])[.]?f[. ]*", r"\1ompare ", proof)
 
-    # cf. -> compare
-    proof = re.sub("\\b([Cc])[.]?f[. ]*", r"\1ompare ", proof)
+        # loc. cit. -> CITE
+        proof = re.sub("(?i:loc[.]? cit(?:[.]|\\b))", "CITE", proof)
 
-    # loc. cit. -> CITE
-    proof = re.sub("(?i:loc[.]? cit(?:[.]|\\b))", "CITE", proof)
+        # QED Q.E.D. qed q.e.d -> QED .
+        # QED. -> QED .
+        # QED . -> QED .
+        proof = re.sub("\\b[Qq]\\.?[Ee]\\.?[Dd]\\.?(\\s\\.)?", "QED .", proof)
 
-    # QED Q.E.D. qed q.e.d -> QED .
-    # QED. -> QED .
-    # QED . -> QED .
-    proof = re.sub("\\b[Qq]\\.?[Ee]\\.?[Dd]\\.?(\\s\\.)?", "QED .", proof)
+        # resp. -> respectively,
+        proof = re.sub(
+            "(?i:\\b(?<![.])(r)esp(?:[.]|\\b)[,]?)", r"\1espectively,", proof
+        )
 
-    # resp. -> respectively,
-    proof = re.sub(
-        "(?i:\\b(?<![.])(r)esp(?:[.]|\\b)[,]?)", r"\1espectively,", proof
-    )
+            # rhs r.h.s. RHS R.H.S. r. h. s.  r h s -> rhs   R.H.S RHS -> Rhs
+        proof = re.sub(
+            "(?i:\\b(?<![.])(r)[.]?[ ]?h[.]?[ ]?s(?:[.]|\\b))",
+            r"\1ight-hand side",
+            proof,
+        )
 
-    # (sketch) -> ""
-    proof = re.sub("\\(\\s*(?i:sketch)\\s*\\)", " ", proof)
+        # s.t. -> such that
+        proof = re.sub("\\b(?<![.])s[.]t[.]([ ,:])", r"such that\1", proof)
+
+        # w.r.t -> with respect to
+        proof = re.sub(
+            "(?i:\\b(?<![.])(w)[.]?r[.]?t(?:[.]|\\b))", r"\1ith respect to", proof
+        )
+
+
+    if aggressive:
+        # (iii 'a-ds,.) -> REF
+        proof = re.sub(
+            r"\((\s*(SII|[iI]+)([0-9]|[A-Za-z]|['.,-–]|\s){0,10}\s*)+\)",
+            "REF ",
+            proof,
+        )
+
+        # (sketch) -> ""
+        proof = re.sub("\\(\\s*(?i:sketch)\\s*\\)", " ", proof)
 
     # ad 1 -> CASE
-    proof = re.sub(f"(?i:ad)\\s*{numAlpha}(.)?", " CASE ", proof)
+    proof = re.sub(f"(?i:ad)\\s*{numAlpha}(.)?", " CASE:", proof)
 
-    # rhs r.h.s. RHS R.H.S. r. h. s.  r h s -> rhs   R.H.S RHS -> Rhs
-    proof = re.sub(
-        "(?i:\\b(?<![.])(r)[.]?[ ]?h[.]?[ ]?s(?:[.]|\\b))",
-        r"\1ight-hand side",
-        proof,
-    )
-
-    # s.t. -> such that
-    proof = re.sub("\\b(?<![.])s[.]t[.]([ ,:])", r"such that\1", proof)
-
-    # w.r.t -> with respect to
-    proof = re.sub(
-        "(?i:\\b(?<![.])(w)[.]?r[.]?t(?:[.]|\\b))", r"\1ith respect to", proof
-    )
+    
 
     if debug:
         print(1000, proof)
@@ -445,7 +461,8 @@ def cleanup(filename: str, proof: str, debug: bool = False):
     # We hope there aren't any, but just in case...
 
     real_re = "(?:[+-]?(?:\\d+(?:[.,]\\d*)?|\\d*(?:[.,]\\d+)))"
-    dimen_re = f"(?:{real_re}[ ]?(?:true[ ]?)?(?:pt|cm|mm|in|bp|em|ex|sp)\\b)"
+    dimen_re2 = f"(?:{real_re}(?:[ ]?true[ ]?)?(?:in)\\b)"
+    dimen_re = f"(?:{real_re}[ ]?(?:true[ ]?)?(?:pt|cm|mm|bp|em|ex|sp)\\b|{dimen_re2})"
     inf_re = f"(?:{real_re}[ ]?fill?l?)"
     dori_re = f"(?:{dimen_re}|{inf_re})"
     glue_re = (
@@ -469,36 +486,46 @@ def cleanup(filename: str, proof: str, debug: bool = False):
     if debug:
         print(1050, proof)
 
-    # Simplify references to theorems, etc.
-    # Prop. 2.1 -> REF
-    # by Propositions 6.3 and 6.4. -> by REF.
-    # by Propositions 6.3, 6.4 -> by REF
-    # by Proposition 6.3 or 6.4 -> by REF
+    if aggressive:
+    
+        # Simplify references to theorems, etc.
+        # Prop. 2.1 -> REF
+        # by Propositions 6.3 and 6.4. -> by REF.
+        # by Propositions 6.3, 6.4 -> by REF
+        # by Proposition 6.3 or 6.4 -> by REF
 
-    # NOT by definition a nonempty -> by REF nonempty
-    # NOT in fact a very -> in REF very
-    # NOT uses Theorem 2. A consequence of -> uses REF . REF consequence of
-    proof = re.sub(
-        f"{theorem_word}\\s?((?![Aa]n?[ ])"
-        f"{theoremNumber}(?:\\s?(?:[,-—]|and|or|with)\\s*"
-        f"(?![Aa]n?[ ]){theoremNumber})*)",
-        lambda m: re.sub(theoremNumber, "REF ", m.group(1)),
-        proof,
-    )
+        # NOT by definition a nonempty -> by REF nonempty
+        # NOT in fact a very -> in REF very
+        # NOT uses Theorem 2. A consequence of -> uses REF . REF consequence of
 
+        proof = re.sub(
+            f"{theorem_word}\\s?((?![Aa]n?[ ])"
+            f"{theoremNumber}(?:\\s?(?:[,-—]|and|or|with)\\s*"
+            f"(?![Aa]n?[ ]){theoremNumber})*)",
+            lambda m: re.sub(theoremNumber, "REF ", m.group(1)),
+            proof,
+        )
+
+    
+
+        # by Theorem I we have -> by REF we have
+        # by Theorem IIa we have -> by REF we have
+        proof = re.sub(f"{theorem_word}\\s?[IVX]+[a-z]?\\b", "REF", proof)
+
+        # Part 3 of the theorem -> REF of the theorem -> REF
+        proof = re.sub(f"REF of the {theorem_word}", "REF", proof)
+    
+    # eliminate extra spaces
     proof = re.sub("[ ]+", " ", proof)
-
-    # by Theorem I we have -> by REF we have
-    # by Theorem IIa we have -> by REF we have
-    proof = re.sub(f"{theorem_word}\\s?[IVX]+[a-z]?\\b", "REF", proof)
-
+    
     if debug:
         print(1100, proof)
 
-    # Part 3 of the theorem -> REF of the theorem -> REF
-    proof = re.sub(f"REF of the {theorem_word}", "REF", proof)
+    
     if debug:
         print(1200, proof)
+
+    #clean up weird parentheses around MATH
 
     # (i) MATH (ii) -> MATH
     proof = re.sub(f"{parenID} (MATH {parenID})+", "MATH", proof)
@@ -517,7 +544,6 @@ def cleanup(filename: str, proof: str, debug: bool = False):
         print(1300, proof)
 
     # Case 1: We have -> CASE: We have
-    # Case 1: We have
     proof = re.sub(
         f"(^|[.;:] )(?i:case)\\s+(?:{numAlpha}|[ivx]+|[IVX]+|\\w)[:.]",
         "\\1CASE:",
@@ -548,15 +574,15 @@ def cleanup(filename: str, proof: str, debug: bool = False):
         proof,
     )
 
-    # (i) We have -> REF We have -> CASE: We have
-    # BUT NOT:  T's Theorem CITE implies -> REF CITE implies -> CASE: implies
-    proof = re.sub(
-        f"(^|[.;:] )REF[.: ]+({upperLetter}\\w+)",
-        lambda m: m.group(1) + "CASE: " + m.group(2)
-        if m.group(2) not in {"CITE", "REF"}
-        else m.group(0),
-        proof,
-    )
+    # # (i) We have -> REF We have -> CASE: We have
+    # # BUT NOT:  T's Theorem CITE implies -> REF CITE implies -> CASE: implies
+    # proof = re.sub(
+    #     f"(^|[.;:] )REF[.: ]+({upperLetter}\\w+)",
+    #     lambda m: m.group(1) + "CASE: " + m.group(2)
+    #     if m.group(2) not in {"CITE", "REF"}
+    #     else m.group(0),
+    #     proof,
+    # )
 
     if debug:
         print(1360, proof)
@@ -577,14 +603,23 @@ def cleanup(filename: str, proof: str, debug: bool = False):
 
     proof = re.sub(f"(?i:stage)\\s*{atomicID}\\s*(.)", "", proof)
 
-    proof = re.sub(f"\\(\\s*([iI]|{atomicID})*\\s*MATH\\s*([iI]|{atomicID})*\\s*\\)\\s*({upperLetter}|{lowerLetter})", " CASE \\3", proof)
+    proof = re.sub(
+        f"\\(\\s*([iI]|{atomicID})*\\s*MATH\\s*([iI]|{atomicID})*\\s*\\)\\s*({upperLetter}|{lowerLetter})",
+        " CASE \\3",
+        proof,
+    )
 
     proof = re.sub(f"\\(\\s*{atomicID}\\s*\\)", "REF", proof)
+
 
     proof = re.sub("CASE\\s*:(\\s*CASE\\s*:)+", "CASE:", proof)
 
     # base and inductive step labeling to CASE only when followed by capital letter
-    proof = re.sub(f"((\\()?\\s*(?i:basis)\\s*(\\))?|(\\()?\\s*(?i:induction)\\s*(\\))?)\\s*({upperLetter})", " CASE \\6", proof)
+    proof = re.sub(
+        f"((\\()?\\s*(?i:basis)\\s*(\\))?|(\\()?\\s*(?i:induction)\\s*(\\))?)\\s*({upperLetter})",
+        " CASE \\6",
+        proof,
+    )
 
     if debug:
         print(1400, proof)
@@ -597,8 +632,8 @@ def cleanup(filename: str, proof: str, debug: bool = False):
     proof = re.sub("\\([ ]*\\)", " ", proof)
 
     if proof.count("(") != proof.count(")"):
-        proof = treat_unbalanced_parens(filename, proof, debug)
-
+        proof = treat_unbalanced_parens(filename, proof, debug, aggressive)
+    
     if debug:
         print(1600, proof)
 
@@ -677,6 +712,7 @@ def cleanup(filename: str, proof: str, debug: bool = False):
     # Collapse adjacent references,
     # Appendix A Theorem 4 -> REF REF -> REF
     # (Appendix A Theorem 4) -> (REF REF) -> (REF) -> REF
+    proof = re.sub(r"(\*)\s*REF\b", "REF", proof)
     proof = re.sub("\\bREF(\\s*REF)*\\b", r"REF", proof)
     proof = re.sub("\\(\\s*REF\\s*\\)", " REF ", proof)
 
@@ -684,6 +720,9 @@ def cleanup(filename: str, proof: str, debug: bool = False):
         print(9800, proof)
 
     # Final cleanup
+
+    #remove 2 = MATH or MATH = 2
+    proof = re.sub(r"([0-9]*\s*=\s*MATH|MATH\s*=\s*[0-9]*|MATH\s*=\s*MATH)", "MATH", proof)
 
     # remove spurious periods after MATH
     # e.g., 0002/math0002001/finalversion.txt
@@ -734,8 +773,11 @@ def cleanup(filename: str, proof: str, debug: bool = False):
     # (of REF) -> ""
     # (proof of REF) -> ""
     # (end of the proof of the claim) -> ""
-    proof = re.sub("\\(\\s*(?i:proof)?\\s*((?i:of\\s*(the)?\\s*theorem)|(?i:of\\s*REF(\\s*,\\s*REF)?)|(?i:of\\s*(the)?\\s*claim)|(?i:outline)|(?i:of\\s*proposition)|(?i:of\\s*lemma))\\s*\\)", "", proof)
-
+    proof = re.sub(
+        "\\(\\s*(?i:proof)?\\s*((?i:of\\s*(the)?\\s*theorem)|(?i:of\\s*REF(\\s*,\\s*REF)?)|(?i:of\\s*(the)?\\s*claim)|(?i:outline)|(?i:of\\s*proposition)|(?i:of\\s*lemma))\\s*\\)",
+        "",
+        proof,
+    )
 
     # an MATH -> a MATH
     proof = re.sub("\\b([Aa])n[ ]MATH\\b", r"\1 MATH", proof)
@@ -751,6 +793,16 @@ def cleanup(filename: str, proof: str, debug: bool = False):
         proof,
     )
 
+    # (i) We have -> REF We have -> CASE: We have
+    # BUT NOT:  T's Theorem CITE implies -> REF CITE implies -> CASE: implies
+    proof = re.sub(
+        f"(^|[.;:] )REF[.: ]+({upperLetter}\\w+)",
+        lambda m: m.group(1) + "CASE: " + m.group(2)
+        if m.group(2) not in {"CITE", "REF"}
+        else m.group(0),
+        proof,
+    )
+
     proof = proof.strip()
 
     if debug:
@@ -759,7 +811,7 @@ def cleanup(filename: str, proof: str, debug: bool = False):
     return proof
 
 
-def clean_proof(orig: str, debug: bool = False, filename: str = "<unknown>"):
+def clean_proof(orig: str, debug: bool = False, filename: str = "<unknown>", aggressive: bool = True):
     if "\t" in orig:
         (prefix, line) = orig.split("\t")
         prefix += "\t"
@@ -769,13 +821,27 @@ def clean_proof(orig: str, debug: bool = False, filename: str = "<unknown>"):
     clean = unicodedata.normalize("NFKC", line)
     if debug:
         print("0000", clean)
-    clean = splitMATH(clean, debug)
-    clean = ner(clean, debug)
+    clean = splitMATH(clean, debug, aggressive)
+    clean = ner(clean, debug, aggressive)
     if debug:
         print("0200", clean)
-    clean = cleanup(filename, clean, debug)
+    clean = cleanup(filename, clean, debug, aggressive)
     # clean = remove_extra_rparens(clean)
     return prefix + clean
+
+
+# Ensure that printing is atomic, even if we're using multiprocessing
+
+# https://stackoverflow.com/questions/25557686/python-sharing-a-lock-between-processes
+def init_pool(l):
+    global print_lock
+    print_lock = l
+
+
+def quietly_clean_and_print_proof(orig: str, filename: str, aggressive: bool = True):
+    clean = clean_proof(orig, False, filename, aggressive) + "\n"
+    with print_lock:
+        sys.stdout.write(clean)
 
 
 if __name__ == "__main__":
@@ -786,19 +852,47 @@ if __name__ == "__main__":
         "-d", "--debug", help="Show tracing output", action="store_true"
     )
     parser.add_argument(
+        "-a", "--aggressive", help="Intensity of cleanup", action="store_false"
+    )
+    parser.add_argument(
+        "-p", "--cores", help="Number of cores to use", type=int, default=8
+    )
+    parser.add_argument(
         "file", nargs="?", type=argparse.FileType("r"), default=sys.stdin
     )
     args = parser.parse_args()
 
-    for orig in args.file.readlines():
-        clean = clean_proof(orig, args.debug, args.file)
-        if args.debug:
-            print()
-            print(orig.strip())
-            print("   --->")
-            print(clean)
-            print()
-        else:
-            print(clean)
+    if args.debug:
+        print("Debugging enabled; will not use multiple cores")
+        args.cores = 1
+        args.p = 1
+
+    if args.cores == 1:
+        for orig in args.file.readlines():
+            clean = clean_proof(orig, args.debug, args.file, args.aggressive)
+            if args.debug:
+                print()
+                print(orig.strip())
+                print("   --->")
+                print(clean)
+                print()
+            else:
+                print(clean)
+    else:
+        assert not args.debug
+        lines = args.file.readlines()
+        lock = Lock()
+        with Pool(
+            processes=args.cores, initializer=init_pool, initargs=(lock,)
+        ) as p:
+            # p.map(pf, tex_files, 1)
+            p.starmap(
+                quietly_clean_and_print_proof,
+                zip(lines, repeat(args.file.name), repeat(args.aggressive)),
+                # let's try handing out files to CPUs
+                # in chunks of 500 (rather than the default
+                # which is approximately num-lines / CPUS / 4)
+                # 500,
+            )
 
     args.file.close()
