@@ -677,6 +677,7 @@ def cleanup(filename: str, proof: str, debug: bool = False):
     # Collapse adjacent references,
     # Appendix A Theorem 4 -> REF REF -> REF
     # (Appendix A Theorem 4) -> (REF REF) -> (REF) -> REF
+    proof = re.sub(r"(\*)\s*REF\b", "REF", proof)
     proof = re.sub("\\bREF(\\s*REF)*\\b", r"REF", proof)
     proof = re.sub("\\(\\s*REF\\s*\\)", " REF ", proof)
 
@@ -750,6 +751,16 @@ def cleanup(filename: str, proof: str, debug: bool = False):
         " REF ",
         proof,
     )
+
+    # # (i) We have -> REF We have -> CASE: We have
+    # # BUT NOT:  T's Theorem CITE implies -> REF CITE implies -> CASE: implies
+    # proof = re.sub(
+    #     f"(^|[.;:] )REF[.: ]+({upperLetter}\\w+)",
+    #     lambda m: m.group(1) + "CASE: " + m.group(2)
+    #     if m.group(2) not in {"CITE", "REF"}
+    #     else m.group(0),
+    #     proof,
+    # )
 
     proof = proof.strip()
 
