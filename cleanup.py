@@ -90,6 +90,7 @@ with open("words_alpha.txt") as fd:
         word = word.strip()
         known_words.add(word)
     known_words.add("profinite")
+    known_words.add("interpolants")
 
 # A set of names that might arise in Mathy text.
 known_names: set[str] = set()
@@ -854,7 +855,7 @@ if __name__ == "__main__":
                 print(clean)
     else:
         assert not args.debug
-        lines = list(args.file.readlines())
+        lines = args.file.readlines()
         lock = Lock()
         with Pool(
             processes=args.cores, initializer=init_pool, initargs=(lock,)
