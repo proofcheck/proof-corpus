@@ -266,12 +266,6 @@ def ner(proof: str, debug: bool = False):
         proof,
     )
 
-    proof = re.sub(
-        r"\((\s*(SII|[iI]+)([0-9]|[A-Za-z]|['.,-–]|\s){0,10}\s*)+\)",
-        "REF ",
-        proof,
-    )
-
     # the theorem of NAME -> REF
     # an elementary theorem of Mori -> REF
     # NOT:   the definition of Gröbner bases -> REF bases
@@ -294,6 +288,7 @@ def ner(proof: str, debug: bool = False):
 
 def treat_unbalanced_parens(filename: str, proof: str, debug: bool = False):
     """Look for common reasons for unbalanced ('s and )'s."""
+    
     # Case 1) This follows by -> CASE: This follows by
     # 1) This follows by -> CASE: This follows by
     # complete. 2) We consider -> complete. CASE: We consider
@@ -308,6 +303,8 @@ def treat_unbalanced_parens(filename: str, proof: str, debug: bool = False):
 
     if proof.count("(") == proof.count(")"):
         return proof
+
+
 
     # by part b) we have -> by we have
     # by part b) MATH -> by REF MATH
@@ -424,6 +421,13 @@ def cleanup(filename: str, proof: str, debug: bool = False):
         "(?i:\\b(?<![.])(r)esp(?:[.]|\\b)[,]?)", r"\1espectively,", proof
     )
 
+    # (iii 'a-ds,.) -> REF
+    proof = re.sub(
+        r"\((\s*(SII|[iI]+)([0-9]|[A-Za-z]|['.,-–]|\s){0,10}\s*)+\)",
+        "REF ",
+        proof,
+    )
+
     # (sketch) -> ""
     proof = re.sub("\\(\\s*(?i:sketch)\\s*\\)", " ", proof)
 
@@ -452,7 +456,8 @@ def cleanup(filename: str, proof: str, debug: bool = False):
     # We hope there aren't any, but just in case...
 
     real_re = "(?:[+-]?(?:\\d+(?:[.,]\\d*)?|\\d*(?:[.,]\\d+)))"
-    dimen_re = f"(?:{real_re}[ ]?(?:true[ ]?)?(?:pt|cm|mm|in|bp|em|ex|sp)\\b)"
+    dimen_re2 = f"(?:{real_re}(?:[ ]?true[ ]?)?(?:in)\\b)"
+    dimen_re = f"(?:{real_re}[ ]?(?:true[ ]?)?(?:pt|cm|mm|bp|em|ex|sp)\\b|{dimen_re2})"
     inf_re = f"(?:{real_re}[ ]?fill?l?)"
     dori_re = f"(?:{dimen_re}|{inf_re})"
     glue_re = (
@@ -555,15 +560,15 @@ def cleanup(filename: str, proof: str, debug: bool = False):
         proof,
     )
 
-    # (i) We have -> REF We have -> CASE: We have
-    # BUT NOT:  T's Theorem CITE implies -> REF CITE implies -> CASE: implies
-    proof = re.sub(
-        f"(^|[.;:] )REF[.: ]+({upperLetter}\\w+)",
-        lambda m: m.group(1) + "CASE: " + m.group(2)
-        if m.group(2) not in {"CITE", "REF"}
-        else m.group(0),
-        proof,
-    )
+    # # (i) We have -> REF We have -> CASE: We have
+    # # BUT NOT:  T's Theorem CITE implies -> REF CITE implies -> CASE: implies
+    # proof = re.sub(
+    #     f"(^|[.;:] )REF[.: ]+({upperLetter}\\w+)",
+    #     lambda m: m.group(1) + "CASE: " + m.group(2)
+    #     if m.group(2) not in {"CITE", "REF"}
+    #     else m.group(0),
+    #     proof,
+    # )
 
     if debug:
         print(1360, proof)
@@ -701,6 +706,9 @@ def cleanup(filename: str, proof: str, debug: bool = False):
 
     # Final cleanup
 
+    #remove 2 = MATH or MATH = 2
+    proof = re.sub(r"([0-9]*\s*=\s*MATH|MATH\s*=\s*[0-9]*|MATH\s*=\s*MATH)", "MATH", proof)
+
     # remove spurious periods after MATH
     # e.g., 0002/math0002001/finalversion.txt
     proof = re.sub(f"MATH \\. ({lowerLetter}\\w+)", "MATH \\1", proof)
@@ -770,15 +778,15 @@ def cleanup(filename: str, proof: str, debug: bool = False):
         proof,
     )
 
-    # # (i) We have -> REF We have -> CASE: We have
-    # # BUT NOT:  T's Theorem CITE implies -> REF CITE implies -> CASE: implies
-    # proof = re.sub(
-    #     f"(^|[.;:] )REF[.: ]+({upperLetter}\\w+)",
-    #     lambda m: m.group(1) + "CASE: " + m.group(2)
-    #     if m.group(2) not in {"CITE", "REF"}
-    #     else m.group(0),
-    #     proof,
-    # )
+    # (i) We have -> REF We have -> CASE: We have
+    # BUT NOT:  T's Theorem CITE implies -> REF CITE implies -> CASE: implies
+    proof = re.sub(
+        f"(^|[.;:] )REF[.: ]+({upperLetter}\\w+)",
+        lambda m: m.group(1) + "CASE: " + m.group(2)
+        if m.group(2) not in {"CITE", "REF"}
+        else m.group(0),
+        proof,
+    )
 
     proof = proof.strip()
 
