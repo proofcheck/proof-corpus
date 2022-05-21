@@ -15,6 +15,7 @@
 
 
 import argparse
+import functools
 from itertools import repeat
 from multiprocessing import Pool, Lock
 import re
@@ -287,9 +288,11 @@ def ner(proof: str, debug: bool = False, aggressive: bool = True):
     return proof
 
 
-def treat_unbalanced_parens(filename: str, proof: str, debug: bool = False, aggressive: bool = True):
+def treat_unbalanced_parens(
+    filename: str, proof: str, debug: bool = False, aggressive: bool = True
+):
     """Look for common reasons for unbalanced ('s and )'s."""
-    
+
     # Case 1) This follows by -> CASE: This follows by
     # 1) This follows by -> CASE: This follows by
     # complete. 2) We consider -> complete. CASE: We consider
@@ -304,7 +307,6 @@ def treat_unbalanced_parens(filename: str, proof: str, debug: bool = False, aggr
 
     if proof.count("(") == proof.count(")"):
         return proof
-
 
     if aggressive:
         # by part b) we have -> by we have
@@ -369,7 +371,9 @@ def treat_unbalanced_parens(filename: str, proof: str, debug: bool = False, aggr
     return proof
 
 
-def cleanup(filename: str, proof: str, debug: bool = False, aggressive: bool = True):
+def cleanup(
+    filename: str, proof: str, debug: bool = False, aggressive: bool = True
+):
     """Simplify proof outputs."""
     if debug:
         print("0999", proof)
@@ -422,7 +426,7 @@ def cleanup(filename: str, proof: str, debug: bool = False, aggressive: bool = T
             "(?i:\\b(?<![.])(r)esp(?:[.]|\\b)[,]?)", r"\1espectively,", proof
         )
 
-            # rhs r.h.s. RHS R.H.S. r. h. s.  r h s -> rhs   R.H.S RHS -> Rhs
+        # rhs r.h.s. RHS R.H.S. r. h. s.  r h s -> rhs   R.H.S RHS -> Rhs
         proof = re.sub(
             "(?i:\\b(?<![.])(r)[.]?[ ]?h[.]?[ ]?s(?:[.]|\\b))",
             r"\1ight-hand side",
@@ -434,9 +438,10 @@ def cleanup(filename: str, proof: str, debug: bool = False, aggressive: bool = T
 
         # w.r.t -> with respect to
         proof = re.sub(
-            "(?i:\\b(?<![.])(w)[.]?r[.]?t(?:[.]|\\b))", r"\1ith respect to", proof
+            "(?i:\\b(?<![.])(w)[.]?r[.]?t(?:[.]|\\b))",
+            r"\1ith respect to",
+            proof,
         )
-
 
     if aggressive:
         # (iii 'a-ds,.) -> REF
@@ -451,8 +456,6 @@ def cleanup(filename: str, proof: str, debug: bool = False, aggressive: bool = T
 
     # ad 1 -> CASE
     proof = re.sub(f"(?i:ad)\\s*{numAlpha}(.)?", " CASE:", proof)
-
-    
 
     if debug:
         print(1000, proof)
@@ -487,7 +490,7 @@ def cleanup(filename: str, proof: str, debug: bool = False, aggressive: bool = T
         print(1050, proof)
 
     if aggressive:
-    
+
         # Simplify references to theorems, etc.
         # Prop. 2.1 -> REF
         # by Propositions 6.3 and 6.4. -> by REF.
@@ -506,26 +509,23 @@ def cleanup(filename: str, proof: str, debug: bool = False, aggressive: bool = T
             proof,
         )
 
-    
-
         # by Theorem I we have -> by REF we have
         # by Theorem IIa we have -> by REF we have
         proof = re.sub(f"{theorem_word}\\s?[IVX]+[a-z]?\\b", "REF", proof)
 
         # Part 3 of the theorem -> REF of the theorem -> REF
         proof = re.sub(f"REF of the {theorem_word}", "REF", proof)
-    
+
     # eliminate extra spaces
     proof = re.sub("[ ]+", " ", proof)
-    
+
     if debug:
         print(1100, proof)
 
-    
     if debug:
         print(1200, proof)
 
-    #clean up weird parentheses around MATH
+    # clean up weird parentheses around MATH
 
     # (i) MATH (ii) -> MATH
     proof = re.sub(f"{parenID} (MATH {parenID})+", "MATH", proof)
@@ -611,7 +611,6 @@ def cleanup(filename: str, proof: str, debug: bool = False, aggressive: bool = T
 
     proof = re.sub(f"\\(\\s*{atomicID}\\s*\\)", "REF", proof)
 
-
     proof = re.sub("CASE\\s*:(\\s*CASE\\s*:)+", "CASE:", proof)
 
     # base and inductive step labeling to CASE only when followed by capital letter
@@ -633,7 +632,7 @@ def cleanup(filename: str, proof: str, debug: bool = False, aggressive: bool = T
 
     if proof.count("(") != proof.count(")"):
         proof = treat_unbalanced_parens(filename, proof, debug, aggressive)
-    
+
     if debug:
         print(1600, proof)
 
@@ -721,8 +720,10 @@ def cleanup(filename: str, proof: str, debug: bool = False, aggressive: bool = T
 
     # Final cleanup
 
-    #remove 2 = MATH or MATH = 2
-    proof = re.sub(r"([0-9]*\s*=\s*MATH|MATH\s*=\s*[0-9]*|MATH\s*=\s*MATH)", "MATH", proof)
+    # remove 2 = MATH or MATH = 2
+    proof = re.sub(
+        r"([0-9]*\s*=\s*MATH|MATH\s*=\s*[0-9]*|MATH\s*=\s*MATH)", "MATH", proof
+    )
 
     # remove spurious periods after MATH
     # e.g., 0002/math0002001/finalversion.txt
@@ -811,7 +812,12 @@ def cleanup(filename: str, proof: str, debug: bool = False, aggressive: bool = T
     return proof
 
 
-def clean_proof(orig: str, debug: bool = False, filename: str = "<unknown>", aggressive: bool = True):
+def clean_proof(
+    orig: str,
+    debug: bool = False,
+    filename: str = "<unknown>",
+    aggressive: bool = True,
+):
     if "\t" in orig:
         (prefix, line) = orig.split("\t")
         prefix += "\t"
@@ -830,18 +836,8 @@ def clean_proof(orig: str, debug: bool = False, filename: str = "<unknown>", agg
     return prefix + clean
 
 
-# Ensure that printing is atomic, even if we're using multiprocessing
-
-# https://stackoverflow.com/questions/25557686/python-sharing-a-lock-between-processes
-def init_pool(l):
-    global print_lock
-    print_lock = l
-
-
-def quietly_clean_and_print_proof(orig: str, filename: str, aggressive: bool = True):
-    clean = clean_proof(orig, False, filename, aggressive) + "\n"
-    with print_lock:
-        sys.stdout.write(clean)
+def quietly_clean_proof(filename: str, aggressive: bool, orig: str):
+    return clean_proof(orig, False, filename, aggressive)
 
 
 if __name__ == "__main__":
@@ -881,18 +877,15 @@ if __name__ == "__main__":
     else:
         assert not args.debug
         lines = args.file.readlines()
-        lock = Lock()
-        with Pool(
-            processes=args.cores, initializer=init_pool, initargs=(lock,)
-        ) as p:
+        with Pool(processes=args.cores) as p:
             # p.map(pf, tex_files, 1)
-            p.starmap(
-                quietly_clean_and_print_proof,
-                zip(lines, repeat(args.file.name), repeat(args.aggressive)),
-                # let's try handing out files to CPUs
-                # in chunks of 500 (rather than the default
-                # which is approximately num-lines / CPUS / 4)
-                # 500,
-            )
+            for line in p.imap(
+                functools.partial(
+                    quietly_clean_proof, args.file.name, args.aggressive
+                ),
+                lines,
+                50,
+            ):
+                print(line)
 
     args.file.close()
