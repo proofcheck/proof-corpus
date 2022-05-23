@@ -9,7 +9,7 @@ proofs%.raw: matches/matches% naive.py
 	foreach file (`find proofs/${*}* -type f -name "*.txt"`); sed s:^:$${file:r:t3:h2}'\t': $$file; end > proofs$*.raw
 
 proofs%.txt: proofs%.raw cleanup.py
-	./cleanup.py -p2 $< > $@
+	./cleanup.py -p50 $< > $@
 
 sent%.txt: proofs%.txt sentize2.py
 	./sentize2.py $< > $@
