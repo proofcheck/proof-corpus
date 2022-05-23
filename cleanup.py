@@ -613,6 +613,7 @@ def cleanup(
 
     proof = re.sub("CASE\\s*:(\\s*CASE\\s*:)+", "CASE:", proof)
 
+
     # base and inductive step labeling to CASE only when followed by capital letter
     proof = re.sub(
         f"((\\()?\\s*(?i:basis)\\s*(\\))?|(\\()?\\s*(?i:induction)\\s*(\\))?)\\s*({upperLetter})",
@@ -783,8 +784,13 @@ def cleanup(
     # an MATH -> a MATH
     proof = re.sub("\\b([Aa])n[ ]MATH\\b", r"\1 MATH", proof)
 
+    # MATH, MATH, MATH -> MATH
+    # MATH and MATH -> MATH
+    proof = re.sub(r"(MATH\s*,\s*|MATH\s*(?i:and)\s*)+MATH", "MATH ", proof)
+
     # Remove any duplicate spaces we introduced
     proof = re.sub("[ ]+", " ", proof)
+
 
     # figure REF ii -> REF
 
@@ -793,6 +799,7 @@ def cleanup(
         " REF ",
         proof,
     )
+
 
     # (i) We have -> REF We have -> CASE: We have
     # BUT NOT:  T's Theorem CITE implies -> REF CITE implies -> CASE: implies
@@ -803,6 +810,13 @@ def cleanup(
         else m.group(0),
         proof,
     )
+
+    # (see REF) -> (REF)
+    proof = re.sub(r"\(\s*((?i:see)|(?i:by))\s*REF\s*\)", "(REF)", proof)
+    # proof = re.sub(r"\(\s*(?i:see)\s*REF\s*.{0,100}\)", "(REF)", proof)
+
+    # REF in REF -> REF
+    proof = re.sub(r"REF\s*in\s*REF", "REF", proof) 
 
     proof = proof.strip()
 
