@@ -816,7 +816,7 @@ def cleanup(
     # proof = re.sub(r"\(\s*(?i:see)\s*REF\s*.{0,100}\)", "(REF)", proof)
 
     # REF in REF -> REF
-    proof = re.sub(r"REF\s*in\s*REF", "REF", proof) 
+    proof = re.sub(r"(?i:REF)(?i:\s*in\s*REF)+", "REF", proof) 
 
     proof = proof.strip()
 
