@@ -17,7 +17,7 @@
 import argparse
 import functools
 from itertools import repeat
-from multiprocessing import Pool, Lock
+from multiprocessing import Pool
 import re
 import sys
 from typing import List, Match
