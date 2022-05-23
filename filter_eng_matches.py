@@ -17,6 +17,7 @@ import os
 import sys
 
 import langdetect
+import nicer
 
 
 def excerpt(text):
@@ -26,10 +27,16 @@ def excerpt(text):
 
 
 if __name__ == "__main__":
+    nicer.make_nice()
+
     for filename in sys.argv[1:]:
         with open(filename, "r") as fd:
             for tex_path in fd:
                 tex_path = tex_path.strip()
+                if tex_path[0] == "#":
+                    print(tex_path)
+                    # sys.stderr.write(f"skipping {tex_path}\n")
+                    continue
                 TEXES = "texes/"
                 proof_path: str = (
                     "proofs/" + tex_path[tex_path.find(TEXES) + len(TEXES) :]
@@ -51,7 +58,7 @@ if __name__ == "__main__":
                             # not really english
                             print(f"# {tex_path} ?? {repr(excerpt(text))}")
                             continue
-                        elif text and len(text) > 5 and text[0] != "#":
+                        elif text and len(text) > 5:
                             try:
                                 lang: str = langdetect.detect(text)
                             except langdetect.LangDetectException:
