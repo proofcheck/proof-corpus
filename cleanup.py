@@ -17,7 +17,7 @@
 import argparse
 import functools
 from itertools import repeat
-from multiprocessing import Pool, Lock
+from multiprocessing import Pool
 import re
 import sys
 from typing import List, Match
@@ -816,7 +816,7 @@ def cleanup(
     # proof = re.sub(r"\(\s*(?i:see)\s*REF\s*.{0,100}\)", "(REF)", proof)
 
     # REF in REF -> REF
-    proof = re.sub(r"REF\s*in\s*REF", "REF", proof) 
+    proof = re.sub(r"REF\s*in\s*REF", "REF", proof)
 
     proof = proof.strip()
 

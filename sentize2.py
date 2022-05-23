@@ -3,6 +3,7 @@
 """Split lines into sentences."""
 
 import argparse
+from multiprocessing import Pool
 import sys
 from typing import List
 
@@ -124,6 +125,62 @@ MATH_ABBREVS = set(
     ]
 )
 
+
+sent_tokenizer = PunktSentenceTokenizer()
+sent_tokenizer._params.abbrev_types = MATH_ABBREVS
+
+word_tokenizer = NLTKWordTokenizer()
+
+
+def sentize_proof(line: str) -> List[str]:
+    # if re.search(suspicious, line):
+    #     continue
+    text: str = line.strip()
+
+    if "\t" in text:
+        (prefix, text) = text.split("\t")
+        prefix += "\t"
+    else:
+        (prefix, text) = ("", text)
+
+    # sents is the list of sentences in this single proofs.
+    sents: List[str] = list(sent_tokenizer.tokenize(text))
+
+    # Loop throught the sentences, clean them slightly,
+    # break them into words, and store them in sent_tokens.
+    output_sents: List[str] = []
+    for sent in sents:
+        if sent[0] == "(":
+            if sent[-1] == ")":
+                interior = sent[1:-1]
+                if inner_parens(interior):
+                    sent = interior
+            elif sent[-2:] == ").":
+                interior = sent[1:-2]
+                if inner_parens(interior):
+                    sent = interior.strip() + " ."
+            elif sent[-3:] == ") .":
+                interior = sent[1:-3]
+                if inner_parens(interior):
+                    sent = interior.strip() + " ."
+
+        # If we have multiple sentences inside parentheses
+        # they will show up as (sent and sent)
+        # This should fix that
+        if sent[0] == "(":
+            if sent.count("(") - 1 == sent.count(")"):
+                sent = sent[1:]
+        elif sent[-1] == ")":
+            if sent.count("(") + 1 == sent.count(")"):
+                sent = sent[:-1]
+
+        words: List[str] = word_tokenizer.tokenize(sent)
+
+        output_sents.append(prefix + " ".join(words))
+
+    return output_sents
+
+
 if __name__ == "__main__":
     nicer.make_nice()
 
@@ -132,57 +189,26 @@ if __name__ == "__main__":
     #     "-d", "--debug", help="Show tracing output", action="store_true"
     # )
     parser.add_argument(
+        "-p", "--cores", help="Number of cores to use", type=int, default=8
+    )
+
+    parser.add_argument(
         "files", nargs="*", type=argparse.FileType("r"), default=[sys.stdin]
     )
     args = parser.parse_args()
 
     for fd in args.files:
-        sent_tokenizer = PunktSentenceTokenizer()
-        sent_tokenizer._params.abbrev_types = MATH_ABBREVS
-
-        word_tokenizer = NLTKWordTokenizer()
-        for line in fd.readlines():
-            # if re.search(suspicious, line):
-            #     continue
-            text: str = line.strip()
-
-            if "\t" in text:
-                (prefix, text) = text.split("\t")
-                prefix += "\t"
-            else:
-                (prefix, text) = ("", text)
-
-            # sents is the list of sentences in this single proofs.
-            sents: List[str] = list(sent_tokenizer.tokenize(text))
-
-            # Loop throught the sentences, clean them slightly,
-            # break them into words, and store them in sent_tokens.
-            for sent in sents:
-
-                if sent[0] == "(":
-                    if sent[-1] == ")":
-                        interior = sent[1:-1]
-                        if inner_parens(interior):
-                            sent = interior
-                    elif sent[-2:] == ").":
-                        interior = sent[1:-2]
-                        if inner_parens(interior):
-                            sent = interior.strip() + " ."
-                    elif sent[-3:] == ") .":
-                        interior = sent[1:-3]
-                        if inner_parens(interior):
-                            sent = interior.strip() + " ."
-
-                # If we have multiple sentences inside parentheses
-                # they will show up as (sent and sent)
-                # This should fix that
-                if sent[0] == "(":
-                    if sent.count("(") - 1 == sent.count(")"):
-                        sent = sent[1:]
-                elif sent[-1] == ")":
-                    if sent.count("(") + 1 == sent.count(")"):
-                        sent = sent[:-1]
-
-                words: List[str] = word_tokenizer.tokenize(sent)
-
-                print(prefix + " ".join(words))
+        if args.cores > 1:
+            with Pool(processes=args.cores) as p:
+                # p.map(pf, tex_files, 1)
+                for lines in p.imap(
+                    sentize_proof,
+                    fd.readlines(),
+                    50,
+                ):
+                    for line in lines:
+                        print(line)
+        else:
+            for proof in fd.readlines():
+                for line in sentize_proof(proof):
+                    print(line)
