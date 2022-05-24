@@ -1029,9 +1029,12 @@ def skip_rest_math(
                 )
                 break
             elif w == "\\begin":
-                get_arg(words)
-                skip_optional_arg(words, macros)
-                final_period = skip_rest_env(words, macros)
+                env_name = "".join(get_arg(words))
+                if env_name.rstrip("*") in DELETE_UNINTERPRETED_ENVS:
+                    skip_rest_env(words, {}, stop_at=env_name)
+                else:
+                    skip_optional_arg(words, macros)
+
             elif w == "}":
                 # Something weird; too many right braces.
                 # Maybe this was {$} in an argument
@@ -1068,7 +1071,7 @@ def skip_rest_env(words, macros, stop_at=None) -> bool:
         w = next(words)
         # print("ske", w, tag, stop_at)
         # if stop_at:
-        #   print("".join(words[:80]))
+        #     print("".join(words[:80]))
         nwords_seen += 1
         if nwords_seen >= 400_000 and stop_at is None:
             print("skip_rest_env", nwords_seen)
@@ -1080,6 +1083,8 @@ def skip_rest_env(words, macros, stop_at=None) -> bool:
             env_nesting += 1
         elif w == "\\end":
             env_name = "".join(get_arg(words))
+            # print("skip-rest-env saw end", env_name)
+            # print(stop_at, env_name == stop_at)
             env_nesting -= 1
             if (env_nesting == 0 and stop_at is None) or env_name == stop_at:
                 break
