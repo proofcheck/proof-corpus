@@ -682,6 +682,8 @@ def cleanup(
         f"\\bCITE(\\s|[,])+({page}\\s*{num_or_range})", r"CITE", proof
     )
 
+    proof = re.sub(r"(?i:subref)", "REF", proof)
+
     # p.45 of CITE -> REF of CITE
     proof = re.sub(f"{page}\\s*{num_or_range}", r"REF", proof)
 
