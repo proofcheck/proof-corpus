@@ -1,0 +1,33 @@
+
+Top 30 most frequent words at the beginning of the sentence
+We  2955764
+The  2535616
+Let  2260346
+By  2012479
+Since  2010176
+Then  1785133
+This  1428516
+For  1257781
+Thus  1205391
+If  1135716
+In  1131545
+Hence  1051496
+It  1016697
+Therefore  936389
+Now  906632
+CASE  874640
+Note  577293
+To  552490
+As  547469
+So  481886
+Suppose  430328
+From  406814
+Using  402636
+Moreover  385118
+REF  385092
+MATH  384234
+On  299610
+Consider  293942
+Finally  293457
+First  271001
+
