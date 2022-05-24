@@ -52,7 +52,7 @@ if __name__ == "__main__":
                             # Definitely a false positive
                             pass
                         elif re.fullmatch(
-                            r"\W*",
+                            r"\W+",
                             text,
                         ):
                             # not really english
