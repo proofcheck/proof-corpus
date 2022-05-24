@@ -76,7 +76,6 @@
 ./texes/0801/0801.0401/ac.tex
 ./texes/0801/0801.0418/ig.tex
 ./texes/0801/0801.0438/realpart.tex
-./texes/0801/0801.0446/LF.tex
 ./texes/0801/0801.0449/semigroupex6.tex
 ./texes/0801/0801.0452/ITA2008.tex
 ./texes/0801/0801.0455/SC.tex
@@ -155,7 +154,6 @@
 ./texes/0801/0801.0970/ejs_2008_170.tex
 ./texes/0801/0801.0980/impmarkov.tex
 ./texes/0801/0801.0996/BoMa2007.tex
-./texes/0801/0801.1026/racine-revision5.tex
 ./texes/0801/0801.1027/lor7.tex
 ./texes/0801/0801.1036/agor-nrlbnkf-08-v12.tex
 ./texes/0801/0801.1036/agor-nrlbnkf-08-v12.tex.bak
@@ -179,7 +177,6 @@
 ./texes/0801/0801.1195/markov1arxivversion.tex
 ./texes/0801/0801.1196/connecting.tex
 ./texes/0801/0801.1212/typical.tex
-./texes/0801/0801.1214/zariski.08.01.08.tex
 ./texes/0801/0801.1220/AP-12589-Connor-Jacka.tex
 ./texes/0801/0801.1225/revised_version.tex
 ./texes/0801/0801.1226/superLS.tex
@@ -236,7 +233,6 @@
 ./texes/0801/0801.1530/0801.1530.tex
 ./texes/0801/0801.1541/lcdb_v6.tex
 ./texes/0801/0801.1544/AEU4000.TEX
-./texes/0801/0801.1556/compactification.tex
 ./texes/0801/0801.1569/jointpapermn5.tex
 ./texes/0801/0801.1581/cochain2.tex
 ./texes/0801/0801.1598/estordpatt.tex
@@ -406,7 +402,6 @@
 ./texes/0801/0801.2511/supercriticalzrp.tex
 ./texes/0801/0801.2522/revised6.tex
 ./texes/0801/0801.2525/assurcombArX.tex
-./texes/0801/0801.2530/newAnosov2d.tex
 ./texes/0801/0801.2531/ent2.tex
 ./texes/0801/0801.2553/toptriv.tex
 ./texes/0801/0801.2554/BihanSottile.tex
@@ -501,7 +496,6 @@
 ./texes/0801/0801.3142/m.tex
 ./texes/0801/0801.3155/poisson_entropy.tex
 ./texes/0801/0801.3157/threshpoisson.tex
-./texes/0801/0801.3166/polygones.tex
 ./texes/0801/0801.3170/leipzigARX.tex
 ./texes/0801/0801.3176/definite_unitary_arxiv_final.tex
 ./texes/0801/0801.3178/pparabolic.tex
@@ -533,7 +527,6 @@
 ./texes/0801/0801.3390/design.tex
 ./texes/0801/0801.3398/fluxon4.tex
 ./texes/0801/0801.3399/damanik-tcheremchantsev.tex
-./texes/0801/0801.3401/stoica_instabilite.tex
 ./texes/0801/0801.3409/final-rig-jan20-arxiv.tex
 ./texes/0801/0801.3410/botelho-pellegrino.tex
 ./texes/0801/0801.3413/maxwell10.tex

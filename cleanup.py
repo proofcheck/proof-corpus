@@ -545,7 +545,7 @@ def cleanup(
 
     # Case 1: We have -> CASE: We have
     proof = re.sub(
-        f"(^|[.;:] )(?i:case)\\s+(?:{numAlpha}|[ivx]+|[IVX]+|\\w)[:.]",
+        f"(^|[.;:] )(?i:(sub)?cas)e\\s+(?:{numAlpha}|[ivx]+|[IVX]+|\\w)[:.]",
         "\\1CASE:",
         proof,
     )
