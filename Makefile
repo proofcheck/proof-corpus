@@ -1,5 +1,3 @@
-SHELL=zsh
-
 matches/matches%: matches/eng-matches
 	grep "/texes/$*" matches/eng-matches | grep -v "^#" > $@
 
