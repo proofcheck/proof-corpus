@@ -454,6 +454,10 @@ def cleanup(
         # (sketch) -> ""
         proof = re.sub("\\(\\s*(?i:sketch)\\s*\\)", " ", proof)
 
+
+    # Case 1: -> CASE
+    proof = re.sub(r"[cC]ase\s*([0-9]*|MATH|REF)\s*(:)", "REF", proof)
+
     # ad 1 -> CASE
     proof = re.sub(f"(?i:ad)\\s*{numAlpha}(.)?", " CASE:", proof)
 
@@ -516,11 +520,15 @@ def cleanup(
         # Part 3 of the theorem -> REF of the theorem -> REF
         proof = re.sub(f"REF of the {theorem_word}", "REF", proof)
 
+        if debug:
+            print(1100, proof)
+
+        proof = re.sub(r"\(\s*([-0-9]+|[a-zA-Z])(\s*,\s*([0-9.,'-]+|[a-zA-Z])\s*)+\)", "MATH", proof)
+
+    
     # eliminate extra spaces
     proof = re.sub("[ ]+", " ", proof)
 
-    if debug:
-        print(1100, proof)
 
     if debug:
         print(1200, proof)
@@ -605,7 +613,7 @@ def cleanup(
 
     proof = re.sub(
         f"\\(\\s*([iI]|{atomicID})*\\s*MATH\\s*([iI]|{atomicID})*\\s*\\)\\s*({upperLetter}|{lowerLetter})",
-        " CASE \\3",
+        " REF \\3",
         proof,
     )
 
@@ -617,7 +625,7 @@ def cleanup(
     # base and inductive step labeling to CASE only when followed by capital letter
     proof = re.sub(
         f"((\\()?\\s*(?i:basis)\\s*(\\))?|(\\()?\\s*(?i:induction)\\s*(\\))?)\\s*({upperLetter})",
-        " CASE \\6",
+        " CASE: \\6",
         proof,
     )
 
@@ -788,7 +796,11 @@ def cleanup(
 
     # MATH, MATH, MATH -> MATH
     # MATH and MATH -> MATH
-    proof = re.sub(r"(MATH\s*,\s*|MATH\s*(?i:and)\s*)+MATH", "MATH ", proof)
+    # MATHMATH -> MATH
+    proof = re.sub(r"(MATH\s*,\s*|MATH\s*((?i:and)|&)\s*)+MATH", "MATH ", proof)
+    proof = re.sub(r"(MATH)+MATH", "MATH", proof)
+
+
 
     # Remove any duplicate spaces we introduced
     proof = re.sub("[ ]+", " ", proof)
