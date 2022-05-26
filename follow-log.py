@@ -19,6 +19,8 @@ import re
 import time
 from typing import Tuple
 
+import psutil
+
 import nicer
 
 STUCK_ITERS = 20  # how many display iterations before we declare a file stuck"
@@ -73,7 +75,16 @@ def display_loop(stdscr, fd):
                 updated_line = (resized_term or
                     display_iter % REFRESH_INTERVAL == 0)
                 flag = "  "
-                if display_iter - n == 0:
+                try:
+                    process_status = psutil.Process(int(pid)).status()
+                except psutil.NoSuchProcess:
+                    process_status = current_file.removesuffix(" (killed)") + " (killed)"
+                if process_status != "running":
+                    if current_file != process_status:
+                        worklog[pid] = (process_status, 0)
+                        current_file = process_status
+                        updated_line = True
+                elif display_iter - n == 0:
                     # new file for this process
                     # flag = "  "
                     updated_line = True
