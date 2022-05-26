@@ -414,6 +414,7 @@ IGNORED_INCLUDES = {
     "wick",  # 0109/hep-th0109182
     "haskell",  # 1007.4266 1005.5278
     "mathlig",  # 1908.03268
+    "figbox",  # 0009/cs0009023
 }
 
 
@@ -1343,6 +1344,14 @@ def execute(cmd, words, macros, nomath=True, debug=False):
         get_arg(words)
         return [" "]
 
+    if cmd == "\\figbox" and cmd not in macros:
+        # 0009/cs0009023
+        skip_optional_arg(words, macros)
+        get_arg(words)
+        get_arg(words)
+        get_arg(words)
+        get_arg(words)
+
     if cmd in ["\\DeclareMathSymbol", "\\mathchoice"]:
         get_arg(words)
         get_arg(words)
@@ -1631,6 +1640,13 @@ def execute(cmd, words, macros, nomath=True, debug=False):
         #    section/paragraph itself.
         get_arg(words)
         return ["CASE: "]
+
+    if cmd == "\\htmladdnormallink":
+        # Ignore the second argument, but not the first.
+        arg1 = get_arg(words)
+        get_arg(words)  # skip hyperlink
+        words.prepend(*arg1)
+        return []
 
     if cmd in macros:
         if cmd == "\\BoxedEPSF":
