@@ -401,9 +401,11 @@ IGNORED_INCLUDES = {
     "custalgorithm",  # 0906/0906.4261
     "diagcat",  # 1811/1811.04372
     "dynkin",  # 1210/1210.0342
+    "epsf",
     "epsf1990",
     "fig4tex",  # 0312/math0312037
     "floatmodif",  # 1402/1402.4958
+    "hyperref",
     "jltmac2e",  # 0007/math0007039
     "myfloat",  # 0603/math0603228
     "myurl",  # 0110/cs0110030
@@ -414,6 +416,7 @@ IGNORED_INCLUDES = {
     "wick",  # 0109/hep-th0109182
     "haskell",  # 1007.4266 1005.5278
     "mathlig",  # 1908.03268
+    "figbox",  # 0009/cs0009023
 }
 
 
@@ -1030,10 +1033,12 @@ def skip_rest_math(
                 break
             elif w == "\\begin":
                 env_name = "".join(get_arg(words))
+                skip_optional_arg(words, macros)
                 if env_name.rstrip("*") in DELETE_UNINTERPRETED_ENVS:
-                    skip_rest_env(words, {}, stop_at=env_name)
+                    print("SKIPPING ", env_name)
+                    final_period = skip_rest_env(words, {}, stop_at=env_name)
                 else:
-                    skip_optional_arg(words, macros)
+                    final_period = skip_rest_env(words, macros)
 
             elif w == "}":
                 # Something weird; too many right braces.
@@ -1337,9 +1342,28 @@ def execute(cmd, words, macros, nomath=True, debug=False):
         get_arg(words)
         return []
 
-    if cmd in ["\\asciiabstract", "\\epsfig", "\\psfig", "\\epsffile"]:
+    if cmd in [
+        "\\asciiabstract",
+        "\\epsfig",
+        "\\psfig",
+        "\\epsffile",
+        "\\epsfgetbb",
+    ]:
         get_arg(words)
         return [" "]
+
+    if cmd == "\\epsfbox":
+        skip_optional_arg(words)
+        get_arg(words)
+        return [" "]
+
+    if cmd == "\\figbox" and cmd not in macros:
+        # 0009/cs0009023
+        skip_optional_arg(words, macros)
+        get_arg(words)
+        get_arg(words)
+        get_arg(words)
+        get_arg(words)
 
     if cmd in ["\\DeclareMathSymbol", "\\mathchoice"]:
         get_arg(words)
@@ -1529,6 +1553,11 @@ def execute(cmd, words, macros, nomath=True, debug=False):
         #     else:
         #         arg.append(w)
 
+    if cmd == "\\lstinputlisting":
+        skip_optional_arg(words)
+        get_arg(words)
+        return [" "]
+
     if cmd == "\\footnote":
         # Footnotes can interrupt sentences, and do not necessarily
         # contain normal "proof-like" wording.
@@ -1629,6 +1658,34 @@ def execute(cmd, words, macros, nomath=True, debug=False):
         #    section/paragraph itself.
         get_arg(words)
         return ["CASE: "]
+
+    if cmd == "\\htmladdnormallink":
+        # Ignore the second argument, but not the first.
+        arg1 = get_arg(words)
+        get_arg(words)  # skip hyperlink
+        words.prepend(*arg1)
+        return []
+
+    if cmd == "\\href":
+        skip_optional_arg(words, macros)
+        get_arg(words)  # url
+        return []  # will emit the text argument normally
+
+    if cmd == "\\hyperref" and cmd not in macros:
+        skip_ws(words)
+        if words.peek() == "[":
+            skip_optional_arg(words, macros)
+            return []  # will emit the text argument normally
+        else:
+            get_arg(words)
+            get_arg(words)
+            get_arg(words)
+            return []  # will emit the text argument normally
+
+    if cmd == "\\color":
+        skip_optional_arg(words, macros)
+        get_arg(words)  # color
+        return []
 
     if cmd in macros:
         if cmd == "\\BoxedEPSF":
