@@ -213,12 +213,15 @@ def ner(proof: str, debug: bool = False, aggressive: bool = True):
 
     # NAME and NotRecognizedAsName -> NAME and NAME
     # NotRecognizedAsName and NAME -> NAME and NAME
-    # NotRecognizedAsName CITE -> NAME CITE
     proof = re.sub(f"\\bNAME and {upperLetter}\\w+\\b", "NAME and NAME", proof)
+    
     proof = re.sub(
         f"(\\s){upperLetter}\\w+\\b and NAME\\b", "\\1NAME and NAME", proof
     )
-    proof = re.sub(f"(?<![.] ){upperLetter}\\w+ CITE\\b", "NAME CITE", proof)
+
+    # proof = re.sub(f"(?<![.] ){upperLetter}\\w+ CITE\\b", "NAME CITE", proof)
+
+    # proof = re.sub("NNAME", "NAME", proof)
 
     if debug:
         print("0125", proof)
