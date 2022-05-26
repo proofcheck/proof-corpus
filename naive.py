@@ -1030,10 +1030,12 @@ def skip_rest_math(
                 break
             elif w == "\\begin":
                 env_name = "".join(get_arg(words))
+                skip_optional_arg(words, macros)
                 if env_name.rstrip("*") in DELETE_UNINTERPRETED_ENVS:
-                    skip_rest_env(words, {}, stop_at=env_name)
+                    print("SKIPPING ", env_name)
+                    final_period = skip_rest_env(words, {}, stop_at=env_name)
                 else:
-                    skip_optional_arg(words, macros)
+                    final_period = skip_rest_env(words, macros)
 
             elif w == "}":
                 # Something weird; too many right braces.
