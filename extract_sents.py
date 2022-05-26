@@ -35,7 +35,9 @@ def main(args):
     if args.word:
         wordlist = [args.word]
     else:
-        wordlist = args.wordlist.readlines()
+        wordlist = args.wordlist.read()
+        wordlist = wordlist.split("\n")
+        print(wordlist)
 
     if args.file:
         flat_result_list = extract_sents(args.file, wordlist)
@@ -84,7 +86,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     main(args)
-
+    args.wordlist.close()
+    args.output.close()
     
 
 
