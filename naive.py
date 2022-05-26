@@ -414,6 +414,7 @@ IGNORED_INCLUDES = {
     "wick",  # 0109/hep-th0109182
     "haskell",  # 1007.4266 1005.5278
     "mathlig",  # 1908.03268
+    "figbox",  # 0009/cs0009023
 }
 
 
@@ -1030,10 +1031,12 @@ def skip_rest_math(
                 break
             elif w == "\\begin":
                 env_name = "".join(get_arg(words))
+                skip_optional_arg(words, macros)
                 if env_name.rstrip("*") in DELETE_UNINTERPRETED_ENVS:
-                    skip_rest_env(words, {}, stop_at=env_name)
+                    print("SKIPPING ", env_name)
+                    final_period = skip_rest_env(words, {}, stop_at=env_name)
                 else:
-                    skip_optional_arg(words, macros)
+                    final_period = skip_rest_env(words, macros)
 
             elif w == "}":
                 # Something weird; too many right braces.
@@ -1341,6 +1344,14 @@ def execute(cmd, words, macros, nomath=True, debug=False):
         get_arg(words)
         return [" "]
 
+    if cmd == "\\figbox" and cmd not in macros:
+        # 0009/cs0009023
+        skip_optional_arg(words, macros)
+        get_arg(words)
+        get_arg(words)
+        get_arg(words)
+        get_arg(words)
+
     if cmd in ["\\DeclareMathSymbol", "\\mathchoice"]:
         get_arg(words)
         get_arg(words)
@@ -1629,6 +1640,13 @@ def execute(cmd, words, macros, nomath=True, debug=False):
         #    section/paragraph itself.
         get_arg(words)
         return ["CASE: "]
+
+    if cmd == "\\htmladdnormallink":
+        # Ignore the second argument, but not the first.
+        arg1 = get_arg(words)
+        get_arg(words)  # skip hyperlink
+        words.prepend(*arg1)
+        return []
 
     if cmd in macros:
         if cmd == "\\BoxedEPSF":
