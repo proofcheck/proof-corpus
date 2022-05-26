@@ -75,7 +75,6 @@ def first_word_pos(fname, pos):
     first_word_pos_list = [w for w in first_word_list if pos_check(w, pos)]
     return first_word_pos_list
 
-
 def pos_check(word, pos):
     # Checks if word has pos sense in synset
     pos_bool = False
@@ -91,18 +90,24 @@ def pos_check(word, pos):
 def main(args):
     if args.synset:
         func = first_word_pos
-        arg_file = [args.file, args.synset]
-        arg_list = zip(args.list, repeat(args.synset),)
+        if args.file:
+            arg_file = [args.file, args.synset]
+        else:
+            arg_list = zip(args.list, repeat(args.synset),)
         
     elif args.tagger:
         func = first_word_filter
-        arg_file = [args.file, args.tagger]
-        arg_list = zip(args.list, repeat(args.tagger),)
+        if args.file:
+            arg_file = [args.file, args.tagger]
+        else:
+            arg_list = zip(args.list, repeat(args.tagger),)
 
     else:
         func = first_word
-        arg_file = args.file
-        arg_list = zip(args.list)
+        if args.file:
+            arg_file = args.file
+        else:
+            arg_list = zip(args.list)
 
     if args.file:
         dist = makedist([func(*arg_file)])
@@ -115,8 +120,10 @@ def main(args):
                         1
                     )
                     dist = makedist(word_list)
-
-    results(args, dist)
+    if args.output:
+        results(args, dist)
+    else:
+        print("Done")
 
 if __name__ == '__main__':
     nicer.make_nice()
