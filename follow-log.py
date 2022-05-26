@@ -79,7 +79,7 @@ def display_loop(stdscr, fd):
                     process_status = psutil.Process(int(pid)).status()
                 except psutil.NoSuchProcess:
                     process_status = current_file.removesuffix(" (killed)") + " (killed)"
-                if process_status != "running":
+                if process_status != "running" and process_status != "disk-sleep":
                     if current_file != process_status:
                         worklog[pid] = (process_status, 0)
                         current_file = process_status
