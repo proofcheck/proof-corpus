@@ -13,17 +13,28 @@ from nltk.corpus import wordnet
 word_tokenizer = NLTKWordTokenizer()
 
 def results(args, dist):
-    if args.verbs:
-        header_text = "\nTotal number of verbs that begin sentences: \n{}\n".format(dist.N())
-        results_text = "\nVerbs tagged that begin sentences with their word count:\n"
+    if args.synset:
+        if args.synset == "v":
+            pos_word = "verbs"
+        elif args.synset == "n":
+            pos_word = "nouns"
+        elif args.synset == "a":
+            pos_word = "adjectives"
+        elif args.synset == "r":
+            pos_word = "adverbs"
+        else:
+            pos_word = "words with an unknown pos tag"
 
-    elif args.tag:
-        header_text = "\nTotal number of {} words that begin sentences: \n{}\n".format(args.tag, dist.N())
-        results_text = "\nWords tagged {} that begin sentences with their word count:\n".format(args.tag)
+        header_text = "\nTotal number of {} that begin sentences: \n{}\n".format(pos_word, dist.N())
+        results_text = "\nWords that have a {} sense that begin sentences and their word count:\n".format(pos_word)
+
+    elif args.tagger:
+        header_text = "\nTotal number of {} words that begin sentences: \n{}\n".format(args.tagger, dist.N())
+        results_text = "\nWords tagged {} that begin sentences and their word count:\n".format(args.tagger)
 
     else:
         header_text = "\nTotal number of words that begin sentences: \n{}\n".format(dist.N())
-        results_text = "\nWords tagged that begin sentences with their word count:\n"
+        results_text = "\nWords tagged that begin sentences and their word count:\n"
 
     output = args.output
     output.write(header_text)
@@ -53,55 +64,40 @@ def first_word(fname):
     return first_words
 
 def first_word_filter(fname, tag):
-    # Returns list of first words of every sentence if the pos tag is tag
+    # Returns list of first words of every sentence if the predicted pos tag is tag
     tag_list = read_one_tagger(fname)
-    first_word_list = [sent[0] for sent in tag_list]
-    filtered_word_list = [w for w,t in first_word_list if t == tag]
-
-    #first_word_tag_list = []
-
-    """
-    first_word_tag_list = [w for sent in tag_list
-    w,t in sent[0] if t == tag for sent in tag_list]
-    """
-
-    # for sent in tag_list:
-    #     first_word = sent[0][0]
-    #     first_word_tag = sent[0][1]
-    #     if first_word_tag == tag:         
-    #         first_word_tag_list += [first_word]
-    #return first_word_tag_list
+    filtered_word_list = [sent[0][0] for sent in tag_list if sent[0][1] == tag]
     return filtered_word_list
 
-def first_word_verbs(fname):
-    # Returns list of first words of every sentence if the word has a verb sense
+def first_word_pos(fname, pos):
+    # Returns list of first words of every sentence if the word has a pos sense
     first_word_list = first_word(fname)
-    first_word_verb_list = [w for w in first_word_list if verb_check(w)]
-    return first_word_verb_list
-    
-def verb_check(word):
-    # Checks if word has verb sense
-    verb_bool = False
+    first_word_pos_list = [w for w in first_word_list if pos_check(w, pos)]
+    return first_word_pos_list
+
+
+def pos_check(word, pos):
+    # Checks if word has pos sense in synset
+    pos_bool = False
     word_morphy = wordnet.morphy(word.lower())
     if word_morphy:
         synsets = wordnet.synsets(word_morphy)
         for syn in synsets:
-            if syn.pos() == "v":
-                verb_bool = True
+            if syn.pos() == pos:
+                pos_bool = True
                 break
-
-    return verb_bool
+    return pos_bool
 
 def main(args):
-    if args.verbs:
-        func = first_word_verbs
-        arg_file = args.file
-        arg_list = zip(args.list)
+    if args.synset:
+        func = first_word_pos
+        arg_file = [args.file, args.synset]
+        arg_list = zip(args.list, repeat(args.synset),)
         
-    elif args.tag:
+    elif args.tagger:
         func = first_word_filter
-        arg_file = [args.file, args.tag]
-        arg_list = zip(args.list, repeat(args.tag),)
+        arg_file = [args.file, args.tagger]
+        arg_list = zip(args.list, repeat(args.tagger),)
 
     else:
         func = first_word
@@ -110,9 +106,6 @@ def main(args):
 
     if args.file:
         dist = makedist([func(*arg_file)])
-        # dist = makedist([first_word(args.file)])
-        # dist_v = makedist([first_word_verbs(args.file)])
-        # dist_nnp = makedist([first_word_filter(args.file, "NNP")])
         
     else:
         with Pool(processes=args.cores) as p:          
@@ -141,15 +134,17 @@ if __name__ == '__main__':
     parser.add_argument( "--cores", "-c",
                             help="Number of cores to use", type=int, default=4)
 
-    parser.add_argument("--tag", "-t", default=None,
+    parser.add_argument("--tagger", "-t", default=None,
                             help="specifies pos tag (given by off the shelf tagger) to filter")
     
-    parser.add_argument("--verbs", "-v", default=None,
-                            help="specifies pos tag (given by off the shelf tagger) to filter")
+    parser.add_argument("--synset", "-s", default=None,
+                            help="specifies pos tag to find based on synset")
     
-
-
     args = parser.parse_args()
 
     main(args)
+
+    
+
+
 
