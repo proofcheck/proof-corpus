@@ -96,9 +96,10 @@
 4.  To do a complete extraction of all the English-language `.tex` files, we can run
 
          rm -rf proofs
-         time ./naive.py -p30 -m matches/eng-matches > log.txt 2>&1
+         nohup ./naive.py -p36 -m matches/eng-matches > log.txt 2>&1 &
 
-    This will take hours, so it's best to let this run overnight.
+    This will take a few hours, so it's best to let this run overnight. The `nohup` command ensures
+    the code will keep running even if we log out.
 
     **Note**: Normally, on a department server, if you're running code for many hours, it's important to mark your
     processes as "low priority"
@@ -114,7 +115,7 @@
 
          rm -f proofs*.raw
          foreach y (`seq 92 99` `seq -w 0 20`)
-           find proofs/$y* -type f -name "*.txt" -print0 | xargs -0 cat >! proofs$y.raw
+           ./collect_raw_proofs.py $y >! proofs$y.raw
          end
 
     This creates text files `proofs92.raw`, `proofs93.raw`, ..., `proofs20.raw' for the years 1992-2020,
@@ -122,16 +123,16 @@
 
     If you just want to do 2000 or 2008, though:
 
-         find proofs/00* -type f -name "*.txt" -print0 | xargs -0 cat >! proofs00.raw
+         ./collect_raw_proofs.py 00 >! proofs00.raw
 
     or
 
-         find proofs/08* -type f -name "*.txt" -print0 | xargs -0 cat >! proofs08.raw
+         ./collect_raw_proofs.py 08 >! proofs08.raw
 
 2.  To run the ad-hoc cleanup script on each of these files (in parallel), we can do
 
          rm -f proofs*.txt
-         nohup foreach y (`seq 92 99` `seq -w 0 20`); ./cleanup.py -p16 proofs$y.raw > proofs$y.txt; end
+         nohup zsh -c 'foreach y (`seq 92 99` `seq -w 0 20`); ./cleanup.py -p36 proofs$y.raw > proofs$y.txt; end' &
 
     This creates files `proofs92.txt`, `proofs93.txt`, ..., `proofs20.txt' for the years 1992-2020, with one proof per line. (It can take up to an hour, but fortunately `cleanup.py`also nices itself so it's OK as a long-running process. The`nohup` keeps the cleanup running even if you close the terminal window or ssh session.)
 
@@ -155,15 +156,12 @@
 
     Or to do all years:
 
-         foreach y (`seq 92 99` `seq -w 0 20`)
-           nohup ./sentize2.py proofs$y.txt > sent$y.txt &
-         end
-         wait
+         nohup zsh -c 'foreach y (`seq 92 99` `seq -w 0 20`); ./sentize2.py -p36 proofs$y.txt > sent$y.txt; end' &
 
-2.  One thing we can do with sentences is to sort them (shuffling parts of different proofs together),
-    and then use `uniq` to count how many times each sentence occurs, e.g.
+2.  One thing we can do with sentences is to strip off the file ID, sort the sentences alphabetically (shuffling parts
+    of different proofs together), and then use `uniq` to count how many times each sentence occurs, e.g.
 
-        sent*.txt | uniq -c | sort -rn > all-sentences.txt
+        cut -f2 sent*.txt | sort | uniq -c | sort -rn > all-sentences.txt
 
     then we can look at, say, the top 100 most common sentences:
 
