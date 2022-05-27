@@ -534,6 +534,7 @@ def cleanup(
     proof = re.sub("[ ]+", " ", proof)
 
 
+
     if debug:
         print(1200, proof)
 
@@ -836,6 +837,10 @@ def cleanup(
     # REF in REF -> REF
     # REF, REF -> REF
     proof = re.sub(r"(?i:REF)(?i:\s*(in|and|,)\s*REF)+", "REF", proof) 
+    if debug:
+        print(9900, proof)
+
+    proof = re.sub(f"\\.({upperLetter}({upperLetter}|{lowerLetter})+)", ". \\1", proof)
 
     proof = proof.strip()
 
