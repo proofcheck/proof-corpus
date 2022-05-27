@@ -5,12 +5,9 @@ import nicer
 from multiprocessing import Pool
 from itertools import repeat
 
-from nltk.tokenize.destructive import NLTKWordTokenizer
 from nltk.probability import FreqDist
 from nltk_tagger import read_one_tagger
 from nltk.corpus import wordnet
-
-word_tokenizer = NLTKWordTokenizer()
 
 def results(args, dist):
     if args.synset:
@@ -59,7 +56,7 @@ def first_word(fname):
     sentences = f.readlines()
     first_words = []
     for sent in sentences:
-        first_words += [word_tokenizer.tokenize(sent)[0]]   
+        first_words += [sent.split()[0]]   
         
     return first_words
 
@@ -123,7 +120,8 @@ def main(args):
     if args.output:
         results(args, dist)
     else:
-        print("Done")
+        print(dist.N())
+        print(dist.most_common())
 
 if __name__ == '__main__':
     nicer.make_nice()
@@ -150,7 +148,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     main(args)
-
+    args.output.close()
     
 
 
