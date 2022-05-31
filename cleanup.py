@@ -806,11 +806,6 @@ def cleanup(
     proof = re.sub(r"(MATH)+MATH", "MATH", proof)
 
 
-
-    # Remove any duplicate spaces we introduced
-    proof = re.sub("[ ]+", " ", proof)
-
-
     # figure REF ii -> REF
 
     proof = re.sub(
@@ -830,6 +825,12 @@ def cleanup(
         proof,
     )
 
+
+    # Case REF -> REF
+    proof = re.sub(r"(?i:case(s)?)\s*REF", "REF", proof)
+
+    proof = re.sub(r"[Cc]ase\s*([0-9]|[A-Za-z]|[',-–]|\s){0,5}([.,])\s*", "REF\\2 ", proof)
+
     # (see REF) -> (REF)
     proof = re.sub(r"\(\s*((?i:see)|(?i:by))\s*REF\s*\)", "(REF)", proof)
     # proof = re.sub(r"\(\s*(?i:see)\s*REF\s*.{0,100}\)", "(REF)", proof)
@@ -841,6 +842,9 @@ def cleanup(
         print(9900, proof)
 
     proof = re.sub(f"\\.({upperLetter}({upperLetter}|{lowerLetter})+)", ". \\1", proof)
+
+    # Remove any duplicate spaces we introduced
+    proof = re.sub("[ ]+", " ", proof)
 
     proof = proof.strip()
 
