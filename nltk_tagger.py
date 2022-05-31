@@ -14,13 +14,13 @@ def proof_pos_tagger(line):
     # returns: ids, tagged sentence
     lines = sentize_proof(line)
     ids, sents = split_sentence_id(lines)
-    
     tokenized = [sent.split() for sent in sents]
     lengths = [len(sent) for sent in tokenized]
     flat_tokenized = [e for sub_l in tokenized for e in sub_l]
     tagged = tagger.tag(flat_tokenized)
     tagged_sent = []
     now_sent = []
+    count = 0
     for length in lengths:
         if tagged == []:
             break
@@ -28,6 +28,8 @@ def proof_pos_tagger(line):
             now_sent = tagged[:length]
             tagged_sent += [now_sent]
             tagged = tagged[length:]
+            #count += 1
+    #(count == )
     return ids, tagged_sent
     
 def split_sentence_id(lines):
@@ -40,30 +42,37 @@ def split_sentence_id(lines):
         
 def main(args):
     # input must be proof.txt
-    output = ""
-    if args.test == False:
-        for fd in args.files:
-            with Pool(processes=args.cores) as p:
-                for proofs in p.imap(
-                    proof_pos_tagger,
-                    fd.readlines(),
-                    250,
-                ):
-                    
-                    ids = proofs[0]
-                    sents = proofs[1]
+    
+    for fd in args.files:
+        with Pool(processes=args.cores) as p:
+            for proofs in p.imap(
+                proof_pos_tagger,
+                fd.readlines(),
+                250,
+            ):
+                
+                ids = proofs[0]
+                sents = proofs[1]
+                
+                for i in range(len(sents)):
                     save_sent = ""
+                    if ids != []:
+                        this_id = ids[i]
+                        save_sent += this_id
+                    save_sent += "\t"
+                    words = ["_".join(word) for word in sents[i]]
+                    save_sent += " ".join(words)
+                    save_sent += "\n"
+                    if args.test == False:
+                        args.output.write(save_sent)
+                    else:
+                        print(save_sent)
+                        print()
+                        #print(output)
                     
-                    for i in range(len(sents)):
-                        if ids != []:
-                            this_id = ids[i]
-                            save_sent += this_id
-                        save_sent += "\t"
-                        words = ["_".join(word) for word in sents[i]]
-                        save_sent += " ".join(words)
-                        save_sent += "\n"
-                        output += save_sent
-        args.output.write(output)
+    if args.output:
+        args.output.close()
+
                         
 if __name__ == '__main__':
     nicer.make_nice()
@@ -83,4 +92,4 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     main(args)
-    args.output.close()
+    
