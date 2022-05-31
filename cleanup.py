@@ -573,6 +573,11 @@ def cleanup(
         "\\1CASE:",
         proof,
     )
+
+
+    # ( MATH ) : -> -> CASE :
+    proof = re.sub(r"\(\s*MATH\s*\)\s*:", "CASE :", proof)
+
     # (Case 1) -> REF
     proof = re.sub(
         f"\\((?i:case)\\s*{atomicID}+\\)",
@@ -814,6 +819,10 @@ def cleanup(
         proof,
     )
 
+    # Case REF -> REF
+    proof = re.sub(r"(?i:case(s)?)\s*(MATH|REF)", "REF", proof)
+
+    proof = re.sub(r"\(\s*REF\s*\)\s*([A-Z])", "REF \\1", proof)
 
     # (i) We have -> REF We have -> CASE: We have
     # BUT NOT:  T's Theorem CITE implies -> REF CITE implies -> CASE: implies
@@ -826,8 +835,9 @@ def cleanup(
     )
 
 
-    # Case REF -> REF
-    proof = re.sub(r"(?i:case(s)?)\s*REF", "REF", proof)
+
+
+
 
     proof = re.sub(r"[Cc]ase\s*([0-9]|[A-Za-z]|[',-–]|\s){0,5}([.,])\s*", "REF\\2 ", proof)
 
