@@ -1,66 +1,86 @@
 #!/usr/bin/env python
+
 import argparse
-from nltk.tag import pos_tag_sents
 from nltk.tag.perceptron import PerceptronTagger
 import nicer
 from multiprocessing import Pool
-from itertools import repeat
+from sentize2 import sentize_proof
+import sys
 
 tagger = PerceptronTagger()
 
-def read_one_tagger(fname):
-    f = open(fname, "r")
-    sentences = f.readlines()
-    tokenized = [(s.split('\t')[-1]).split() for s in sentences]
-    f.close()
-    tagged = [tagger.tag(sent) for sent in tokenized]
-    return tagged
-
-def read_one(fn):
-    f = open(fn, "r")
-    lines = f.readlines()
-    f.close()
-    return lines
-
-def save_tag(fname):
-    output = fname.split('/')[-1] 
-    output = output.split('.')[0] + "_tag.txt"
-    tagged = read_one_tagger(fname)
-    o = open(output, "w")
-    o.write(str(tagged))
-    o.close()
-
-def main(args):
-    if args.file:
-        save_tag(args.file)
+def proof_pos_tagger(line):
+    # input: one line from proofs**.txt (one proof)
+    # returns: ids, tagged sentence
+    lines = sentize_proof(line)
+    ids, sents = split_sentence_id(lines)
+    
+    tokenized = [sent.split() for sent in sents]
+    lengths = [len(sent) for sent in tokenized]
+    flat_tokenized = [e for sub_l in tokenized for e in sub_l]
+    tagged = tagger.tag(flat_tokenized)
+    tagged_sent = []
+    now_sent = []
+    for length in lengths:
+        if tagged == []:
+            break
+        else:
+            now_sent = tagged[:length]
+            tagged_sent += [now_sent]
+            tagged = tagged[length:]
+    return ids, tagged_sent
+    
+def split_sentence_id(lines):
+    # splits ids and rest of text
+    # input: list of lines
+    # output: ids, text
+    ids = [line.split("\t")[0] for line in lines if "\t" in line]
+    sents = [line.split("\t")[1] if "\t" in line else line for line in lines ]
+    return ids, sents
         
-    else:
-        with Pool(processes=args.cores) as p:          
-                    return_list = p.starmap(
-                            save_tag,
-                            zip(args.list
-                            ),
-                        1
-                    )
-
-
+def main(args):
+    # input must be proof.txt
+    output = ""
+    if args.test == False:
+        for fd in args.files:
+            with Pool(processes=args.cores) as p:
+                for proofs in p.imap(
+                    proof_pos_tagger,
+                    fd.readlines(),
+                    250,
+                ):
+                    
+                    ids = proofs[0]
+                    sents = proofs[1]
+                    save_sent = ""
+                    
+                    for i in range(len(sents)):
+                        if ids != []:
+                            this_id = ids[i]
+                            save_sent += this_id
+                        save_sent += "\t"
+                        words = ["_".join(word) for word in sents[i]]
+                        save_sent += " ".join(words)
+                        save_sent += "\n"
+                        output += save_sent
+        args.output.write(output)
+                        
 if __name__ == '__main__':
     nicer.make_nice()
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--file", "-f",
-                            help="txt file to read proof from")
-
-    parser.add_argument("--list", "-l", nargs='*',
+    parser.add_argument("--files", "-f", nargs='*',type=argparse.FileType("r"), default=[sys.stdin],
                             help="list of txt files to read proof from")
     
+    parser.add_argument("--output", "-o", type=argparse.FileType('w'),
+                            help="txt file to write results to")
 
     parser.add_argument( "--cores", "-c",
                             help="Number of cores to use", type=int, default=4)
 
-    
-    
-    args = parser.parse_args()
+    parser.add_argument( "--test", "-t",
+                            help="test", action="store_true")
 
+    args = parser.parse_args()
     main(args)
-    
+    args.output.close()
