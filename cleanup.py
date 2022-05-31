@@ -574,7 +574,6 @@ def cleanup(
         proof,
     )
 
-
     # ( MATH ) : -> -> CASE :
     proof = re.sub(r"\(\s*MATH\s*\)\s*:", "CASE :", proof)
 
@@ -585,12 +584,13 @@ def cleanup(
         proof,
     )
 
+    if aggressive:
     # dfajfdkls Case 1 dfhaslsfdlk -> dfajfdkls REF dfhaslsfdlk
-    proof = re.sub(
-        f"({lowerLetter}+\\s*)(?i:case)\\s*{atomicID}*(\\s+{lowerLetter}+)",
-        "\\1REF\\2",
-        proof,
-    )
+        proof = re.sub(
+            f"({lowerLetter}+\\s*)(?i:case)\\s*{atomicID}*(\\s+{lowerLetter}+)",
+            "\\1REF\\2",
+            proof,
+        )
 
     # # (i) We have -> REF We have -> CASE: We have
     # # BUT NOT:  T's Theorem CITE implies -> REF CITE implies -> CASE: implies
