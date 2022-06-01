@@ -166,6 +166,8 @@ texes
 
 
 *.txt
+*.tsv
+*.xml
 words
 sentences
 backup*
