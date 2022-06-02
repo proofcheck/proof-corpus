@@ -19,4 +19,7 @@ sorted%.txt: sent%.tsv
 backup%:
 	cp sorted$*.txt
 
+successful-proof-ids:
+	find proofs -name "*.txt" -not -empty | cut -d'/' -f3 > successful-proof-ids
+
 .PRECIOUS: matches/matches% proofs%.tsv cleanproofs%.tsv sent%.tsv sorted%.txt
