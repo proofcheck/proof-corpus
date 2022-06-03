@@ -853,6 +853,8 @@ def cleanup(
 
     proof = re.sub(f"\\.({upperLetter}({upperLetter}|{lowerLetter})+)", ". \\1", proof)
 
+    proof = re.sub(r"([﹘–—⸺⸻])", r" \1 ", proof)
+
     # Remove any duplicate spaces we introduced
     proof = re.sub("[ ]+", " ", proof)
 
