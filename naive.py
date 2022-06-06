@@ -691,14 +691,14 @@ def skip_num(words: "more_itertools.peekable[str]"):
         next(words)
         return
     # Digits
-    if words.peek() in {"+", "-"}:
+    if words.peek("x") in {"+", "-"}:
         next(words)
-    if words.peek().isdigit():
-        while words.peek().isdigit():
+    if words.peek("x").isdigit():
+        while words.peek("x").isdigit():
             next(words)
-        if words.peek() in {",", "."}:
+        if words.peek("x") in {",", "."}:
             next(words)
-            while words.peek().isdigit():
+            while words.peek("x").isdigit():
                 next(words)
     else:
         # e.g., \vskip-\topskip
@@ -1162,29 +1162,48 @@ def try_assign(words, allow_space: bool = False) -> bool:
     """
     # print("try_assign: ", " ".join(words[:15]))
     if words.peek("") in (["=", " "] if allow_space else ["="]):
-        w2 = words[:2]
-        if len(w2) < 2:
+        w23 = words[1:3]
+        if len(w23) < 2:
+            print("ta: too short")
             return False
-        elif w2[1].isdigit() or w2[1] in ["-", "."]:
-            next(words)  # Drop the '=' (or ' ')
-        elif w2[1] == "{":
-            next(words)  # Drop the '=' (or ' ')
+
+        # print("ta: w23", w23)
+        if w23[0] == " ":
+            tok = w23[1]
+            skip = 2
+        else:
+            tok = w23[0]
+            skip = 1
+        # print("ta: ", tok, skip)
+
+        if tok.isdigit() or tok in ["-", "."]:
+            for _ in range(skip):
+                next(words)  # Drop the '=' (or ' ')
+        elif tok == "{":
+            for _ in range(skip):
+                next(words)  # Drop the '=' (or ' ')
             get_arg(words)
             return True
         else:
+            # print("TA: no 1")
             return False
+    # print("ta: ", " ".join(words[:15]))
     if words.peek("x").isdigit() or words.peek("x") in ["-", "."]:
-        if words.peek("x") != ".":
-            skip_int(words)
-        # decimal?
-        if words.peek("x") in [".", ","]:
-            next(words)  # skip the '.'
-            skip_int(words)
-        # Skip units
-        try_skip_units(words)
-        # print("  try_assign", " ".join(words[:15]))
+        skip_glue(words)
+        # if words.peek("x") != ".":
+        #     skip_int(words)
+        # # decimal?
+        # if words.peek("x") in [".", ","]:
+        #     next(words)  # skip the '.'
+        #     skip_int(words)
+        # print("ta3: ", " ".join(words[:15]))
+
+        # # Skip units
+        # try_skip_units(words)
+        # # print("  try_assign", " ".join(words[:15]))
         return True
     else:
+        # print("TA: no 2")
         return False
 
 
@@ -1384,7 +1403,7 @@ def execute(cmd, words, macros, nomath=True, debug=False):
             skip_dimen(words)
         return [" "]
 
-    if cmd in ["\\hskip", "\\vskip"]:
+    if cmd in ["\\hskip", "\\vskip", "\\mskip"]:
         skip_glue(words)
         return [" "]
 
