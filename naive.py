@@ -208,6 +208,10 @@ DELETE_UNINTERPRETED_ENVS = {
     # 1007.4266
     # 1005.5278
     "haskell",
+    # 9911/math9911074
+    "texdraw",
+    # diagrams package
+    "codi",
 }
 
 
