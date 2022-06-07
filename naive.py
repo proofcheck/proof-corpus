@@ -134,6 +134,8 @@ TEX_REFS = {
     "\\DHrefpart": 1,
     # 0404/cs0404006
     "\\refrange": 2,
+    # 1504/1504.06475
+    "\\wref": 1,
 }
 
 # Set of LaTeX \cite-like commands
@@ -157,6 +159,8 @@ TEX_CITES = {
     # amsref
     "\\citelist",
     "\\cites",
+    # 0304/math0304192
+    "\\mycite",
 }
 
 
@@ -214,6 +218,8 @@ DELETE_UNINTERPRETED_ENVS = {
     "texdraw",
     # diagrams package
     "codi",
+    # pstricks
+    "psmatrix",
 }
 
 
@@ -1274,6 +1280,11 @@ def execute(cmd, words, macros, nomath=True, debug=False):
             pass
         return [" "]
 
+    if cmd == "\\psmatrix":
+        while next(words) != "\\endpsmatrix":
+            pass
+        return [" "]
+
     # pictex
     if cmd == "\\beginpicture":
         while next(words) != "\\endpicture":
@@ -1759,6 +1770,28 @@ def execute(cmd, words, macros, nomath=True, debug=False):
         get_arg(words)
         return []
 
+    # if cmd == "\\useshorthands" or cmd == "\\useshorthands*":
+    #     if '"' in "".join(get_arg(words)):
+    #         macros["german shorthands"] = True
+    #         print("GS")
+    #         exit(-1)
+    #     return []
+
+    if cmd == "\\languageshorthands":
+        argument = "".join(get_arg(words))
+        if "german" in argument:
+            macros["german shorthands"] = True
+        return []
+
+    if cmd == "\\catcode":
+        # 1504/1504.0647
+        # Terrible hack to check for german shorthands
+        if words[:5] == ["`",'"',"=","1","3"]:
+            macros["german shorthands"] = True
+            for i in range(5):
+                next(words)
+        return []
+
     if cmd in macros:
         if cmd == "\\BoxedEPSF":
             # Hack for 0002/math0002136/zinno.tex
@@ -1784,7 +1817,7 @@ def execute(cmd, words, macros, nomath=True, debug=False):
         )
         raise SkipThisProof(f"oops: encountered {cmd}")
 
-    if cmd in {"\\psset", "\\psline", "\\rput", "\\uput", "\\pspolyline", "\\newrgbcolor", "\\pscircle", "\\qline"}:
+    if cmd in {"\\psset", "\\psline", "\\rput", "\\uput", "\\pspolyline", "\\newrgbcolor", "\\pscircle", "\\qline", "\\ncline"}:
         raise SkipThisProof(f"oops: encountered {cmd}")
 
 
@@ -1936,10 +1969,17 @@ def get_proofs(
                         )
 
         elif w in ["\\usepackage", "\\RequirePackage"]:
-            skip_optional_arg(words, macros)
+            if words.peek() == "[":
+                optional = get_optional_arg(words)
+            else:
+                optional = ""
             filenames = "".join(get_arg(words)).split(",")
             for filename in filenames:
                 fn = Path(filename.lower())
+                if fn == "babel":
+                    if "german" in optional:
+                        macros["german shorthands"] = True
+                    continue
                 if fn.suffix == "":
                     fn = fn.with_suffix(".sty")
                 if fn.stem in IGNORED_INCLUDES or kpse.in_TeX_path(fn.name):
@@ -2189,6 +2229,11 @@ def get_proofs(
         elif w.startswith("\\xymatrix"):
             skip_to_lbrace(words)
             get_arg(words)
+
+        elif w == '"' and "german shorthands" in macros:
+            if words.peek("x") in ["~", "=", "-", "/"]:
+                next(words)
+                words.prepend("-")
 
         # elif w == "[" and words[:2] == ["$$", "]"]:
         #     next(words)
