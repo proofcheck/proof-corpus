@@ -12,6 +12,131 @@ import nltk
 from load_tagged_sent import load_one_sent
 from load_ontonotes_pos import *
 
+# Trains tagger on {5, 10, 50, 100, 500} random sentences from args.train
+    # Prints accuracy, number of VBs mistakenly tagged as NPP, number of mislabelled tokens overall
+    # for default and trained taggers 
+    # Tests tagger on args.test and WSJ corpus
+
+"""
+python3 train_tagger.py -tr first_suppose.txt -te first_suppose.txt first_fixt.txt -nte 100
+
+output:
+
+first_suppose.tsv
+Training on 5 sentences
+Default vs Trained
+Accuracy :      0.8930581613508443      0.9765478424015009
+VB words tagged as NNP :        87      0
+Mislabeled words overall :      114     25
+
+Training on 10 sentences
+Default vs Trained
+Accuracy :      0.8930581613508443      0.9699812382739212
+VB words tagged as NNP :        87      3
+Mislabeled words overall :      114     32
+
+Training on 20 sentences
+Default vs Trained
+Accuracy :      0.8930581613508443      0.9784240150093808
+VB words tagged as NNP :        87      0
+Mislabeled words overall :      114     23
+
+Training on 50 sentences
+Default vs Trained
+Accuracy :      0.8930581613508443      0.9727954971857411
+VB words tagged as NNP :        87      0
+Mislabeled words overall :      114     29
+
+Training on 100 sentences
+Default vs Trained
+Accuracy :      0.8930581613508443      0.9624765478424016
+VB words tagged as NNP :        87      0
+Mislabeled words overall :      114     40
+
+Training on 500 sentences
+Default vs Trained
+Accuracy :      0.8930581613508443      0.9690431519699813
+VB words tagged as NNP :        87      0
+Mislabeled words overall :      114     33
+
+
+first_fix.tsv
+Training on 5 sentences
+Default vs Trained
+Accuracy :      0.9238805970149254      0.9798507462686568
+VB words tagged as NNP :        97      8
+Mislabeled words overall :      102     27
+
+Training on 10 sentences
+Default vs Trained
+Accuracy :      0.9238805970149254      0.9589552238805971
+VB words tagged as NNP :        97      36
+Mislabeled words overall :      102     55
+
+Training on 20 sentences
+Default vs Trained
+Accuracy :      0.9238805970149254      0.917910447761194
+VB words tagged as NNP :        97      76
+Mislabeled words overall :      102     110
+
+Training on 50 sentences
+Default vs Trained
+Accuracy :      0.9238805970149254      0.917910447761194
+VB words tagged as NNP :        97      97
+Mislabeled words overall :      102     110
+
+Training on 100 sentences
+Default vs Trained
+Accuracy :      0.9238805970149254      0.9119402985074627
+VB words tagged as NNP :        97      98
+Mislabeled words overall :      102     118
+
+Training on 500 sentences
+Default vs Trained
+Accuracy :      0.9238805970149254      0.9119402985074627
+VB words tagged as NNP :        97      77
+Mislabeled words overall :      102     118
+
+
+WSJ
+Training on 5 sentences
+Default vs Trained
+Accuracy :      0.8737085567374869      0.8726668004702239
+VB words tagged as NNP :        27      21
+Mislabeled words overall :      13214   13323
+
+Training on 10 sentences
+Default vs Trained
+Accuracy :      0.8737085567374869      0.8729630797755923
+VB words tagged as NNP :        27      23
+Mislabeled words overall :      13214   13292
+
+Training on 20 sentences
+Default vs Trained
+Accuracy :      0.8737085567374869      0.8734887366076975
+VB words tagged as NNP :        27      26
+Mislabeled words overall :      13214   13237
+
+Training on 50 sentences
+Default vs Trained
+Accuracy :      0.8737085567374869      0.8737659011191712
+VB words tagged as NNP :        27      27
+Mislabeled words overall :      13214   13208
+
+Training on 100 sentences
+Default vs Trained
+Accuracy :      0.8737085567374869      0.8727145874549608
+VB words tagged as NNP :        27      28
+Mislabeled words overall :      13214   13318
+
+Training on 500 sentences
+Default vs Trained
+Accuracy :      0.8737085567374869      0.8727623744396976
+VB words tagged as NNP :        27      26
+Mislabeled words overall :      13214   13313
+"""
+
+
 def make_fixed_sents(lines, n, compare=None):
     # Creates a random list of n tagged sentences
     # Input: lines (unique lines from tagged file)
@@ -44,16 +169,19 @@ def make_wsj_test():
     # creates testing set of "normal sentences" from WSJ
     sentences = []
     for sect in range(22, 25):
-        #print(load_section(sect))
         sentences += load_section(sect)
     return sentences
 
 def num_mislabelings(confusion):
-    # counts 
+    # counts the number of mislabeled tokens from confusion matrix
     mislabelings = confusion._total - confusion._correct
     return mislabelings 
 
 def do_one_experiment(training, testing):
+    # obtains the results of the default tagger and trained tagger tested on testing
+    # input: training (list of tagged sentences)
+    #        testing (list of tagged sentences)
+    nltk.data.clear_cache()
     default_tagger = PerceptronTagger()
     default_confusion = default_tagger.confusion(testing)
 
@@ -77,14 +205,16 @@ def do_one_experiment(training, testing):
 
 
 def do_experiments(args):
+    # Trains tagger on {5, 10, 50, 100, 500} sentences from args.train
+    # Prints accuracy, number of VBs mistakenly tagged as NPP, number of mislabelled tokens overall
+    # for default and trained taggers 
+    # Tests tagger on args.test and WSJ corpus
+
     train_lines = args.train.readlines()
-    args.train.close()
-    # set testing sentences
-    # {suppose sentences, fix sentences, "non-math" (e.g., conll) sentences}
-    #testing_sets = [make_fixed_sents(f, args.numtest) for f in args.test] + make_wsj_test()
-    
+    args.train.close()  
     
     for f in args.test + ['WSJ']:
+        # creates testing set
         if f == 'WSJ':
             testing = make_wsj_test()
             print(f)
@@ -95,8 +225,7 @@ def do_experiments(args):
             print(f.name)
 
         # for each testing set
-        # try training on different number of sentences
-        #  {5 suppose sentences, or 10, or 20, 50, 100, 500} 
+        #  train tagger on {5 sentences, or 10, or 20, 50, 100, 500} 
         for train_num in [5, 10, 20, 50, 100, 500]:
             print("Training on {} sentences".format(train_num))
             print("Default vs Trained")
@@ -111,8 +240,6 @@ def do_experiments(args):
     
 
 def main(args):
-    #training, testing = create_train_test(args.train, args.test, args.numtrain, args.numtest)
-    #train_imperative(training, testing)
     do_experiments(args)
 
 if __name__ == '__main__':
@@ -138,10 +265,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     main(args)
-
-    
- 
-    
-
 
 
