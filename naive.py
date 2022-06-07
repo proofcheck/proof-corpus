@@ -988,7 +988,7 @@ def skip_rest_math(
                 raise SkipThisProof
 
             if debug:
-                print(f"math-skip {single_dollar=} saw: {w} {w in macros}")
+                print(f"skip_rest_math {single_dollar=} saw: {w} {w in macros}")
                 print("   ", "".join(words[:20]))
                 if verbose:
                     print("    ", words[:10])
@@ -1174,6 +1174,7 @@ def try_assign(words, allow_space: bool = False) -> bool:
     """
     # print("try_assign: ", " ".join(words[:15]))
     if words.peek("") in (["=", " "] if allow_space else ["="]):
+        # print("TA: 000")
         w23 = words[1:3]
         if len(w23) < 2:
             print("ta: too short")
@@ -1200,7 +1201,10 @@ def try_assign(words, allow_space: bool = False) -> bool:
             # print("TA: no 1")
             return False
     # print("ta: ", " ".join(words[:15]))
-    if words.peek("x").isdigit() or words.peek("x") in ["-", "."]:
+    if words.peek("x").isdigit() or \
+         (words.peek("x") in ["-", "."]
+         and words[:2][-1].isdigit()):
+
         skip_glue(words)
         # if words.peek("x") != ".":
         #     skip_int(words)
