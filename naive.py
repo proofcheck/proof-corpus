@@ -1856,16 +1856,15 @@ def get_all_proofs(
     proofs: List[str] = []
     while words:
         try:
-            proofs.extend(
-                get_proofs(
-                    words,
-                    directory,
-                    macros,
-                    verbose,
-                    debug,
-                    strip,
-                    input_nesting,
-                )
+            get_proofs(
+                words,
+                directory,
+                macros,
+                proofs,
+                verbose,
+                debug,
+                strip,
+                input_nesting,
             )
             # If get_proofs finished normally, we don't
             # want to loop.
@@ -1883,6 +1882,7 @@ def get_proofs(
     words,
     directory,
     macros,
+    proofs : List[str],
     verbose=False,
     debug=False,
     strip=True,
@@ -1896,7 +1896,6 @@ def get_proofs(
 
     proof_nesting = 0
     current_proof_words: List[str] = []
-    proofs: List[str] = []
 
     tag = random.random()
 
