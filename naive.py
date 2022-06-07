@@ -1258,8 +1258,15 @@ def execute(cmd, words, macros, nomath=True, debug=False):
 
     # Override xy macros
     if cmd == "\\xy" and "\\endxy" in words[:]:
-        while next(words) != "\\endxy":
-            pass
+        nesting = 1
+        while True:
+            word = next(words)
+            if word == "\\xy":
+                nesting += 1
+            elif word == "\\endxy":
+                nesting -= 1
+                if nesting == 0:
+                    break
         return [" "]
 
     if cmd == "\\pspicture":
@@ -1270,6 +1277,11 @@ def execute(cmd, words, macros, nomath=True, debug=False):
     # pictex
     if cmd == "\\beginpicture":
         while next(words) != "\\endpicture":
+            pass
+        return [" "]
+
+    if cmd == "\\begindc":
+        while next(words) != "\\enddc":
             pass
         return [" "]
 
@@ -1741,6 +1753,12 @@ def execute(cmd, words, macros, nomath=True, debug=False):
         skip_optional_arg(words, macros)
         return []
 
+    if cmd == "\\put" and cmd not in macros:
+        while next(words) != ")":
+            pass
+        get_arg(words)
+        return []
+
     if cmd in macros:
         if cmd == "\\BoxedEPSF":
             # Hack for 0002/math0002136/zinno.tex
@@ -1765,6 +1783,10 @@ def execute(cmd, words, macros, nomath=True, debug=False):
             file=sys.stdout if debug else sys.stderr,
         )
         raise SkipThisProof(f"oops: encountered {cmd}")
+
+    if cmd in {"\\psset", "\\psline", "\\rput", "\\uput", "\\pspolyline", "\\newrgbcolor", "\\pscircle", "\\qline"}:
+        raise SkipThisProof(f"oops: encountered {cmd}")
+
 
     if try_assign(words):
         return []
