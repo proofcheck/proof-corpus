@@ -174,6 +174,8 @@ DELETE_ENVS = {
     "minipage",
     "prooftree",
     "tikzpicture",
+    # 1509/1509.06811
+    "tz",
 }
 
 DELETE_UNINTERPRETED_ENVS = {
@@ -1535,7 +1537,7 @@ def execute(cmd, words, macros, nomath=True, debug=False):
         get_arg(words)
         return ["CASE: "]
 
-    if cmd in ["\\includegraphics", "\\marginpar"]:
+    if cmd in ["\\includegraphics", "\\marginpar", "\\adjincludegraphics"]:
         skip_optional_arg(words, macros)
         get_arg(words)
         return [" "]
@@ -1708,6 +1710,35 @@ def execute(cmd, words, macros, nomath=True, debug=False):
     if cmd == "\\color":
         skip_optional_arg(words, macros)
         get_arg(words)  # color
+        return []
+
+    if cmd == "\\tikzset":
+        get_arg(words) # ignore argument
+        return []
+
+    if cmd == "\\adjustimage":
+        get_arg(words)
+        get_arg(words)
+        return [" "]
+
+    if cmd == "\\adjustbox":
+        get_arg(words) # ignore scaling
+        # implicitly leave the content alone
+        return []
+
+    if cmd == "\\tikz":
+        skip_optional_arg(words, macros)
+        if words.peek() == "{":
+            get_arg(words)
+        else:
+            while True:
+                if next(words) == ";":
+                    break
+
+    if cmd == "\\tikzstyle":
+        get_arg(words)
+        skip_optional_eq(words)
+        skip_optional_arg(words, macros)
         return []
 
     if cmd in macros:
@@ -1973,6 +2004,9 @@ def get_proofs(
                 # than one such argument, but just in case...
                 while words.peek() == "{":
                     get_arg(words)
+            elif env_name == "adjustbox":
+                # ignore scaling argument
+                get_arg(words)
 
             elif env_name.rstrip("*") in MATH_ENVS:
                 fp = skip_rest_env(words, macros)
