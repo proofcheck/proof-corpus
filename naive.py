@@ -134,6 +134,8 @@ TEX_REFS = {
     "\\DHrefpart": 1,
     # 0404/cs0404006
     "\\refrange": 2,
+    # 1504/1504.06475
+    "\\wref": 1,
 }
 
 # Set of LaTeX \cite-like commands
@@ -157,6 +159,8 @@ TEX_CITES = {
     # amsref
     "\\citelist",
     "\\cites",
+    # 0304/math0304192
+    "\\mycite",
 }
 
 
@@ -174,6 +178,8 @@ DELETE_ENVS = {
     "minipage",
     "prooftree",
     "tikzpicture",
+    # 1509/1509.06811
+    "tz",
 }
 
 DELETE_UNINTERPRETED_ENVS = {
@@ -208,6 +214,12 @@ DELETE_UNINTERPRETED_ENVS = {
     # 1007.4266
     # 1005.5278
     "haskell",
+    # 9911/math9911074
+    "texdraw",
+    # diagrams package
+    "codi",
+    # pstricks
+    "psmatrix",
 }
 
 
@@ -691,14 +703,14 @@ def skip_num(words: "more_itertools.peekable[str]"):
         next(words)
         return
     # Digits
-    if words.peek() in {"+", "-"}:
+    if words.peek("x") in {"+", "-"}:
         next(words)
-    if words.peek().isdigit():
-        while words.peek().isdigit():
+    if words.peek("x").isdigit():
+        while words.peek("x").isdigit():
             next(words)
-        if words.peek() in {",", "."}:
+        if words.peek("x") in {",", "."}:
             next(words)
-            while words.peek().isdigit():
+            while words.peek("x").isdigit():
                 next(words)
     else:
         # e.g., \vskip-\topskip
@@ -976,7 +988,7 @@ def skip_rest_math(
                 raise SkipThisProof
 
             if debug:
-                print(f"math-skip {single_dollar=} saw: {w} {w in macros}")
+                print(f"skip_rest_math {single_dollar=} saw: {w} {w in macros}")
                 print("   ", "".join(words[:20]))
                 if verbose:
                     print("    ", words[:10])
@@ -1162,29 +1174,52 @@ def try_assign(words, allow_space: bool = False) -> bool:
     """
     # print("try_assign: ", " ".join(words[:15]))
     if words.peek("") in (["=", " "] if allow_space else ["="]):
-        w2 = words[:2]
-        if len(w2) < 2:
+        # print("TA: 000")
+        w23 = words[1:3]
+        if len(w23) < 2:
+            print("ta: too short")
             return False
-        elif w2[1].isdigit() or w2[1] in ["-", "."]:
-            next(words)  # Drop the '=' (or ' ')
-        elif w2[1] == "{":
-            next(words)  # Drop the '=' (or ' ')
+
+        # print("ta: w23", w23)
+        if w23[0] == " ":
+            tok = w23[1]
+            skip = 2
+        else:
+            tok = w23[0]
+            skip = 1
+        # print("ta: ", tok, skip)
+
+        if tok.isdigit() or tok in ["-", "."]:
+            for _ in range(skip):
+                next(words)  # Drop the '=' (or ' ')
+        elif tok == "{":
+            for _ in range(skip):
+                next(words)  # Drop the '=' (or ' ')
             get_arg(words)
             return True
         else:
+            # print("TA: no 1")
             return False
-    if words.peek("x").isdigit() or words.peek("x") in ["-", "."]:
-        if words.peek("x") != ".":
-            skip_int(words)
-        # decimal?
-        if words.peek("x") in [".", ","]:
-            next(words)  # skip the '.'
-            skip_int(words)
-        # Skip units
-        try_skip_units(words)
-        # print("  try_assign", " ".join(words[:15]))
+    # print("ta: ", " ".join(words[:15]))
+    if words.peek("x").isdigit() or \
+         (words.peek("x") in ["-", "."]
+         and words[:2][-1].isdigit()):
+
+        skip_glue(words)
+        # if words.peek("x") != ".":
+        #     skip_int(words)
+        # # decimal?
+        # if words.peek("x") in [".", ","]:
+        #     next(words)  # skip the '.'
+        #     skip_int(words)
+        # print("ta3: ", " ".join(words[:15]))
+
+        # # Skip units
+        # try_skip_units(words)
+        # # print("  try_assign", " ".join(words[:15]))
         return True
     else:
+        # print("TA: no 2")
         return False
 
 
@@ -1233,8 +1268,15 @@ def execute(cmd, words, macros, nomath=True, debug=False):
 
     # Override xy macros
     if cmd == "\\xy" and "\\endxy" in words[:]:
-        while next(words) != "\\endxy":
-            pass
+        nesting = 1
+        while True:
+            word = next(words)
+            if word == "\\xy":
+                nesting += 1
+            elif word == "\\endxy":
+                nesting -= 1
+                if nesting == 0:
+                    break
         return [" "]
 
     if cmd == "\\pspicture":
@@ -1242,9 +1284,19 @@ def execute(cmd, words, macros, nomath=True, debug=False):
             pass
         return [" "]
 
+    if cmd == "\\psmatrix":
+        while next(words) != "\\endpsmatrix":
+            pass
+        return [" "]
+
     # pictex
     if cmd == "\\beginpicture":
         while next(words) != "\\endpicture":
+            pass
+        return [" "]
+
+    if cmd == "\\begindc":
+        while next(words) != "\\enddc":
             pass
         return [" "]
 
@@ -1384,7 +1436,7 @@ def execute(cmd, words, macros, nomath=True, debug=False):
             skip_dimen(words)
         return [" "]
 
-    if cmd in ["\\hskip", "\\vskip"]:
+    if cmd in ["\\hskip", "\\vskip", "\\mskip"]:
         skip_glue(words)
         return [" "]
 
@@ -1512,7 +1564,7 @@ def execute(cmd, words, macros, nomath=True, debug=False):
         get_arg(words)
         return ["CASE: "]
 
-    if cmd in ["\\includegraphics", "\\marginpar"]:
+    if cmd in ["\\includegraphics", "\\marginpar", "\\adjincludegraphics"]:
         skip_optional_arg(words, macros)
         get_arg(words)
         return [" "]
@@ -1687,6 +1739,63 @@ def execute(cmd, words, macros, nomath=True, debug=False):
         get_arg(words)  # color
         return []
 
+    if cmd == "\\tikzset":
+        get_arg(words) # ignore argument
+        return []
+
+    if cmd == "\\adjustimage":
+        get_arg(words)
+        get_arg(words)
+        return [" "]
+
+    if cmd == "\\adjustbox":
+        get_arg(words) # ignore scaling
+        # implicitly leave the content alone
+        return []
+
+    if cmd == "\\tikz":
+        skip_optional_arg(words, macros)
+        if words.peek() == "{":
+            get_arg(words)
+        else:
+            while True:
+                if next(words) == ";":
+                    break
+
+    if cmd == "\\tikzstyle":
+        get_arg(words)
+        skip_optional_eq(words)
+        skip_optional_arg(words, macros)
+        return []
+
+    if cmd == "\\put" and cmd not in macros:
+        while next(words) != ")":
+            pass
+        get_arg(words)
+        return []
+
+    # if cmd == "\\useshorthands" or cmd == "\\useshorthands*":
+    #     if '"' in "".join(get_arg(words)):
+    #         macros["german shorthands"] = True
+    #         print("GS")
+    #         exit(-1)
+    #     return []
+
+    if cmd == "\\languageshorthands":
+        argument = "".join(get_arg(words))
+        if "german" in argument:
+            macros["german shorthands"] = True
+        return []
+
+    if cmd == "\\catcode":
+        # 1504/1504.0647
+        # Terrible hack to check for german shorthands
+        if words[:5] == ["`",'"',"=","1","3"]:
+            macros["german shorthands"] = True
+            for i in range(5):
+                next(words)
+        return []
+
     if cmd in macros:
         if cmd == "\\BoxedEPSF":
             # Hack for 0002/math0002136/zinno.tex
@@ -1711,6 +1820,10 @@ def execute(cmd, words, macros, nomath=True, debug=False):
             file=sys.stdout if debug else sys.stderr,
         )
         raise SkipThisProof(f"oops: encountered {cmd}")
+
+    if cmd in {"\\psset", "\\psline", "\\rput", "\\uput", "\\pspolyline", "\\newrgbcolor", "\\pscircle", "\\qline", "\\ncline"}:
+        raise SkipThisProof(f"oops: encountered {cmd}")
+
 
     if try_assign(words):
         return []
@@ -1743,16 +1856,15 @@ def get_all_proofs(
     proofs: List[str] = []
     while words:
         try:
-            proofs.extend(
-                get_proofs(
-                    words,
-                    directory,
-                    macros,
-                    verbose,
-                    debug,
-                    strip,
-                    input_nesting,
-                )
+            get_proofs(
+                words,
+                directory,
+                macros,
+                proofs,
+                verbose,
+                debug,
+                strip,
+                input_nesting,
             )
             # If get_proofs finished normally, we don't
             # want to loop.
@@ -1770,6 +1882,7 @@ def get_proofs(
     words,
     directory,
     macros,
+    proofs : List[str],
     verbose=False,
     debug=False,
     strip=True,
@@ -1783,7 +1896,6 @@ def get_proofs(
 
     proof_nesting = 0
     current_proof_words: List[str] = []
-    proofs: List[str] = []
 
     tag = random.random()
 
@@ -1860,10 +1972,17 @@ def get_proofs(
                         )
 
         elif w in ["\\usepackage", "\\RequirePackage"]:
-            skip_optional_arg(words, macros)
+            if words.peek() == "[":
+                optional = get_optional_arg(words)
+            else:
+                optional = ""
             filenames = "".join(get_arg(words)).split(",")
             for filename in filenames:
                 fn = Path(filename.lower())
+                if fn == "babel":
+                    if "german" in optional:
+                        macros["german shorthands"] = True
+                    continue
                 if fn.suffix == "":
                     fn = fn.with_suffix(".sty")
                 if fn.stem in IGNORED_INCLUDES or kpse.in_TeX_path(fn.name):
@@ -1950,6 +2069,9 @@ def get_proofs(
                 # than one such argument, but just in case...
                 while words.peek() == "{":
                     get_arg(words)
+            elif env_name == "adjustbox":
+                # ignore scaling argument
+                get_arg(words)
 
             elif env_name.rstrip("*") in MATH_ENVS:
                 fp = skip_rest_env(words, macros)
@@ -2110,6 +2232,11 @@ def get_proofs(
         elif w.startswith("\\xymatrix"):
             skip_to_lbrace(words)
             get_arg(words)
+
+        elif w == '"' and "german shorthands" in macros:
+            if words.peek("x") in ["~", "=", "-", "/"]:
+                next(words)
+                words.prepend("-")
 
         # elif w == "[" and words[:2] == ["$$", "]"]:
         #     next(words)

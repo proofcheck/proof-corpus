@@ -214,7 +214,7 @@ def ner(proof: str, debug: bool = False, aggressive: bool = True):
     # NAME and NotRecognizedAsName -> NAME and NAME
     # NotRecognizedAsName and NAME -> NAME and NAME
     proof = re.sub(f"\\bNAME and {upperLetter}\\w+\\b", "NAME and NAME", proof)
-    
+
     proof = re.sub(
         f"(\\s){upperLetter}\\w+\\b and NAME\\b", "\\1NAME and NAME", proof
     )
@@ -529,7 +529,7 @@ def cleanup(
 
         proof = re.sub(r"\(\s*([-0-9]+|[a-zA-Z])(\s*,\s*([0-9.,'-]+|[a-zA-Z])\s*)+\)", "MATH", proof)
 
-    
+
     # eliminate extra spaces
     proof = re.sub("[ ]+", " ", proof)
 
@@ -847,7 +847,7 @@ def cleanup(
 
     # REF in REF -> REF
     # REF, REF -> REF
-    proof = re.sub(r"(?i:REF)(?i:\s*(in|and|,)\s*REF)+", "REF", proof) 
+    proof = re.sub(r"(?i:REF)(?i:\s*(in|and|,)\s*REF)+", "REF", proof)
     if debug:
         print(9900, proof)
 
@@ -927,7 +927,10 @@ if __name__ == "__main__":
                 print(clean)
                 print()
             else:
-                print(clean)
+                # 1410/1410.313
+                # Hacky check for a german-language proof
+                if "Angenommen" not in clean:
+                    print(clean)
     else:
         assert not args.debug
         lines = args.file.readlines()
