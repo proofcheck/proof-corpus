@@ -4,6 +4,7 @@ all:
 	-rm -rf proofs
 	-rm -rf proofs*.tsv
 	-rm -rf cleanproofs*.tsv
+	-rm -rf sent*.tsv
 	./naive.py -p36 -m matches/eng-matches > log.txt 2>&1 
 	foreach y (`seq 92 99` `seq -w 0 20`); ./collect_raw_proofs.py $$y >! proofs$$y.tsv; end
 	foreach y (`seq 92 99` `seq -w 0 20`); ./cleanup.py -p36 proofs$$y.tsv > cleanproofs$$y.tsv; end
