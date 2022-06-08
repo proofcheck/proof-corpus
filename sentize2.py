@@ -1680,16 +1680,17 @@ def sentize_proof(line: str) -> List[str]:
         # If we have multiple sentences inside parentheses
         # they will show up as (sent and sent)
         # This should fix that
-        if sent[0] == "(":
-            if sent.count("(") - 1 == sent.count(")"):
-                sent = sent[1:]
-        elif sent[-1] == ")":
-            if sent.count("(") + 1 == sent.count(")"):
-                sent = sent[:-1]
+        if sent:
+            if sent[0] == "(":
+                if sent.count("(") - 1 == sent.count(")"):
+                    sent = sent[1:]
+            elif sent[-1] == ")":
+                if sent.count("(") + 1 == sent.count(")"):
+                    sent = sent[:-1]
 
-        words: List[str] = word_tokenizer.tokenize(sent)
+            words: List[str] = word_tokenizer.tokenize(sent)
 
-        output_sents.append(prefix + " ".join(words))
+            output_sents.append(prefix + " ".join(words))
 
     return output_sents
 

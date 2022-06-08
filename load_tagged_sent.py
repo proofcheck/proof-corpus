@@ -4,20 +4,21 @@ import argparse
 import nicer
 from multiprocessing import Pool
 from itertools import repeat
+import os
+os.environ['OPENBLAS_NUM_THREADS'] = '1'
 
 from nltk.probability import FreqDist
-
 from nltk_tagger import proof_pos_tagger, write_tags
 
 def results(args, dist):
-    header_text = "\nTotal number of {} words that begin sentences: \n{}\n".format(args.tagger, dist.N())
-    results_text = "\nWords tagged {} that begin sentences and their word count:\n".format(args.tagger)
+    # header_text = "\nTotal number of {} words that begin sentences: \n{}\n".format(args.tagger, dist.N())
+    # results_text = "\nWords tagged {} that begin sentences and their word count:\n".format(args.tagger)
 
     output = args.output
-    output.write(header_text)
-    output.write("\n")
-    output.write(results_text)
-    output.write("\n")
+    # output.write(header_text)
+    # output.write("\n")
+    # output.write(results_text)
+    # output.write("\n")
     for x in dist.most_common():
         output.write(str(x[0]) + '  ' + str(x[1]))
         output.write("\n")
@@ -78,13 +79,15 @@ def load_one_sent(line):
         sentence = line
     
     tags = [tuple(word.split('_')) for word in sentence.split(" ") ]
+    
+    return this_id, tags
 
     # for word in tags:
     #     if "—" in word[0]:
     #         print(this_id)
     #         print(sentence)
-
-    return this_id, tags
+    
+    
 
 def load_tags(tagfile, cores=5):
     all_tags = []
@@ -98,22 +101,39 @@ def load_tags(tagfile, cores=5):
             ids = all_tags[0]
             sents = all_tags[1]
     tagfile.close()
+    
     return ids, sents
+
+def is_sent(sent):
+    for word in sent:
+        if type(word) is not tuple or len(word) != 2:
+            return False
+    
+    return True
 
 def find_proof_tags(search_id, ids, tags):
     index_id = [ind for ind, this_id in enumerate(ids) if this_id == search_id]
     proof_tags = [tags[i] for i in index_id]
     return proof_tags
 
+def nnp_dist(tagfile):
+    ids, sents = load_tags(tagfile)
+    first_word_nnp = [word[0] for sent in sents for word in sent if word[1] == "NNP"]
+
+    return FreqDist(first_word_nnp)
+
 def main(args):
     # ids, sents = load_tags(args.file, args.cores)
     # this_id = "9203/alg-geom9203002"
     # tags = find_proof_tags(this_id, ids, sents)
 
-    ids, sents, word_dist = first_word_filter(args.file, args.cores, args.tag)
-    write_tags(ids, sents, args.output_sentences)
-    args.output_wordlist.write("Words that begin sentences with the tag {}\n".format(args.tag))
-    dist_output(word_dist, args.output_wordlist)
+    # ids, sents, word_dist = first_word_filter(args.file, args.cores, args.tag)
+    # write_tags(ids, sents, args.output_sentences)
+    # args.output_wordlist.write("Words that begin sentences with the tag {}\n".format(args.tag))
+    # dist_output(word_dist, args.output_wordlist)
+    dist = nnp_dist(args.file)
+    results(args, dist)
+    
 
 if __name__ == '__main__':
     nicer.make_nice()
@@ -134,6 +154,9 @@ if __name__ == '__main__':
     parser.add_argument("--tag", "-t", default=None,
                             help="specifies pos tag (given by off the shelf tagger) to filter")
     
+    parser.add_argument("--output", "-o", type=argparse.FileType('w'),
+                            help="txt file to write to")
+
     
     args = parser.parse_args()
 
