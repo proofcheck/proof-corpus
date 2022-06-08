@@ -28,8 +28,6 @@ def proof_pos_tagger(line):
             now_sent = tagged[:length]
             tagged_sent += [now_sent]
             tagged = tagged[length:]
-            #count += 1
-    #(count == )
     return ids, tagged_sent
     
 def split_sentence_id(lines):
@@ -39,11 +37,29 @@ def split_sentence_id(lines):
     ids = [line.split("\t")[0] for line in lines if "\t" in line]
     sents = [line.split("\t")[1] if "\t" in line else line for line in lines ]
     return ids, sents
+
+def write_tags(ids, sents, output=None):    
+    for i in range(len(sents)):
+        save_sent = ""
+        if ids != []:
+            this_id = ids[i]
+            save_sent += this_id
+            save_sent += "\t"
+        words = ["_".join(word) for word in sents[i]]
+        save_sent += " ".join(words)
+        save_sent += "\n"
+        if output:
+            output.write(save_sent)
+        else:
+            print(save_sent)
+            print()
+
+    
         
 def main(args):
-    # input must be proof.txt
-    
+    # input must be proof.tsv
     for fd in args.files:
+        print(fd)
         with Pool(processes=args.cores) as p:
             for proofs in p.imap(
                 proof_pos_tagger,
@@ -54,25 +70,14 @@ def main(args):
                 ids = proofs[0]
                 sents = proofs[1]
                 
-                for i in range(len(sents)):
-                    save_sent = ""
-                    if ids != []:
-                        this_id = ids[i]
-                        save_sent += this_id
-                    save_sent += "\t"
-                    words = ["_".join(word) for word in sents[i]]
-                    save_sent += " ".join(words)
-                    save_sent += "\n"
-                    if args.test == False:
-                        args.output.write(save_sent)
-                    else:
-                        print(save_sent)
-                        print()
-                        #print(output)
+                if args.test == False:
+                    write_tags(ids, sents, args.output)
+                    
+                else:
+                    write_tags(ids, sents)
                     
     if args.output:
         args.output.close()
-
                         
 if __name__ == '__main__':
     nicer.make_nice()
@@ -81,7 +86,7 @@ if __name__ == '__main__':
     parser.add_argument("--files", "-f", nargs='*',type=argparse.FileType("r"), default=[sys.stdin],
                             help="list of txt files to read proof from")
     
-    parser.add_argument("--output", "-o", type=argparse.FileType('w'),
+    parser.add_argument("--output", "-o", type=argparse.FileType("w"),
                             help="txt file to write results to")
 
     parser.add_argument( "--cores", "-c",
