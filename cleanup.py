@@ -820,7 +820,7 @@ def cleanup(
     )
 
     # Case REF -> REF
-    proof = re.sub(r"(?i:case(s)?)\s*(MATH|REF)", "REF", proof)
+    proof = re.sub(r"([Ss]ub)?(?i:case(s)?)\s*(MATH|REF)", "REF", proof)
 
     proof = re.sub(r"\(\s*REF\s*\)\s*([A-Z])", "REF \\1", proof)
 
@@ -836,14 +836,17 @@ def cleanup(
 
 
 
+    if debug:
+        print(9890, proof)
 
 
-
-    proof = re.sub(r"[Cc]ase\s*([0-9]|[A-Za-z]|[',-–]|\s){0,5}([.,])\s*", "REF\\2 ", proof)
+    proof = re.sub(r"([Ss]ub)?[Cc]ase\s*([0-9]|[A-Za-z]|[',-–]|\s){0,5}([.,])\s*", "REF\\2 ", proof)
 
     # (see REF) -> (REF)
     proof = re.sub(r"\(\s*((?i:see)|(?i:by))\s*REF\s*\)", "(REF)", proof)
     # proof = re.sub(r"\(\s*(?i:see)\s*REF\s*.{0,100}\)", "(REF)", proof)
+
+    proof = re.sub(r"(CASE:\s*)(CASE:\s*)+", "CASE: ", proof)
 
     # REF in REF -> REF
     # REF, REF -> REF
