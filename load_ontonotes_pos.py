@@ -1,3 +1,6 @@
+import os
+os.environ['OPENBLAS_NUM_THREADS'] = '1'
+
 from nltk.corpus.reader.bracket_parse import BracketParseCorpusReader
 
 # E.g., to get the sentences from sections 00 through 18,
