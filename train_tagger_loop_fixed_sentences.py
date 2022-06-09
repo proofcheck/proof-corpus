@@ -2,18 +2,11 @@
 
 import argparse
 import nicer
-import random
-from multiprocessing import Pool
-from itertools import repeat
-import pickle
 import os
 os.environ['OPENBLAS_NUM_THREADS'] = '1'
 
-from nltk.tag.perceptron import PerceptronTagger, load
 import nltk
 
-from nltk_tagger import write_tags
-from load_tagged_sent import load_one_sent, load_tags, is_sent
 from load_ontonotes_pos import *
 from train_tagger import *
 
@@ -52,20 +45,20 @@ def fixed_experiments(args):
             o.write(str(num)+"\t")
         o.write("\n")
     i = 0
-    while i < args.num_itr:
-        do_one_fixed_experiment(testing, training, wsj_train)
+    while i < args.num:
+        do_one_fixed_experiment(testing, training, wsj_train, args.nr_iter)
         i+= 1
 
-def do_one_fixed_experiment(testing, training, wsj_train):
+def do_one_fixed_experiment(testing, training, wsj_train, nr_iter):
     with open(args.output, "a") as o:
-        trained_tagger = train_tagger(training, wsj_train)
+        trained_tagger = train_tagger(training, wsj_train, nr_iter)
         trained_confusion = trained_tagger.confusion(testing)
         trained_results = [trained_tagger.accuracy(testing), 
                         trained_confusion['VB', 'NNP'],
                         num_mislabelings(trained_confusion),
                     ]
         for num in trained_results:
-            o.write(num+"\t")
+            o.write(str(num)+"\t")
         o.write("\n")
 
 def main(args):
@@ -81,8 +74,11 @@ if __name__ == '__main__':
     parser.add_argument("--test", "-te", type=argparse.FileType('r'), default=None,
                             help="txt file to read testing sentences from")
     
-    parser.add_argument("--num_itr", "-n",type=int, default=5,
-                            help="number of iterations")
+    parser.add_argument("--num", "-n",type=int, default=5,
+                            help="number of loops")
+
+    parser.add_argument("--nr_itr", "-ni",type=int, default=5,
+                            help="number of iterations for shuffling")
     
     parser.add_argument("--combine_wsj", "-c", action='store_true',
                             help="combine wsj training set")

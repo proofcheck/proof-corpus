@@ -207,11 +207,11 @@ def print_results(default_results, trained_results, num, output=None):
             o.write("VB words tagged as NNP :\t{} \t{}\n".format(default_results[1], trained_results[1]))
             o.write("Mislabeled words overall :\t{} \t{}\n".format(default_results[2], trained_results[2]))
 
-def train_tagger(training, wsj_train):
+def train_tagger(training, wsj_train, nr_iter=5):
     nltk.data.clear_cache()
     tagger = PerceptronTagger(load=False)
     print("training")
-    tagger.train(training + wsj_train)
+    tagger.train(training + wsj_train, nr_iter=nr_iter)
     print("done training")
     return tagger
 
