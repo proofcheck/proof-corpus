@@ -54,8 +54,6 @@ def write_tags(ids, sents, output=None):
             print(save_sent)
             print()
 
-    
-        
 def main(args):
     # input must be proof.tsv
     for fd in args.files:

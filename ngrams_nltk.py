@@ -1,6 +1,5 @@
 import argparse
 from collections import Counter
-from concurrent.futures import process
 import os, re
 from xmlrpc.client import Boolean
 
@@ -12,7 +11,6 @@ from nltk.lm import MLE
 
 from ngrams import get_ngrams, read_one
 from nltk.tokenize.treebank import TreebankWordDetokenizer
-
 
 
 def results(args):

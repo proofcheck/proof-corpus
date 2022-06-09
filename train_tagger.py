@@ -21,6 +21,8 @@ from load_ontonotes_pos import *
     # for default and trained taggers 
     # Tests tagger on args.test and WSJ corpus
 
+#random.seed(42)
+
 def make_default_tagger():
     file_path = "default_tagger.pickle"
     try:
@@ -137,7 +139,7 @@ def make_training_set(train_lines, train_num=None, sample_all=False, testing=[],
 
         for lines_one_file in train_lines:
             training_set += make_fixed_sents(lines_one_file, train_num, testing, output)
-    
+    print(len(training_set))
     return training_set
 
 def do_experiments(args):
