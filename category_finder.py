@@ -34,28 +34,31 @@ allIds = []
 ids = set(ids)
 for arxiv in tree.findall(".//{http://arxiv.org/OAI/arXiv/}arXiv"):
     arxivId = arxiv.find("{http://arxiv.org/OAI/arXiv/}id").text
+    # print(('nope', arxivId))
     if arxivId in ids:
-        if "." in arxivId:
-            yr = arxivId[0:2]
-        else:
-            yr = arxivId[arxivId.index("/")+1:arxivId.index("/")+3]
+#         if "." in arxivId:
+#             yr = arxivId[0:2]
+#         else:
+#             yr = arxivId[arxivId.index("/")+1:arxivId.index("/")+3]
         categories = arxiv.find("{http://arxiv.org/OAI/arXiv/}categories").text
         cats = categories.split(" ")
-        bigCats = set()
-# #         # largeCats = [0]*6
-        for cat in cats:
-# #             if cat in d:
-# #                 d[cat] += 1
-# #             else:
-# #                 d[cat] = 1
-            bigCats.add(types[cat])
-        for x in bigCats:
-            yearCats[years.index(yr)][d4[x]] += 1
-for x in years:
-    d5[x] = yearCats[years.index(x)]
-print(d5)
-print(yearCats)
-print(years)
+        if "math.CO" in cats:
+            print(arxivId)
+#         bigCats = set()
+# # #         # largeCats = [0]*6
+#         for cat in cats:
+# # #             if cat in d:
+# # #                 d[cat] += 1
+# # #             else:
+# # #                 d[cat] = 1
+#             bigCats.add(types[cat])
+#         for x in bigCats:
+#             yearCats[years.index(yr)][d4[x]] += 1
+# for x in years:
+#     d5[x] = yearCats[years.index(x)]
+# print(d5)
+# print(yearCats)
+# print(years)
 #             d2[x] += 1
 #         #     largeCats[d4[types[cat]]] += 1
 #         # for x in range(6):
