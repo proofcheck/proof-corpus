@@ -188,6 +188,13 @@ def do_experiments(args):
     default_results, trained_results = do_one_experiment(None, trained_tagger, default_tagger, args.numtest, training, save)
     print_results(default_results, trained_results, args.numtrain, args.output)
 
+def get_word_key(tagger, word):
+    model_dict = tagger.model.weights
+    word_key = [key for key in model_dict.keys() if word in key]
+    return word_key
+
+def compare_weights(default_tagger, trained_tagger):
+    return 0
 
 def print_results(default_results, trained_results, num, output=None):
     
