@@ -1796,6 +1796,12 @@ def execute(cmd, words, macros, nomath=True, debug=False):
         skip_optional_arg(words, macros)
         return []
 
+    if cmd == "\\pdfstringdefDisableCommands":
+        # hyperref
+        get_arg(words)
+        return []
+
+
     if cmd == "\\xspace":
         XSPACE_EXCEPTIONS = {",", ".", "’", "'", "/", "?", ";", ":", "!", "~",
                             "-", ")", "\\ ", "\\/", "\\bgroup", "\\egroup",
