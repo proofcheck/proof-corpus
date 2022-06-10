@@ -9,6 +9,12 @@ import sys
 
 tagger = PerceptronTagger()
 
+def sent_tagger(line):
+    sent_id, sent = split_sentence_id(line)
+    tokenized = [sent.split() for sent in sent]
+    tagged = tagger.tag(tokenized)
+    return sent_id, tagged
+
 def proof_pos_tagger(line):
     # input: one line from proofs**.txt (one proof)
     # returns: ids, tagged sentence
@@ -59,20 +65,19 @@ def main(args):
     for fd in args.files:
         print(fd)
         with Pool(processes=args.cores) as p:
-            for proofs in p.imap(
-                proof_pos_tagger,
+            sent_tuples = p.imap(
+                sent_tagger,
                 fd.readlines(),
                 250,
-            ):
+            )
                 
-                ids = proofs[0]
-                sents = proofs[1]
+            sent_ids, sents = zip(*sent_tuples)
+            
+            if args.test == False:
+                write_tags(sent_ids, sents, args.output)
                 
-                if args.test == False:
-                    write_tags(ids, sents, args.output)
-                    
-                else:
-                    write_tags(ids, sents)
+            else:
+                write_tags(sent_ids, sents)
                     
     if args.output:
         args.output.close()

@@ -59,7 +59,7 @@ def extract_sents_from_lines(args):
         args.extension = ""
 
     for word in word_list:
-        file_name = "word_bins/unique" + word + args.extension + ".txt"
+        file_name = "word_bins/unique/" + word + args.extension + ".txt"
         unique_sents = set()
         with open(args.file, "r") as fd:
             with open(file_name, "w") as output:
@@ -70,7 +70,7 @@ def extract_sents_from_lines(args):
                             fd.readlines(),
                             repeat(word),
                             ),
-                                50,
+                                1000,
                         ):
                             if line:
                                 sent = line.split("\t")[1]
