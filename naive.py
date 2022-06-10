@@ -1739,6 +1739,17 @@ def execute(cmd, words, macros, nomath=True, debug=False):
         get_arg(words)  # color
         return []
 
+    if cmd == "\\definecolor":  # tikz
+        get_arg(words)
+        get_arg(words)
+        get_arg(words)
+        return []
+
+    if cmd == "\\colorlet":   # tikz
+        get_arg(words)
+        get_arg(words)
+        return []
+
     if cmd == "\\tikzset":
         get_arg(words) # ignore argument
         return []
