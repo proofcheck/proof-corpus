@@ -10,13 +10,15 @@ import sys
 tagger = PerceptronTagger()
 
 def sent_tagger(line):
-    sent_id, sent = split_sentence_id(line)
-    tokenized = [sent.split() for sent in sent]
+    # input: one line from sent**.tsv
+    # returns: id, tagged sentence
+    sent_id, sent = line.split("\t")
+    tokenized = sent.strip().split(" ")
     tagged = tagger.tag(tokenized)
     return sent_id, tagged
 
 def proof_pos_tagger(line):
-    # input: one line from proofs**.txt (one proof)
+    # input: one line from proofs**.tsv (one proof)
     # returns: ids, tagged sentence
     lines = sentize_proof(line)
     ids, sents = split_sentence_id(lines)
