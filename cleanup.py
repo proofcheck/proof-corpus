@@ -16,14 +16,11 @@
 
 import argparse
 import functools
-from itertools import repeat
 from multiprocessing import Pool
 import re
 import sys
 from typing import List, Match
 import unicodedata
-
-from pyparsing import alphanums
 
 import nicer
 
@@ -868,6 +865,14 @@ def cleanup(
 
     return proof
 
+URL = re.compile(r"""\b(?:https?|ftp|gopher)\s?:\s?/{1,3}\s?(?:[-a-z0-9_%@']+[.])+[-a-z0-9_%@]+(?:[:][0-9]+)?(?:\s*[/]\s*[.a-z0-9_%#~&@*()'-]*)*[a-z0-9_%#~&@*()'-]/?""",
+                 re.IGNORECASE)
+
+def urls(proof, debug=False):
+    # Don't let it end with a period
+    proof = re.sub(URL, " URL ", proof)
+    proof = re.sub(r"\(\s*URL\s*\)", " URL ", proof)
+    return proof
 
 def clean_proof(
     orig: str,
@@ -882,8 +887,10 @@ def clean_proof(
         (prefix, line) = ("", orig)
 
     clean = unicodedata.normalize("NFKC", line)
+    clean = clean.replace("�", "") # 0810/0810.4782
     if debug:
         print("0000", clean)
+    clean = urls(clean, debug)
     clean = splitMATH(clean, debug, aggressive)
     clean = ner(clean, debug, aggressive)
     if debug:
@@ -911,7 +918,7 @@ if __name__ == "__main__":
         "-p", "--cores", help="Number of cores to use", type=int, default=8
     )
     parser.add_argument(
-        "file", nargs="?", type=argparse.FileType("r"), default=sys.stdin
+        "files", nargs="*", type=argparse.FileType("r"), default=[sys.stdin]
     )
     args = parser.parse_args()
 
@@ -920,32 +927,37 @@ if __name__ == "__main__":
         args.cores = 1
         args.p = 1
 
-    if args.cores == 1:
-        for orig in args.file.readlines():
-            clean = clean_proof(orig, args.debug, args.file, args.aggressive)
-            if args.debug:
-                print()
-                print(orig.strip())
-                print("   --->")
-                print(clean)
-                print()
-            else:
-                # 1410/1410.313
-                # Hacky check for a german-language proof
-                if "Angenommen" not in clean:
+    for fd in args.files:
+        if args.cores == 1:
+            for orig in fd.readlines():
+                clean = clean_proof(orig, args.debug, args.file, args.aggressive)
+                if args.debug:
+                    print()
+                    print(orig.strip())
+                    print("   --->")
                     print(clean)
-    else:
-        assert not args.debug
-        lines = args.file.readlines()
-        with Pool(processes=args.cores) as p:
-            # p.map(pf, tex_files, 1)
-            for line in p.imap(
-                functools.partial(
-                    quietly_clean_proof, args.file.name, args.aggressive
-                ),
-                lines,
-                50,
-            ):
-                print(line)
+                    print()
+                else:
+                    # 1410/1410.313
+                    # Hacky check for a german-language proof
+                    if "Angenommen" not in clean:
+                        print(clean)
+        else:
+            assert not args.debug
+            lines = fd.readlines()
+            with Pool(processes=args.cores) as p:
+                # p.map(pf, tex_files, 1)
+                for line in p.imap(
+                    functools.partial(
+                        quietly_clean_proof, fd.name, args.aggressive
+                    ),
+                    lines,
+                    50,
+                ):
+                    # 1410/1410.313
+                    # Hacky check for a german-language proof
+                    if "Angenommen" not in line:
+                        print(line)
+                    pass
 
-    args.file.close()
+        fd.close()

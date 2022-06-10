@@ -3,6 +3,7 @@
 import argparse
 import nicer
 import random
+import re
 from multiprocessing import Pool
 from itertools import repeat
 import pickle
@@ -12,7 +13,7 @@ os.environ['OPENBLAS_NUM_THREADS'] = '1'
 from nltk.tag.perceptron import PerceptronTagger, load
 import nltk
 
-from nltk_tagger import write_tags
+from tagger import write_tags
 from load_tagged_sent import load_one_sent, load_tags, is_sent
 from load_ontonotes_pos import *
 
@@ -20,6 +21,8 @@ from load_ontonotes_pos import *
     # Prints accuracy, number of VBs mistakenly tagged as NPP, number of mislabelled tokens overall
     # for default and trained taggers 
     # Tests tagger on args.test and WSJ corpus
+
+#random.seed(42)
 
 def make_default_tagger():
     file_path = "default_tagger.pickle"
@@ -137,7 +140,7 @@ def make_training_set(train_lines, train_num=None, sample_all=False, testing=[],
 
         for lines_one_file in train_lines:
             training_set += make_fixed_sents(lines_one_file, train_num, testing, output)
-    
+    print(len(training_set))
     return training_set
 
 def do_experiments(args):
@@ -178,13 +181,53 @@ def do_experiments(args):
     
     trained_tagger = train_tagger(training, wsj_train)
 
-    if args.test:
-        for test_file in args.test:
-            default_results, trained_results = do_one_experiment(test_file, trained_tagger, default_tagger, args.numtest, training, save)
-            print_results(default_results, trained_results, args.numtrain, args.output)
+    if args.compare_weights:
+        compare_weights(default_tagger, trained_tagger, args.word, args.output)
 
-    default_results, trained_results = do_one_experiment(None, trained_tagger, default_tagger, args.numtest, training, save)
-    print_results(default_results, trained_results, args.numtrain, args.output)
+    else:
+        if args.test:
+            for test_file in args.test:
+                default_results, trained_results = do_one_experiment(test_file, trained_tagger, default_tagger, args.numtest, training, save)
+                print_results(default_results, trained_results, args.numtrain, args.output)
+
+        default_results, trained_results = do_one_experiment(None, trained_tagger, default_tagger, args.numtest, training, save)
+        print_results(default_results, trained_results, args.numtrain, args.output)
+
+def get_word_key(model_dict, word):
+    word_key = [key for key in model_dict.keys() if word.lower() in key]
+    return word_key
+
+def compare_weights(default_tagger, trained_tagger, word, output=None):
+    default_dict = default_tagger.model.weights
+    #default_keys = get_word_key(default_dict, word)
+    default_keys = default_dict.keys()
+    trained_dict = trained_tagger.model.weights
+    #trained_keys = get_word_key(trained_dict, word)
+    trained_keys = trained_dict.keys()
+
+    all_keys = set(default_keys + trained_keys)
+    output_string = ""
+
+    for key in all_keys:
+        if key in default_dict.keys() and key in trained_dict.keys() and default_dict[key] != trained_dict[key]:
+            output_string += key + "\t" + str(default_dict[key]) + "\t" + str(trained_dict[key]) + "\n"
+        
+        elif key in default_dict.keys() and key in trained_dict.keys() and default_dict[key] == trained_dict[key]:
+            continue
+
+        elif key in trained_dict.keys():
+            output_string += key + "\t\t" + str(trained_dict[key]) + "\n"
+        
+        else:
+            continue
+
+        if output:
+            with open(output, "a") as o:
+                o.write(output_string)
+            
+        
+        else:
+            print(output_string)
 
 
 def print_results(default_results, trained_results, num, output=None):
@@ -205,11 +248,11 @@ def print_results(default_results, trained_results, num, output=None):
             o.write("VB words tagged as NNP :\t{} \t{}\n".format(default_results[1], trained_results[1]))
             o.write("Mislabeled words overall :\t{} \t{}\n".format(default_results[2], trained_results[2]))
 
-def train_tagger(training, wsj_train):
+def train_tagger(training, wsj_train, nr_iter=5):
     nltk.data.clear_cache()
     tagger = PerceptronTagger(load=False)
     print("training")
-    tagger.train(training + wsj_train)
+    tagger.train(training + wsj_train, nr_iter=nr_iter)
     print("done training")
     return tagger
 
@@ -289,6 +332,13 @@ if __name__ == '__main__':
 
     parser.add_argument("--output", "-o",
                             help="txt file to write confusion matrices and sentences to")
+
+    parser.add_argument("--word", "-w",
+                            help="Word to check for in keys")
+
+    parser.add_argument("--compare_weights", "-cw", action='store_true',
+                            help="compare weights dictionary")
+
 
     args = parser.parse_args()
 

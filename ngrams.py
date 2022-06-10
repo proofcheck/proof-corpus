@@ -1,16 +1,22 @@
-
+#!/usr/bin/env python
 import argparse
 from collections import Counter
 from concurrent.futures import process
 import os, re
+from signal import default_int_handler
 from xmlrpc.client import Boolean
+import nicer
+from multiprocessing import Pool
+from itertools import repeat
 
-alias_list = ["CASE", "CITE", "MATH", "NAME", "REF"]
-punctuation_list = [".", ",", ":", ";", "'", '"', "-", "?", "!", "(", ")", "{", "}", "[", "]", "`", "–"]
+alias_list = {"CASE", "CITE", "MATH", "NAME", "REF"}
+punctuation_list = {".", ",", ":", ";", "'", '"', "-", "?", "!", "(", ")", "{", "}", "[", "]", "`", "–"}
+
 
 def read_one(fname, size=-1, remove_punctuation=False):
     # Reads a single txt file with one sentence of proof per line
     # Returns a list of all the words in the file 
+    f = open(fname, "r")
     processed_elements = []
 
     # Testing purposes
@@ -18,7 +24,7 @@ def read_one(fname, size=-1, remove_punctuation=False):
     if size!=-1:
         elements = [next(fname) for x in range(size)]
     else:
-        elements = fname.readlines()
+        elements = f.readlines()
 
     # Tokenizes and removes punctuation if specified
     for element in elements:
@@ -28,12 +34,13 @@ def read_one(fname, size=-1, remove_punctuation=False):
             element = filter_nonwords(element)
         processed_element += element
         processed_elements += [processed_element]
+    f.close()
     return processed_elements
 
 def tokenize(s):
     # Returns tokenized sentences
     s = s.strip()
-    split_list = re.split(r'(\W)', s)
+    split_list = re.split('\W', s)
     filtered_list = filter(lambda x: (x != ""), split_list)
     tokenized_list = filter(lambda x: (x != " "), filtered_list)
 
@@ -106,8 +113,22 @@ def generate_endline_character(n):
         l += [char]
     return l
 
-def results(args):
-    list_of_words = read_one(args.file, args.size, args.remove_punctuation)
+def results(args, list_w=None):
+    test = False
+    if args.file:
+        list_of_words = read_one(args.file, args.size, args.remove_punctuation)
+     
+    elif test:
+        list_of_words = []
+        for t in args.list:
+            f = open(t, "r")
+            list_of_words += read_one(f, args.size, args.remove_punctuation)
+            f.close()
+            print("Finshed {}".format(t))
+
+    else:
+        list_of_words = [item for sublist in list_w for item in sublist]
+
     output = args.output
     for i in range(1, args.ngrams+1):
         cnt_ngrams = get_ngrams(list_of_words, i, args.remove_marker)
@@ -119,10 +140,11 @@ def results(args):
         output.write("\n")
 
 def main(args): 
-    if args.output != None:
+    test = True
+    if (args.output != None) and (test != True):
         results(args)
     
-    else:
+    elif test!=True:
         list_of_words = read_one(args.file, args.size, args.remove_punctuation)
     
         cnt_uni = get_unigrams(list_of_words)
@@ -131,42 +153,43 @@ def main(args):
         
         cnt_ngrams = get_ngrams(list_of_words, args.ngrams, args.remove_marker)
 
-        print("Top 10 most frequent unigrams:")
+        print("Top {} most frequent unigrams:".format(args.top_n))
         print(cnt_uni.most_common(args.top_n))
         print("\n")
         
-        print("Top 10 most frequent bigrams:")
+        print("Top {} most frequent bigrams:".format(args.top_n))
         print(cnt_bi.most_common(args.top_n))
         print("\n")
 
-        print("Top 10 most frequent trigrams:")
+        print("Top {} most frequent trigrams:".format(args.top_n))
         print(cnt_tri.most_common(args.top_n))
         print("\n")
 
-        ngrams_text = "Top 10 most frequent {}-grams:"
-        print(ngrams_text.format(args.ngrams))
+        ngrams_text = "Top {} most frequent {}-grams:"
+        print(ngrams_text.format(args.top_n, args.ngrams))
         print(cnt_ngrams.most_common(args.top_n))
         print("\n")
 
-        ngrams_text = "Top 10 most frequent {}-grams:"
-        print(ngrams_text.format(args.ngrams))
+        ngrams_text = "Top {} most frequent {}-grams:"
+        print(ngrams_text.format(args.top_n, args.ngrams))
         print(cnt_ngrams.most_common(args.top_n))
         print("\n")
 
 if __name__ == '__main__':
+    nicer.make_nice()
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--file", "-f", type=argparse.FileType('r'),
+    parser.add_argument("--file", "-f",
                             help="txt file to read proof from")
 
-    parser.add_argument("--directory", "-d",
-                            help="directory to extract files from")
+    parser.add_argument("--list", "-l", nargs='*',
+                            help="list of txt files to read proof from")
 
-    parser.add_argument("--size", "-s", type=int, nargs='?', const=1000, default=-1,
+    parser.add_argument("--size", "-s", type=int, nargs='?', default=-1,
                             help="specifies first (s) sentences to extract")
 
-    parser.add_argument("--top_n", "-t", type=int, nargs='?', const=10,
-                            help="specifies top (n) most common _grams")
+    parser.add_argument("--top_n", "-t", type=int, nargs='?', default=10,
+                            help="specifies top most common ngrams")
 
     parser.add_argument("--remove_punctuation", "-p", action='store_true',
                             help="remove punctuation")
@@ -174,12 +197,31 @@ if __name__ == '__main__':
     parser.add_argument("--remove_marker", "-m", action='store_true',
                             help="remove sentence boundary markers")
 
-    parser.add_argument("--ngrams", "-n", type=int, nargs='?', const=4,
+    parser.add_argument("--ngrams", "-n", type=int, nargs='?', default=4,
                             help="specifies (n)grams")
 
     parser.add_argument("--output", "-o", type=argparse.FileType('w'),
                             help="txt file to write results to")
 
+    parser.add_argument( "--cores", "-c",
+                            help="Number of cores to use", type=int, default=4)
+
     args = parser.parse_args()
 
     main(args)
+    
+    
+
+    if args.list:
+        with Pool(processes=args.cores) as p:
+                
+                word_list = p.starmap(
+                    read_one,
+                    zip(
+                        args.list,
+                        repeat(args.size),
+                        repeat(args.remove_punctuation)
+                    ),
+                    1
+                )
+                results(args, word_list)

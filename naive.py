@@ -136,6 +136,8 @@ TEX_REFS = {
     "\\refrange": 2,
     # 1504/1504.06475
     "\\wref": 1,
+    # 0209/math-ph0209020
+    "\\itemref": 1
 }
 
 # Set of LaTeX \cite-like commands
@@ -419,6 +421,7 @@ IGNORED_INCLUDES = {
     "floatmodif",  # 1402/1402.4958
     "hyperref",
     "jltmac2e",  # 0007/math0007039
+    "moveproofs", # 1806/1806.03205
     "myfloat",  # 0603/math0603228
     "myurl",  # 0110/cs0110030
     "psfig",
@@ -450,8 +453,8 @@ IGNORED_INCLUDES = {
 #    \ \\\% not a comment
 #
 # Assumes every line in this multiline string ends with a newline!
-TEX_COMMENT = re.compile(r"((?<!\\)(\\\\)+|(?<!\\))%.*?\n[ \t]*")
-
+# Non-ASCII ٪ character appears in 1901/1901.05588
+TEX_COMMENT = re.compile(r"((?<!\\)(\\\\)+|(?<!\\))[%٪].*?\n[ \t]*")
 
 def decomment(tex_source: str) -> str:
     """
@@ -459,7 +462,8 @@ def decomment(tex_source: str) -> str:
 
     Assumes every line (including the last) ends with \n.
     """
-    return re.sub(TEX_COMMENT, "", tex_source)
+    result = re.sub(TEX_COMMENT, "", tex_source)
+    return result
 
 
 def tokenize_string(tex_source: str):
@@ -1068,7 +1072,7 @@ def skip_rest_math(
                 pass
 
             elif w.startswith("\\") or w in macros:
-                execute(w, words, macros, nomath=False, debug=debug)
+                execute(w, words, macros, nomath=False, debug=debug, inproof=False)
 
     return final_period
 
@@ -1113,7 +1117,7 @@ def skip_rest_env(words, macros, stop_at=None) -> bool:
         elif not w.isspace() and not w.startswith("\\"):
             final_period = False
         elif (w.startswith("\\") or w in macros) and stop_at is None:
-            execute(w, words, macros, nomath=False, debug=False)
+            execute(w, words, macros, nomath=False, debug=False, inproof=False)
 
     return final_period
 
@@ -1254,7 +1258,7 @@ def try_skip_units(words):
 #
 
 
-def execute(cmd, words, macros, nomath=True, debug=False):
+def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
     """Naively attempt to interpret TeX and LaTeX commands."""
     if cmd == "\\ensuremath":
         get_arg(words)
@@ -1739,6 +1743,17 @@ def execute(cmd, words, macros, nomath=True, debug=False):
         get_arg(words)  # color
         return []
 
+    if cmd == "\\definecolor":  # tikz
+        get_arg(words)
+        get_arg(words)
+        get_arg(words)
+        return []
+
+    if cmd == "\\colorlet":   # tikz
+        get_arg(words)
+        get_arg(words)
+        return []
+
     if cmd == "\\tikzset":
         get_arg(words) # ignore argument
         return []
@@ -1747,6 +1762,20 @@ def execute(cmd, words, macros, nomath=True, debug=False):
         get_arg(words)
         get_arg(words)
         return [" "]
+
+    if cmd in {"\\AxiomC" , "\\UnaryInfC", "\\BinaryInfC", "\\TrinaryInfC",
+               "\\QuaternaryInfC", "\\QuinaryInfC", "\\LeftLabel", "\\RightLabel"}:
+        # bussproofs, e.g., 1708/1708.05896
+        get_arg(words)
+        return [""]
+
+    if cmd == "\\DisplayProof":
+        # bussproofs, e.g., 1708/1708.05896
+        return [" MATH "]
+
+    if cmd in {"\\noLine", "\\doubleLine"}:
+        # bussproofs, e.g., 1708/1708.05896
+        return [""]
 
     if cmd == "\\adjustbox":
         get_arg(words) # ignore scaling
@@ -1767,6 +1796,38 @@ def execute(cmd, words, macros, nomath=True, debug=False):
         skip_optional_eq(words)
         skip_optional_arg(words, macros)
         return []
+
+    if cmd == "\\pdfstringdefDisableCommands":
+        # hyperref
+        get_arg(words)
+        return []
+
+    if cmd == "\\textattachfile":
+        skip_optional_arg(words, macros)
+        get_arg(words)
+        # implicitly leave the text alone
+        return []
+
+    if cmd == "\\theoremstyle":
+        get_arg(words)
+
+    if cmd == "\\newtheorem":
+        get_arg(words)
+        skip_optional_arg(words, macros)
+        get_arg(words)
+        skip_optional_arg(words, macros)
+        return []
+
+
+    if cmd == "\\xspace":
+        XSPACE_EXCEPTIONS = {",", ".", "’", "'", "/", "?", ";", ":", "!", "~",
+                            "-", ")", "\\ ", "\\/", "\\bgroup", "\\egroup",
+                            "\\@sptoken", "\\space", "\\@xobeysp", "\\footnote", "\\footnotemark"}
+        upcoming = words.peek(".")
+        if upcoming not in XSPACE_EXCEPTIONS:
+            return [" "]
+        else:
+            return []
 
     if cmd == "\\put" and cmd not in macros:
         while next(words) != ")":
@@ -1821,7 +1882,7 @@ def execute(cmd, words, macros, nomath=True, debug=False):
         )
         raise SkipThisProof(f"oops: encountered {cmd}")
 
-    if cmd in {"\\psset", "\\psline", "\\rput", "\\uput", "\\pspolyline", "\\newrgbcolor", "\\pscircle", "\\qline", "\\ncline"}:
+    if inproof and cmd in {"\\psset", "\\psline", "\\rput", "\\uput", "\\pspolyline", "\\newrgbcolor", "\\pscircle", "\\qline", "\\ncline"}:
         raise SkipThisProof(f"oops: encountered {cmd}")
 
 
@@ -1932,6 +1993,12 @@ def get_proofs(
                 else:
                     macros[name] = (parameters, optional_arg, body)
                 # print("defined ", name, macros[name])
+
+        elif w == "\\csdef":
+            # ignore macros defined with etoolbox's \csdef
+            get_arg(words)
+            skip_to_lbrace(words)
+            get_arg(words)
 
         elif w in ["\\input", "\\include"]:
             # I saw one file that just had a bare \input with no filename.
@@ -2251,7 +2318,7 @@ def get_proofs(
                 # proof we're extracting, there's no need to
                 # crash.
                 potential_output = execute(
-                    w, words, macros, nomath=(proof_nesting > 0), debug=debug
+                    w, words, macros, nomath=(proof_nesting > 0), debug=debug, inproof=(proof_nesting > 0)
                 )
             else:
                 potential_output = [w]
