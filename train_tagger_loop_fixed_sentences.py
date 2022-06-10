@@ -41,17 +41,19 @@ def fixed_experiments(args):
 
     training = make_training_set(train_lines)
     with open(args.output, "a") as o:
+        o.write("Default : ")
         for num in default_results:
             o.write(str(num)+"\t")
         o.write("\n")
+        
     i = 0
     while i < args.num:
-        do_one_fixed_experiment(testing, training, wsj_train, args.nr_iter)
+        do_one_fixed_experiment(testing, training, wsj_train, args.nr_itr)
         i+= 1
 
-def do_one_fixed_experiment(testing, training, wsj_train, nr_iter):
+def do_one_fixed_experiment(testing, training, wsj_train, nr_itr):
     with open(args.output, "a") as o:
-        trained_tagger = train_tagger(training, wsj_train, nr_iter)
+        trained_tagger = train_tagger(training, wsj_train, nr_itr)
         trained_confusion = trained_tagger.confusion(testing)
         trained_results = [trained_tagger.accuracy(testing), 
                         trained_confusion['VB', 'NNP'],
