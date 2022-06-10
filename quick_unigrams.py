@@ -7,7 +7,7 @@ from collections import Counter
 import sys
 
 
-aliases = {"CASE", "CITE", "MATH", "NAME", "REF"}
+aliases = {"CASE", "CITE", "MATH", "NAME", "REF", "VERBATIM", "URL"}
 punctuation = {
     ".",
     ",",
