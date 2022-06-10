@@ -136,6 +136,8 @@ TEX_REFS = {
     "\\refrange": 2,
     # 1504/1504.06475
     "\\wref": 1,
+    # 0209/math-ph0209020
+    "\\itemref": 1
 }
 
 # Set of LaTeX \cite-like commands
@@ -450,8 +452,8 @@ IGNORED_INCLUDES = {
 #    \ \\\% not a comment
 #
 # Assumes every line in this multiline string ends with a newline!
-TEX_COMMENT = re.compile(r"((?<!\\)(\\\\)+|(?<!\\))%.*?\n[ \t]*")
-
+# Non-ASCII ٪ character appears in 1901/1901.05588
+TEX_COMMENT = re.compile(r"((?<!\\)(\\\\)+|(?<!\\))[%٪].*?\n[ \t]*")
 
 def decomment(tex_source: str) -> str:
     """
@@ -459,7 +461,8 @@ def decomment(tex_source: str) -> str:
 
     Assumes every line (including the last) ends with \n.
     """
-    return re.sub(TEX_COMMENT, "", tex_source)
+    result = re.sub(TEX_COMMENT, "", tex_source)
+    return result
 
 
 def tokenize_string(tex_source: str):
@@ -1759,6 +1762,20 @@ def execute(cmd, words, macros, nomath=True, debug=False):
         get_arg(words)
         return [" "]
 
+    if cmd in {"\\AxiomC" , "\\UnaryInfC", "\\BinaryInfC", "\\TrinaryInfC",
+               "\\QuaternaryInfC", "\\QuinaryInfC", "\\LeftLabel", "\\RightLabel"}:
+        # bussproofs, e.g., 1708/1708.05896
+        get_arg(words)
+        return [""]
+
+    if cmd == "\\DisplayProof":
+        # bussproofs, e.g., 1708/1708.05896
+        return [" MATH "]
+
+    if cmd in {"\\noLine", "\\doubleLine"}:
+        # bussproofs, e.g., 1708/1708.05896
+        return [""]
+
     if cmd == "\\adjustbox":
         get_arg(words) # ignore scaling
         # implicitly leave the content alone
@@ -1778,6 +1795,16 @@ def execute(cmd, words, macros, nomath=True, debug=False):
         skip_optional_eq(words)
         skip_optional_arg(words, macros)
         return []
+
+    if cmd == "\\xspace":
+        XSPACE_EXCEPTIONS = {",", ".", "’", "'", "/", "?", ";", ":", "!", "~",
+                            "-", ")", "\\ ", "\\/", "\\bgroup", "\\egroup",
+                            "\\@sptoken", "\\space", "\\@xobeysp", "\\footnote", "\\footnotemark"}
+        upcoming = words.peek(".")
+        if upcoming not in XSPACE_EXCEPTIONS:
+            return [" "]
+        else:
+            return []
 
     if cmd == "\\put" and cmd not in macros:
         while next(words) != ")":
@@ -1943,6 +1970,12 @@ def get_proofs(
                 else:
                     macros[name] = (parameters, optional_arg, body)
                 # print("defined ", name, macros[name])
+
+        elif w == "\\csdef":
+            # ignore macros defined with etoolbox's \csdef
+            get_arg(words)
+            skip_to_lbrace(words)
+            get_arg(words)
 
         elif w in ["\\input", "\\include"]:
             # I saw one file that just had a bare \input with no filename.
