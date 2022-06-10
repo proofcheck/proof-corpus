@@ -421,6 +421,7 @@ IGNORED_INCLUDES = {
     "floatmodif",  # 1402/1402.4958
     "hyperref",
     "jltmac2e",  # 0007/math0007039
+    "moveproofs", # 1806/1806.03205
     "myfloat",  # 0603/math0603228
     "myurl",  # 0110/cs0110030
     "psfig",
@@ -1799,6 +1800,22 @@ def execute(cmd, words, macros, nomath=True, debug=False):
     if cmd == "\\pdfstringdefDisableCommands":
         # hyperref
         get_arg(words)
+        return []
+
+    if cmd == "\\textattachfile":
+        skip_optional_arg(words, macros)
+        get_arg(words)
+        # implicitly leave the text alone
+        return []
+
+    if cmd == "\\theoremstyle":
+        get_arg(words)
+
+    if cmd == "\\newtheorem":
+        get_arg(words)
+        skip_optional_arg(words, macros)
+        get_arg(words)
+        skip_optional_arg(words, macros)
         return []
 
 
