@@ -6,7 +6,7 @@ from multiprocessing import Pool
 from itertools import repeat
 
 from nltk.probability import FreqDist
-from nltk_tagger import read_one_tagger
+from tagger import read_one_tagger
 from nltk.corpus import wordnet
 
 def results(args, dist):

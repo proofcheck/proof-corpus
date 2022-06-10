@@ -49,15 +49,18 @@ def check_one_sent(sent, word):
 
 def extract_sents_from_lines(args):
     if args.word:
-        word_list = [args.word]
+        word_list = args.word.split()
 
-    else:
-        word_list = args.wordlist.read()
-        args.wordlist.close()
-        word_list = args.wordlist.split("\n")
+    elif args.word_file:
+        word_list = args.word_file.read().splitlines()
+        args.word_file.close()
+    
+    if not args.extension:
+        args.extension = ""
 
     for word in word_list:
-        file_name = "first_" + word + args.extension + ".txt"
+        file_name = "word_bins/unique" + word + args.extension + ".txt"
+        unique_sents = set()
         with open(args.file, "r") as fd:
             with open(file_name, "w") as output:
                 with Pool(processes=args.cores) as p:          
@@ -70,7 +73,10 @@ def extract_sents_from_lines(args):
                                 50,
                         ):
                             if line:
-                                output.write(line)
+                                sent = line.split("\t")[1]
+                                if sent not in unique_sents:
+                                    unique_sents.add(sent)
+                                    output.write(sent)
 
 def previous_main(args):
     if args.word:
@@ -124,15 +130,15 @@ if __name__ == '__main__':
 
     parser.add_argument( "--cores", "-c",
                             help="number of cores to use", type=int, default=4)
-
-    parser.add_argument( "--extension", "-e", default= None,
-                            help="file extension")
-    
-    parser.add_argument("--wordlist", "-wl", type=argparse.FileType('r'),
-                            help="txt file to read word list from")
     
     parser.add_argument("--word", "-w", 
                             help="single word as word list")
+    
+    parser.add_argument("--extension", "-e", 
+                            help="custom extension for filename")
+    
+    parser.add_argument("--word_file", "-wf", type=argparse.FileType('r'),
+                            help="txt file to read word list from")
     
     
     args = parser.parse_args()

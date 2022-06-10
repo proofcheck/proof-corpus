@@ -13,7 +13,7 @@ os.environ['OPENBLAS_NUM_THREADS'] = '1'
 from nltk.tag.perceptron import PerceptronTagger, load
 import nltk
 
-from nltk_tagger import write_tags
+from tagger import write_tags
 from load_tagged_sent import load_one_sent, load_tags, is_sent
 from load_ontonotes_pos import *
 

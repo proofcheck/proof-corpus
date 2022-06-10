@@ -8,7 +8,7 @@ import os
 os.environ['OPENBLAS_NUM_THREADS'] = '1'
 
 from nltk.probability import FreqDist
-from nltk_tagger import proof_pos_tagger, write_tags
+from tagger import proof_pos_tagger, write_tags
 
 def results(args, dist):
     # header_text = "\nTotal number of {} words that begin sentences: \n{}\n".format(args.tagger, dist.N())
