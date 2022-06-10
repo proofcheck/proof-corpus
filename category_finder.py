@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 import re
-
+import os
 import xml.etree.ElementTree as ET
 
 years = list(range(21)) + list(range(91, 100))
 years = ["0" + str(x) if len(str(x)) == 1 else str(x) for x in years]
 
-f = open("successful-proof-ids", "r")
+f = open("successful-proof-ids.txt", "r")
 ids = f.readlines()
 f.close()
 
@@ -34,16 +34,23 @@ allIds = []
 ids = set(ids)
 for arxiv in tree.findall(".//{http://arxiv.org/OAI/arXiv/}arXiv"):
     arxivId = arxiv.find("{http://arxiv.org/OAI/arXiv/}id").text
-    # print(('nope', arxivId))
     if arxivId in ids:
 #         if "." in arxivId:
 #             yr = arxivId[0:2]
-#         else:
+#         else:q
 #             yr = arxivId[arxivId.index("/")+1:arxivId.index("/")+3]
+        if "." in arxivId:
+            date = arxivId[0:4]
+        else:
+            date = arxivId[arxivId.index("/")+1:arxivId.index("/")+5]
         categories = arxiv.find("{http://arxiv.org/OAI/arXiv/}categories").text
         cats = categories.split(" ")
         if "math.CO" in cats:
-            print(arxivId)
+            arxid = re.sub(r"(([A-Za-z]|[-])+)\/([0-9]+)", "\\1\\3", arxivId)
+            proofs =  os.listdir(f'./texes/{date}/{arxid}/')
+            for x in proofs:
+                if x[-3:] == "tex":
+                    print(f"./texes/{date}/{arxid}/{x}")
 #         bigCats = set()
 # # #         # largeCats = [0]*6
 #         for cat in cats:
