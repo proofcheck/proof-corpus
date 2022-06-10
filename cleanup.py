@@ -887,6 +887,7 @@ def clean_proof(
         (prefix, line) = ("", orig)
 
     clean = unicodedata.normalize("NFKC", line)
+    clean = clean.replace("�", "") # 0810/0810.4782
     if debug:
         print("0000", clean)
     clean = urls(clean, debug)
