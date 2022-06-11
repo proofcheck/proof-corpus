@@ -1072,7 +1072,7 @@ def skip_rest_math(
                 pass
 
             elif w.startswith("\\") or w in macros:
-                execute(w, words, macros, nomath=False, debug=debug)
+                execute(w, words, macros, nomath=False, debug=debug, inproof=False)
 
     return final_period
 
@@ -1117,7 +1117,7 @@ def skip_rest_env(words, macros, stop_at=None) -> bool:
         elif not w.isspace() and not w.startswith("\\"):
             final_period = False
         elif (w.startswith("\\") or w in macros) and stop_at is None:
-            execute(w, words, macros, nomath=False, debug=False)
+            execute(w, words, macros, nomath=False, debug=False, inproof=False)
 
     return final_period
 
@@ -1258,7 +1258,7 @@ def try_skip_units(words):
 #
 
 
-def execute(cmd, words, macros, nomath=True, debug=False):
+def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
     """Naively attempt to interpret TeX and LaTeX commands."""
     if cmd == "\\ensuremath":
         get_arg(words)
@@ -1882,7 +1882,7 @@ def execute(cmd, words, macros, nomath=True, debug=False):
         )
         raise SkipThisProof(f"oops: encountered {cmd}")
 
-    if cmd in {"\\psset", "\\psline", "\\rput", "\\uput", "\\pspolyline", "\\newrgbcolor", "\\pscircle", "\\qline", "\\ncline"}:
+    if inproof and cmd in {"\\psset", "\\psline", "\\rput", "\\uput", "\\pspolyline", "\\newrgbcolor", "\\pscircle", "\\qline", "\\ncline"}:
         raise SkipThisProof(f"oops: encountered {cmd}")
 
 
@@ -2318,7 +2318,7 @@ def get_proofs(
                 # proof we're extracting, there's no need to
                 # crash.
                 potential_output = execute(
-                    w, words, macros, nomath=(proof_nesting > 0), debug=debug
+                    w, words, macros, nomath=(proof_nesting > 0), debug=debug, inproof=(proof_nesting > 0)
                 )
             else:
                 potential_output = [w]
