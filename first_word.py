@@ -6,7 +6,6 @@ from multiprocessing import Pool
 from itertools import repeat
 
 from nltk.probability import FreqDist
-from tagger import read_one_tagger
 from nltk.corpus import wordnet
 
 def results(args, dist):
@@ -43,7 +42,7 @@ def results(args, dist):
         output.write("\n")
     output.write("\n")
 
-def makedist(word_list):
+def make_dist(word_list):
     # Converts word_list into Frequency Distribution
     dist = FreqDist()
     for l in word_list:
@@ -60,13 +59,8 @@ def first_word(fname):
         
     return first_words
 
-def first_word_filter(fname, tag):
-    # Returns list of first words of every sentence if the predicted pos tag is tag
-    tag_list = read_one_tagger(fname)
-    filtered_word_list = [sent[0][0] for sent in tag_list if sent[0][1] == tag]
-    return filtered_word_list
 
-def first_word_pos(fname, pos):
+def first_word_pos_synset(fname, pos):
     # Returns list of first words of every sentence if the word has a pos sense
     first_word_list = first_word(fname)
     first_word_pos_list = [w for w in first_word_list if pos_check(w, pos)]
@@ -86,19 +80,12 @@ def pos_check(word, pos):
 
 def main(args):
     if args.synset:
-        func = first_word_pos
+        func = first_word_pos_synset
         if args.file:
             arg_file = [args.file, args.synset]
         else:
             arg_list = zip(args.list, repeat(args.synset),)
         
-    elif args.tagger:
-        func = first_word_filter
-        if args.file:
-            arg_file = [args.file, args.tagger]
-        else:
-            arg_list = zip(args.list, repeat(args.tagger),)
-
     else:
         func = first_word
         if args.file:
@@ -107,7 +94,7 @@ def main(args):
             arg_list = zip(args.list)
 
     if args.file:
-        dist = makedist([func(*arg_file)])
+        dist = make_dist([func(*arg_file)])
         
     else:
         with Pool(processes=args.cores) as p:          
@@ -116,7 +103,7 @@ def main(args):
                             arg_list,
                         1
                     )
-                    dist = makedist(word_list)
+                    dist = make_dist(word_list)
     if args.output:
         results(args, dist)
     else:
@@ -138,10 +125,7 @@ if __name__ == '__main__':
 
     parser.add_argument( "--cores", "-c",
                             help="Number of cores to use", type=int, default=4)
-
-    parser.add_argument("--tagger", "-t", default=None,
-                            help="specifies pos tag (given by off the shelf tagger) to filter")
-    
+ 
     parser.add_argument("--synset", "-s", default=None,
                             help="specifies pos tag to find based on synset")
     

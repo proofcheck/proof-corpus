@@ -9,6 +9,7 @@ os.environ['OPENBLAS_NUM_THREADS'] = '1'
 
 from nltk.probability import FreqDist
 from tagger import proof_pos_tagger, write_tags
+from first_word import make_dist
 
 def results(args, dist):
     # header_text = "\nTotal number of {} words that begin sentences: \n{}\n".format(args.tagger, dist.N())
@@ -25,12 +26,6 @@ def results(args, dist):
     output.write("\n")
 
 
-def makedist(word_list):
-    # Converts word_list into Frequency Distribution
-    dist = FreqDist()
-    for l in word_list:
-        dist.update(l)
-    return dist
 
 def dist_output(dist, output):
     for x in dist.most_common():
@@ -48,28 +43,26 @@ def first_word_filter(fname, cores, tag, make_tag=False):
 
     with Pool(processes=cores) as p:
             return_list = p.starmap(
-                check_one_sent,
+                check_one_sent_tag,
                 zip(ids, 
                 tag_list, 
                 repeat(tag),
                 ),
                 1000,
             )
-            print(return_list)
             all_tags = list(zip(*return_list))
             ids = all_tags[0]
             sents = all_tags[1]
             words = all_tags[2]
     
-    word_dist = makedist(words)
+    word_dist = make_dist(words)
     return ids, sents, word_dist
 
-def check_one_sent(this_id, this_sent, tag):
+def check_one_sent_tag(this_id, this_sent, tag):
     if this_sent[0][1] == tag:
         return this_id, this_sent, this_sent[0][1]
 
-
-def load_one_sent(line):
+def load_one_sent_tags(line):
     line = line.strip()
     if "\t" in line:
         this_id = line.split('\t')[0]
@@ -81,21 +74,15 @@ def load_one_sent(line):
     tags = [tuple(word.split('_')) for word in sentence.split(" ") ]
     
     return this_id, tags
-
-    # for word in tags:
-    #     if "—" in word[0]:
-    #         print(this_id)
-    #         print(sentence)
-    
     
 
 def load_tags(tagfile, cores=5):
     all_tags = []
     with Pool(processes=cores) as p:
             tags = p.imap(
-                load_one_sent,
+                load_one_sent_tags,
                 tagfile.readlines(),
-                1000,
+                250,
             )
             all_tags = list(zip(*tags))
             ids = all_tags[0]

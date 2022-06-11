@@ -63,7 +63,7 @@ def write_tags(ids, sents, output=None):
             print()
 
 def main(args):
-    # input must be proof.tsv
+    # input must be sent**.tsv
     for fd in args.files:
         print(fd)
         with Pool(processes=args.cores) as p:
