@@ -1754,7 +1754,7 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
             get_arg(words)
             return []  # will emit the text argument normally
 
-    if cmd == "\\color":
+    if cmd in {"\\color", "\\textcolor", "\\colorbox"}:
         skip_optional_arg(words, macros)
         get_arg(words)  # color
         return []
