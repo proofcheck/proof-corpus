@@ -4,8 +4,8 @@ import argparse
 import nicer
 from multiprocessing import Pool
 from itertools import repeat
-
 from nltk.probability import FreqDist
+
 from first_word import make_dist
 
 def dist_output(dist, output):
@@ -24,23 +24,24 @@ def nnp_dist(tagfile, cores):
 def first_word_filter(fname, cores, tag):
     # Returns list of first words of every sentence if the predicted pos tag is tag
     ids, tag_list = load_tags(fname, cores)
-
+    filtered_ids = []
+    filtered_sents = []
+    word_dist = FreqDist()
     with Pool(processes=cores) as p:
-            return_list = p.starmap(
+            for return_tuple in p.starmap(
                 check_one_sent_tag,
                 zip(ids, 
                 tag_list, 
                 repeat(tag),
                 ),
                 1000,
-            )
-            all_tags = list(zip(*return_list))
-            ids = all_tags[0]
-            sents = all_tags[1]
-            words = all_tags[2]
+            ):
+                if return_tuple:
+                    filtered_ids += return_tuple[0]
+                    filtered_sents += return_tuple[1]
+                    word_dist.update(return_tuple[2])
     
-    word_dist = make_dist(words)
-    return ids, sents, word_dist
+    return filtered_ids, filtered_sents, word_dist
 
 def check_one_sent_tag(this_id, this_sent, tag):
     # Checks if first word of the sentence is tagged tag

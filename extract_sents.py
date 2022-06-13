@@ -42,13 +42,12 @@ def make_bins(args):
 
     for word in word_list:
         file_name = "word_bins/" + word + args.extension + ".txt"
-        output = open(file_name, "w")
         if args.unique:
             file_name_unique = "word_bins/unique/" + word + args.extension + ".txt"
             unique_sents = set()
             unique_output = open(file_name_unique, "w")
           
-        with open(output, "w") as o:  
+        with open(file_name, "w") as output:  
             with open(args.file, "r") as fd:
                 with Pool(processes=args.cores) as p:          
                     for line in p.starmap(
@@ -61,7 +60,7 @@ def make_bins(args):
                         ):
                             if line:
                                 sent = line.split("\t")[1]
-                                o.write(sent)
+                                output.write(sent)
                                 if args.unique:
                                     if sent not in unique_sents:
                                         unique_sents.add(sent)
