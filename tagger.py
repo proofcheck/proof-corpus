@@ -109,6 +109,8 @@ def main(args):
     # input must be sent**.tsv
     for fd in args.files:
         print(fd)
+        if args.cores > 20:
+            args.cores = 20
         with Pool(processes=args.cores) as p:
             sent_tuples = p.imap(
                 sent_tagger,
