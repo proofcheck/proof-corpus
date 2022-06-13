@@ -8,7 +8,6 @@ import os
 os.environ['OPENBLAS_NUM_THREADS'] = '1'
 
 from nltk.probability import FreqDist
-from tagger import proof_pos_tagger, write_tags
 from first_word import make_dist
 
 def results(args, dist):
@@ -34,12 +33,9 @@ def dist_output(dist, output):
     output.write("\n")
 
 
-def first_word_filter(fname, cores, tag, make_tag=False):
+def first_word_filter(fname, cores, tag):
     # Returns list of first words of every sentence if the predicted pos tag is tag
-    if make_tag:
-        ids, tag_list = proof_pos_tagger(fname)
-    else:
-        ids, tag_list = load_tags(fname, cores)
+    ids, tag_list = load_tags(fname, cores)
 
     with Pool(processes=cores) as p:
             return_list = p.starmap(

@@ -57,35 +57,38 @@ def extract_sents_from_lines(args):
     
     if not args.extension:
         args.extension = ""
-    
 
     for word in word_list:
-        file_name = "word_bins/" + word + args.extension + ".txt"
         if args.unique:
             file_name_unique = "word_bins/unique/" + word + args.extension + ".txt"
             unique_sents = set()
             unique_output = open(file_name_unique, "w")
+        else:
+            file_name = "word_bins/" + word + args.extension + ".txt"
+            output = open(file_name, "w")
         with open(args.file, "r") as fd:
-            with open(file_name, "w") as output:
-                with Pool(processes=args.cores) as p:          
-                    for line in p.starmap(
-                        check_one_sent,
-                        zip(
-                            fd.readlines(),
-                            repeat(word),
-                            ),
-                                50,
-                        ):
-                            if line:
-                                sent = line.split("\t")[1]
-                                if args.unique:
-                                    if sent not in unique_sents:
-                                        unique_sents.add(sent)
-                                        unique_output.write(sent)
-                                else:
-                                    output.write(sent)
-                    if args.unique:
-                        unique_output.close()
+            with Pool(processes=args.cores) as p:          
+                for line in p.starmap(
+                    check_one_sent,
+                    zip(
+                        fd.readlines(),
+                        repeat(word),
+                        ),
+                            50,
+                    ):
+                        if line:
+                            sent = line.split("\t")[1]
+                            if args.unique:
+                                if sent not in unique_sents:
+                                    unique_sents.add(sent)
+                                    unique_output.write(sent)
+                            else:
+                                output.write(sent)
+
+                if args.unique:
+                    unique_output.close()
+                else:
+                    output.close()
 
 def previous_main(args):
     if args.word:

@@ -9,7 +9,7 @@ os.environ['OPENBLAS_NUM_THREADS'] = '1'
 from nltk.tag.perceptron import PerceptronTagger
 import nltk
 
-from load_tagged_sent import load_one_sent
+from load_tagged_sent import load_one_sent_tags
 from load_ontonotes_pos import *
 
 
@@ -21,14 +21,14 @@ def make_fixed_sents(lines, n, compare=None):
     #        list of tagged sentences (if we need to make sure there are no overlaps)
     sampled_lines = random.sample(lines, n)
     if compare == None:
-        sents = [load_one_sent(line)[1] for line in sampled_lines]
+        sents = [load_one_sent_tags(line)[1] for line in sampled_lines]
 
     else:
         # compare the random sentences to ensure there are no overlapping sentences
-        sents = [load_one_sent(line)[1] for line in sampled_lines if line not in compare]
+        sents = [load_one_sent_tags(line)[1] for line in sampled_lines if line not in compare]
         while len(sents) < n:
             new_sent = random.sample(lines)
-            new_tagged_sent = load_one_sent(new_sent)[1]
+            new_tagged_sent = load_one_sent_tags(new_sent)[1]
             if new_sent not in sents and new_sent not in compare:
                 test_sents += new_tagged_sent
     

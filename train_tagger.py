@@ -13,8 +13,9 @@ os.environ['OPENBLAS_NUM_THREADS'] = '1'
 from nltk.tag.perceptron import PerceptronTagger, load
 import nltk
 
-from tagger import write_tags
-from load_tagged_sent import load_one_sent, load_tags, is_sent
+from tagger import write_tags, make_default_tagger, make_wsj_train
+
+from load_tagged_sent import load_one_sent_tags, load_tags, is_sent
 from load_ontonotes_pos import *
 
 # Trains tagger on {5, 10, 50, 100, 500} random sentences from args.train
@@ -23,20 +24,6 @@ from load_ontonotes_pos import *
     # Tests tagger on args.test and WSJ corpus
 
 #random.seed(42)
-
-def make_default_tagger():
-    file_path = "default_tagger.pickle"
-    try:
-        with open(file_path, "rb") as resource:
-            default_tagger = pickle.load(resource)
-
-    except FileNotFoundError:
-        with open(file_path, "wb") as resource:
-            default_tagger = PerceptronTagger(load=False)
-            default_tagger.train(make_wsj_train())
-            pickle.dump(default_tagger, resource)
-
-    return default_tagger
 
 def make_fixed_sents(lines, n=None, compare=[], output=None):
     # Creates a random list of n tagged sentences
@@ -56,16 +43,16 @@ def make_fixed_sents(lines, n=None, compare=[], output=None):
                 o.write(lines)
 
     if compare == []:
-        sents = [load_one_sent(line)[1] for line in sampled_lines if is_sent(load_one_sent(line)[1])]
+        sents = [load_one_sent_tags(line)[1] for line in sampled_lines if is_sent(load_one_sent_tags(line)[1])]
 
     else:
         # compare the random sentences to ensure there are no overlapping sentences
-        sents = [load_one_sent(line)[1] for line in sampled_lines if line not in compare and is_sent(load_one_sent(line)[1])]
+        sents = [load_one_sent_tags(line)[1] for line in sampled_lines if line not in compare and is_sent(load_one_sent_tags(line)[1])]
 
         if n:
             while len(sents) < n:
                 new_sent = random.sample(lines, 1)[0]
-                new_tagged_sent = load_one_sent(new_sent)[1]
+                new_tagged_sent = load_one_sent_tags(new_sent)[1]
                 if new_sent not in sents and new_sent not in compare and is_sent(new_tagged_sent):
                     test_sents += new_tagged_sent
     
@@ -98,29 +85,6 @@ def make_wsj_test():
                     1000,
                 ):
                     sentences.extend(loaded_section)
-        output = open(file_path, "w")
-        write_tags([], sentences, output)
-
-    return sentences
-
-def make_wsj_train():
-    # creates training set from WSJ
-    sentences = []
-    file_path = "wsj_train.txt"
-
-    try:
-        with open(file_path, "r") as resource:
-            sentences = list(load_tags(resource, cores=50)[1])
-
-    except FileNotFoundError:
-        with Pool(processes=18) as p:
-                for loaded_section in p.imap(
-                    load_section,
-                    range(0, 19),
-                    1000,
-                ):
-                    sentences.extend(loaded_section)
-
         output = open(file_path, "w")
         write_tags([], sentences, output)
 
