@@ -54,7 +54,10 @@ if __name__ == "__main__":
                     or tex_path.endswith(".doc")
                     or tex_path.endswith("_")
                     or "/.svn/" in tex_path
-                    or re.search(r"[.]tex[.]\S+$", tex_path, re.IGNORECASE)
+                    or (
+                        re.search(r"[.]tex[.]\S+$", tex_path, re.IGNORECASE)
+                        and not tex_path.endswith(".tex.tex")
+                    )
                 ):
                     all_lines[next_index] = f"{CMT} " + all_lines[next_index]
                     continue
