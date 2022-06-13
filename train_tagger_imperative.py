@@ -2,30 +2,15 @@
 
 import argparse
 import nicer
-import random
-import re
+
 from multiprocessing import Pool
-from itertools import repeat
-import pickle
 import os
 os.environ['OPENBLAS_NUM_THREADS'] = '1'
 
-from nltk.tag.perceptron import PerceptronTagger
-import nltk
-
-from tagger import write_tags
-from load_tagged_sent import load_one_sent_tags, load_tags, is_sent
 from load_ontonotes_pos import *
 from train_tagger import *
 from train_tagger_loop_fixed_sentences import do_one_iteration_experiment
 
-
-"""
-
-100 sentences from each bin (45 most common bins, test on 5 least common) 
-5, 10, 20 iter
-
-"""
 
 TRAIN_NUM_LIST = [5, 10, 20, 50, 100]
 ITER_NUM_LIST = [5, 10, 20]
@@ -119,7 +104,6 @@ def do_experiments(args):
                 do_one_iteration_experiment(wsj_test, trained_tagger, output_wsj)
                 i += 1
 
-
 def main(args):
    do_experiments(args)
 
@@ -130,7 +114,7 @@ if __name__ == '__main__':
     parser.add_argument("--train", "-tr",type=argparse.FileType('r'),
                             help="txt file to read imperative verbs from")
     
-    parser.add_argument("--numtrain", "-ntr",type=int, default=None,
+    parser.add_argument("--numtrain", "-ntr",type=int, default=45,
                             help="number of training words")
     
     parser.add_argument("--save_sentences", "-s",

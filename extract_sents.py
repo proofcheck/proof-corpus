@@ -6,48 +6,30 @@ from multiprocessing import Pool
 from itertools import repeat
 
 from load_tagged_sent import load_one_sent_tags
+from tagger import split_sentence_id
 
-def results(args, ids, sentences):
-    zipped = zip(ids, sentences)
-
-    results_text = ["\t".join(results) for results in zipped]
-    if args.output:
-        output = args.output
-        output.write("\n".join(results_text))
-    
-    else:
-        print("\n".join(results_text))
-    
-def extract_sents(fn, word):
-    ids, sentences = read_one(fn)
-    if ids != []:
-        sentences_with_id = zip(ids, sentences)
-        filtered_sents_with_id = [s for s in sentences_with_id if (s[1].split())[0] == word]
-        unzipped = zip(*filtered_sents_with_id)
-        filtered_ids = list(unzipped[0])
-        filtered_sents = list(unzipped[1])
-
-    else:
-        filtered_ids = []
-        filtered_sents = [s for s in sentences if s.split()[0] == word]
-        
-    return filtered_ids, filtered_sents
-
+# Extracts sentences and tags that begin with words in word_file
+# from tagged sentences
 
 def read_one(fn):
+    # Input: file of sentences/proofs
+    # Returns list of ids and sentences
     f = open(fn, "r")
     lines = f.readlines()
-    ids = [l.split('\t')[0] for l in lines if "\t" in l]
-    sents = [l.split('\t')[1]  if "\t" in l else l for l in lines]
+    ids, sents = split_sentence_id(lines)
     f.close()
     return ids, sents
 
-def check_one_sent(sent, word):
+def check_first_word(sent, word):
+    # Input: sentence with tags (connected by _ ), word
+    # Returns sentence if the first word of the sentence is word
     sent_id, sent_tags = load_one_sent_tags(sent)
     if sent_tags[0][0] == word:
         return sent
 
-def extract_sents_from_lines(args):
+def make_bins(args):
+    # Extract sentences that begin with specified word from tagged file
+    # Input: tagged file, word/words (file)
     if args.word:
         word_list = args.word.split()
 
@@ -59,73 +41,37 @@ def extract_sents_from_lines(args):
         args.extension = ""
 
     for word in word_list:
+        file_name = "word_bins/" + word + args.extension + ".txt"
+        output = open(file_name, "w")
         if args.unique:
             file_name_unique = "word_bins/unique/" + word + args.extension + ".txt"
             unique_sents = set()
             unique_output = open(file_name_unique, "w")
-        else:
-            file_name = "word_bins/" + word + args.extension + ".txt"
-            output = open(file_name, "w")
-        with open(args.file, "r") as fd:
-            with Pool(processes=args.cores) as p:          
-                for line in p.starmap(
-                    check_one_sent,
-                    zip(
-                        fd.readlines(),
-                        repeat(word),
-                        ),
-                            50,
-                    ):
-                        if line:
-                            sent = line.split("\t")[1]
-                            if args.unique:
-                                if sent not in unique_sents:
-                                    unique_sents.add(sent)
-                                    unique_output.write(sent)
-                            else:
-                                output.write(sent)
-
-                if args.unique:
-                    unique_output.close()
-                else:
-                    output.close()
-
-def previous_main(args):
-    if args.word:
-        word_list = [args.word]
-
-    else:
-        word_list = args.wordlist.read()
-        word_list = args.wordlist.split("\n")
-        print(word_list)
-    if args.file:
-        ids, sents = extract_sents(args.file, word_list)
+          
+        with open(output, "w") as o:  
+            with open(args.file, "r") as fd:
+                with Pool(processes=args.cores) as p:          
+                    for line in p.starmap(
+                        check_first_word,
+                        zip(
+                            fd.readlines(),
+                            repeat(word),
+                            ),
+                                50,
+                        ):
+                            if line:
+                                sent = line.split("\t")[1]
+                                o.write(sent)
+                                if args.unique:
+                                    if sent not in unique_sents:
+                                        unique_sents.add(sent)
+                                        unique_output.write(sent) 
+                                
+                    if args.unique:
+                        unique_output.close()
         
-    else:
-        
-        with Pool(processes=args.cores) as p:          
-                            return_list = p.starmap(
-                                    extract_sents,
-                                    zip(args.list,
-                                        repeat(word_list)
-                                    ),
-                                250
-                            )
-                            if len(return_list[0][0]) == 1:
-                                ids = []
-                                sents = [e for sub_l in return_list for e in sub_l]
-                            else:
-                                combined = list(zip(*return_list))
-                                ids = [e for sub_l in combined[0] for e in sub_l]
-                                sents = [e for sub_l in combined[1] for e in sub_l]
-
-    if args.output:
-        args.output.close()
-    if args.wordlist:
-        args.wordlist.close()
-
 def main(args):
-    extract_sents_from_lines(args)
+    make_bins(args)
 
 if __name__ == '__main__':
     nicer.make_nice()
