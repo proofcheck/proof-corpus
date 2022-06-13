@@ -526,6 +526,7 @@ def cleanup(
 
         proof = re.sub(r"\(\s*([-0-9]+|[a-zA-Z])(\s*,\s*([0-9.,'-]+|[a-zA-Z])\s*)+\)", "MATH", proof)
 
+        proof = re.sub(r"(?i:fig)\s*[.]?\s*[0-9]*", "", proof)
 
     # eliminate extra spaces
     proof = re.sub("[ ]+", " ", proof)
@@ -615,6 +616,8 @@ def cleanup(
         "\\1CASE: \\2",
         proof,
     )
+
+
 
     proof = re.sub(f"(?i:stage)\\s*{atomicID}\\s*(.)", "", proof)
 
@@ -930,7 +933,7 @@ if __name__ == "__main__":
     for fd in args.files:
         if args.cores == 1:
             for orig in fd.readlines():
-                clean = clean_proof(orig, args.debug, args.file, args.aggressive)
+                clean = clean_proof(orig, args.debug, fd.name, args.aggressive)
                 if args.debug:
                     print()
                     print(orig.strip())
