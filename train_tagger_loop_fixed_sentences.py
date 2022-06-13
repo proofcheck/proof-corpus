@@ -18,10 +18,7 @@ def do_fixed_iteration_experiments(args):
 
     if args.combine_wsj:
         print("Training on WSJ corpus and sampled sentences")
-        wsj_train = make_wsj_train()
-    
-    else:
-        wsj_train = []
+    wsj_train = args.combine_wsj
 
     train_lines = [train_file.readlines() for train_file in args.train]
     for train_file in args.train:
@@ -49,10 +46,10 @@ def do_fixed_iteration_experiments(args):
     i = 0
     while i < args.num:
         trained_tagger = train_tagger(training, wsj_train, args.nr_itr)
-        do_one_iteration_experiment(testing, trained_tagger, args.output)
+        do_one_iteration_results(testing, trained_tagger, args.output)
         i+= 1
 
-def do_one_iteration_experiment(testing, tagger, output):
+def do_one_iteration_results(testing, tagger, output):
     with open(output, "a") as o:
         trained_confusion = tagger.confusion(testing)
         trained_results = [tagger.accuracy(testing), 

@@ -4,61 +4,52 @@ import argparse
 import nicer
 from multiprocessing import Pool
 from itertools import repeat
-import os
-os.environ['OPENBLAS_NUM_THREADS'] = '1'
-
 from nltk.probability import FreqDist
+
 from first_word import make_dist
 
-def results(args, dist):
-    # header_text = "\nTotal number of {} words that begin sentences: \n{}\n".format(args.tagger, dist.N())
-    # results_text = "\nWords tagged {} that begin sentences and their word count:\n".format(args.tagger)
-
-    output = args.output
-    # output.write(header_text)
-    # output.write("\n")
-    # output.write(results_text)
-    # output.write("\n")
-    for x in dist.most_common():
-        output.write(str(x[0]) + '  ' + str(x[1]))
-        output.write("\n")
-    output.write("\n")
-
-
-
 def dist_output(dist, output):
+    # Writes distribution to output depending in order of frequency
+    # Input : distribution, output file
     for x in dist.most_common():
         output.write(str(x[0]) + '  ' + str(x[1]))
         output.write("\n")
     output.write("\n")
 
+def nnp_dist(tagfile, cores):
+    # Creates distribution of words that begin sentenes and are taggged NNP
+    ids, sents, dist = first_word_filter(tagfile, cores, "NNP")
+    return dist
 
 def first_word_filter(fname, cores, tag):
     # Returns list of first words of every sentence if the predicted pos tag is tag
     ids, tag_list = load_tags(fname, cores)
-
+    filtered_ids = []
+    filtered_sents = []
+    word_dist = FreqDist()
     with Pool(processes=cores) as p:
-            return_list = p.starmap(
+            for return_tuple in p.starmap(
                 check_one_sent_tag,
                 zip(ids, 
                 tag_list, 
                 repeat(tag),
                 ),
                 1000,
-            )
-            all_tags = list(zip(*return_list))
-            ids = all_tags[0]
-            sents = all_tags[1]
-            words = all_tags[2]
+            ):
+                if return_tuple:
+                    filtered_ids += return_tuple[0]
+                    filtered_sents += return_tuple[1]
+                    word_dist.update(return_tuple[2])
     
-    word_dist = make_dist(words)
-    return ids, sents, word_dist
+    return filtered_ids, filtered_sents, word_dist
 
 def check_one_sent_tag(this_id, this_sent, tag):
+    # Checks if first word of the sentence is tagged tag
     if this_sent[0][1] == tag:
         return this_id, this_sent, this_sent[0][1]
 
 def load_one_sent_tags(line):
+    # Loads one sentence of tags
     line = line.strip()
     if "\t" in line:
         this_id = line.split('\t')[0]
@@ -68,11 +59,11 @@ def load_one_sent_tags(line):
         sentence = line
     
     tags = [tuple(word.split('_')) for word in sentence.split(" ") ]
-    
     return this_id, tags
     
 
 def load_tags(tagfile, cores=5):
+    # Loads tags from file of tagged sentences
     all_tags = []
     with Pool(processes=cores) as p:
             tags = p.imap(
@@ -88,34 +79,17 @@ def load_tags(tagfile, cores=5):
     return ids, sents
 
 def is_sent(sent):
+    # Checks if the list (sentence) is actually a sentence
     for word in sent:
         if type(word) is not tuple or len(word) != 2:
             return False
     
     return True
 
-def find_proof_tags(search_id, ids, tags):
-    index_id = [ind for ind, this_id in enumerate(ids) if this_id == search_id]
-    proof_tags = [tags[i] for i in index_id]
-    return proof_tags
-
-def nnp_dist(tagfile):
-    ids, sents = load_tags(tagfile)
-    first_word_nnp = [word[0] for sent in sents for word in sent if word[1] == "NNP"]
-
-    return FreqDist(first_word_nnp)
 
 def main(args):
-    # ids, sents = load_tags(args.file, args.cores)
-    # this_id = "9203/alg-geom9203002"
-    # tags = find_proof_tags(this_id, ids, sents)
-
-    # ids, sents, word_dist = first_word_filter(args.file, args.cores, args.tag)
-    # write_tags(ids, sents, args.output_sentences)
-    # args.output_wordlist.write("Words that begin sentences with the tag {}\n".format(args.tag))
-    # dist_output(word_dist, args.output_wordlist)
-    dist = nnp_dist(args.file)
-    results(args, dist)
+    dist = nnp_dist(args.file, args.cores)
+    dist_output(args, dist)
     
 
 if __name__ == '__main__':

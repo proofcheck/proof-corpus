@@ -2,30 +2,17 @@
 
 import argparse
 import nicer
-import random
-import re
 from multiprocessing import Pool
-from itertools import repeat
-import pickle
 import os
-os.environ['OPENBLAS_NUM_THREADS'] = '1'
 
-from nltk.tag.perceptron import PerceptronTagger
-import nltk
-
-from tagger import write_tags
-from load_tagged_sent import load_one_sent_tags, load_tags, is_sent
 from load_ontonotes_pos import *
 from train_tagger import *
-from train_tagger_loop_fixed_sentences import do_one_iteration_experiment
+from train_tagger_loop_fixed_sentences import do_one_iteration_results
 
-
-"""
-
-100 sentences from each bin (45 most common bins, test on 5 least common) 
-5, 10, 20 iter
-
-"""
+# Trains on n sentences (element in TRAIN_NUM_LIST) from num_train bins
+# Iterates for nr_itr times (element in ITER_NUM_LIST)
+# Runs 10 loops for each experiment
+# Tests on WSJ and testing set (all sentences in unused bins)
 
 TRAIN_NUM_LIST = [5, 10, 20, 50, 100]
 ITER_NUM_LIST = [5, 10, 20]
@@ -78,8 +65,6 @@ def do_experiments(args):
         save = None
     
     nltk.data.clear_cache()
-    wsj_train = make_wsj_train()
-    wsj_test = make_wsj_test()
 
     with open(args.train, "r") as wl:
         word_list = wl.readlines()
@@ -103,22 +88,35 @@ def do_experiments(args):
             o.write(str(num)+"\t")
             o.write("\n")
 
-    for num in train_num_list:
-        training = []
-        for imperative_verb in training_set:
-            training += imperative_verb[:num]
+    with Pool(processes=args.cores) as p:
+        for num_train_sent in train_num_list:
+            for nr_iter in iter_num_list:
+                p.starmap(
+                    do_one_iteration,
+                    zip(
+                        repeat(testing),
+                        repeat(training_set),
+                        num_train_sent,
+                        nr_iter,
+                        repeat(args.extension),
+                    ),
+                    1
+                )
+
+def do_one_iteration(testing, training_set, num_train_sent, nr_iter, extension=""):
+    training = []
+    for imperative_verb in training_set:
+        training += imperative_verb[:num_train_sent]
         
-        for nr_itr in iter_num_list:
-            output_wsj = "experiments/experiment_" + str(num) + "sents_" + str(nr_itr) + "iters_wsj_" + args.extension + ".txt"
-            output_test = "experiments/experiment_" + str(num) + "sents_" + str(nr_itr) + "iters_test_" + args.extension + ".txt"
+    output_wsj = "experiments/experiment_" + str(num_train_sent) + "sents_" + str(nr_iter) + "iters_wsj_" + extension + ".txt"
+    output_test = "experiments/experiment_" + str(num_train_sent) + "sents_" + str(nr_iter) + "iters_test_" + extension + ".txt"
 
-            i = 0
-            while i < 10:
-                trained_tagger = train_tagger(training, wsj_train, args.nr_itr)
-                do_one_iteration_experiment(testing, trained_tagger, output_test)
-                do_one_iteration_experiment(wsj_test, trained_tagger, output_wsj)
-                i += 1
-
+    i = 0
+    while i < 10:
+        trained_tagger = train_tagger(training, nr_iter=nr_iter)
+        do_one_iteration_results(testing, trained_tagger, output_test)
+        do_one_iteration_results(WSJ_TEST, trained_tagger, output_wsj)
+        i += 1
 
 def main(args):
    do_experiments(args)
@@ -130,7 +128,7 @@ if __name__ == '__main__':
     parser.add_argument("--train", "-tr",type=argparse.FileType('r'),
                             help="txt file to read imperative verbs from")
     
-    parser.add_argument("--numtrain", "-ntr",type=int, default=None,
+    parser.add_argument("--numtrain", "-ntr",type=int, default=45,
                             help="number of training words")
     
     parser.add_argument("--save_sentences", "-s",

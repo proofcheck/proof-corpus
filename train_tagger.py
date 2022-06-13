@@ -13,10 +13,13 @@ os.environ['OPENBLAS_NUM_THREADS'] = '1'
 from nltk.tag.perceptron import PerceptronTagger, load
 import nltk
 
-from tagger import write_tags, make_default_tagger, make_wsj_train
+from tagger import DEFAULT_TAGGER, write_tags, make_default_tagger, make_wsj_train, make_wsj_test
 
 from load_tagged_sent import load_one_sent_tags, load_tags, is_sent
 from load_ontonotes_pos import *
+
+WSJ_TRAIN = make_wsj_train()
+WSJ_TEST = make_wsj_test()
 
 # Trains tagger on {5, 10, 50, 100, 500} random sentences from args.train
     # Prints accuracy, number of VBs mistakenly tagged as NPP, number of mislabelled tokens overall
@@ -66,29 +69,7 @@ def fix_NNP(tags):
         sent[0] = first_word, 'VB'
     return tags
 
-def make_wsj_test():
-    # creates testing set of "normal sentences" from WSJ
-    sentences = []
-    file_path = "wsj_test.txt"
 
-    try:
-        with open(file_path, "r") as resource:
-            sentences = list(load_tags(resource, cores=50)[1])
-            print("loaded")
-
-    except FileNotFoundError:
-        
-        with Pool(processes=3) as p:
-                for loaded_section in p.imap(
-                    load_section,
-                    range(22, 25),
-                    1000,
-                ):
-                    sentences.extend(loaded_section)
-        output = open(file_path, "w")
-        write_tags([], sentences, output)
-
-    return sentences
 
 def num_mislabelings(confusion):
     # counts the number of mislabeled tokens from confusion matrix
@@ -124,10 +105,8 @@ def do_experiments(args):
     
     if args.combine_wsj:
         print("Training on WSJ corpus and sampled sentences")
-        wsj_train = make_wsj_train()
+    wsj_train = args.combine_wsj
     
-    else:
-        wsj_train = []
 
     if args.sample_all:
         print("Training on sentences sampled from all training files combined")
@@ -143,12 +122,12 @@ def do_experiments(args):
             train_file.close()
 
     nltk.data.clear_cache()
-    default_tagger = make_default_tagger()
+    default_tagger = DEFAULT_TAGGER
 
 
     training = make_training_set(train_lines, args.numtrain, sample_all=args.sample_all, output=save)
     
-    trained_tagger = train_tagger(training, wsj_train)
+    trained_tagger = train_tagger(training, wsj_train=wsj_train)
 
     if args.compare_weights:
         compare_weights(default_tagger, trained_tagger, args.word, args.output)
@@ -156,10 +135,10 @@ def do_experiments(args):
     else:
         if args.test:
             for test_file in args.test:
-                default_results, trained_results = do_one_experiment(test_file, trained_tagger, default_tagger, args.numtest, training, save)
+                default_results, trained_results = do_one_basic_experiment(test_file, trained_tagger, default_tagger, args.numtest, training, save)
                 print_results(default_results, trained_results, args.numtrain, args.output)
 
-        default_results, trained_results = do_one_experiment(None, trained_tagger, default_tagger, args.numtest, training, save)
+        default_results, trained_results = do_one_basic_experiment(None, trained_tagger, default_tagger, args.numtest, training, save)
         print_results(default_results, trained_results, args.numtrain, args.output)
 
 def get_word_key(model_dict, word):
@@ -217,15 +196,18 @@ def print_results(default_results, trained_results, num, output=None):
             o.write("VB words tagged as NNP :\t{} \t{}\n".format(default_results[1], trained_results[1]))
             o.write("Mislabeled words overall :\t{} \t{}\n".format(default_results[2], trained_results[2]))
 
-def train_tagger(training, wsj_train, nr_iter=5):
+def train_tagger(training, wsj_train=True, nr_iter=5):
     nltk.data.clear_cache()
     tagger = PerceptronTagger(load=False)
     print("training")
-    tagger.train(training + wsj_train, nr_iter=nr_iter)
+    if wsj_train:
+        tagger.train(training + WSJ_TRAIN, nr_iter=nr_iter)
+    else:
+        tagger.train(training, nr_iter=nr_iter)
     print("done training")
     return tagger
 
-def do_one_experiment(test_file, trained_tagger, default_tagger, numtest=None, compare=[], output=None):
+def do_one_basic_experiment(test_file, trained_tagger, default_tagger, numtest=None, compare=[], output=None):
     # creates testing set
     if test_file == None:
         testing = [sent for sent in make_wsj_test() if sent not in compare]
