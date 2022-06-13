@@ -466,7 +466,20 @@ def decomment(tex_source: str) -> str:
     return result
 
 
-def tokenize_string(tex_source: str):
+def fixup(filename: str, tex_source: str) -> str:
+    """
+    Fixup annoyances in isolated .tex inputs.
+
+    I had been modifying the actual file in texes/*, but
+    that's dangerous since there are copies of this
+    directory floating around on different computers.
+    """
+    if "solpara-arxiv-2" in filename:
+        tex_source = tex_source.replace("\\providecommand{ }[1]{\\textcolor{blue}{#1}}", "")
+    return tex_source
+
+
+def tokenize_string(filename: str, tex_source: str):
     """
     Turn a string (representing an entire file) into a stream of TeX-ish words.
 
@@ -489,6 +502,9 @@ def tokenize_string(tex_source: str):
 
     # Remove all the comments
     tex_source = decomment(tex_source)
+
+    # Ad-hoc fixups
+    tex_source = fixup(filename, tex_source)
 
     # Insert "\par" where there were blank lines
     tex_source = re.sub("^[ \\t]*$", "\\\\par", tex_source, flags=re.MULTILINE)
@@ -569,7 +585,7 @@ def get_words(filename: str):
                 if not tex_source:
                     tex_source = ""
 
-    return more_itertools.peekable(tokenize_string(tex_source))
+    return more_itertools.peekable(tokenize_string(filename, tex_source))
 
 
 def skip_ws(words: "more_itertools.peekable[str]"):

@@ -4,10 +4,51 @@ import argparse
 from nltk.tag.perceptron import PerceptronTagger
 import nicer
 from multiprocessing import Pool
-from sentize2 import sentize_proof
 import sys
+import pickle
 
-tagger = PerceptronTagger()
+from load_tagged_sent import load_tags
+from load_ontonotes_pos import *
+
+def make_wsj_train():
+    # creates training set from WSJ
+    sentences = []
+    file_path = "wsj_train.txt"
+
+    try:
+        with open(file_path, "r") as resource:
+            sentences = list(load_tags(resource, cores=50)[1])
+
+    except FileNotFoundError:
+        with Pool(processes=18) as p:
+                for loaded_section in p.imap(
+                    load_section,
+                    range(0, 19),
+                    1000,
+                ):
+                    sentences.extend(loaded_section)
+
+        output = open(file_path, "w")
+        write_tags([], sentences, output)
+
+    return sentences
+
+
+def make_default_tagger():
+    file_path = "default_tagger.pickle"
+    try:
+        with open(file_path, "rb") as resource:
+            default_tagger = pickle.load(resource)
+
+    except FileNotFoundError:
+        with open(file_path, "wb") as resource:
+            default_tagger = PerceptronTagger(load=False)
+            default_tagger.train(make_wsj_train())
+            pickle.dump(default_tagger, resource)
+
+    return default_tagger
+
+tagger = make_default_tagger()
 
 def sent_tagger(line):
     # input: one line from sent**.tsv
@@ -17,26 +58,26 @@ def sent_tagger(line):
     tagged = tagger.tag(tokenized)
     return sent_id, tagged
 
-def proof_pos_tagger(line):
-    # input: one line from proofs**.tsv (one proof)
-    # returns: ids, tagged sentence
-    lines = sentize_proof(line)
-    ids, sents = split_sentence_id(lines)
-    tokenized = [sent.split() for sent in sents]
-    lengths = [len(sent) for sent in tokenized]
-    flat_tokenized = [e for sub_l in tokenized for e in sub_l]
-    tagged = tagger.tag(flat_tokenized)
-    tagged_sent = []
-    now_sent = []
-    count = 0
-    for length in lengths:
-        if tagged == []:
-            break
-        else:
-            now_sent = tagged[:length]
-            tagged_sent += [now_sent]
-            tagged = tagged[length:]
-    return ids, tagged_sent
+# def proof_pos_tagger(line):
+#     # input: one line from proofs**.tsv (one proof)
+#     # returns: ids, tagged sentence
+#     lines = sentize_proof(line)
+#     ids, sents = split_sentence_id(lines)
+#     tokenized = [sent.split() for sent in sents]
+#     lengths = [len(sent) for sent in tokenized]
+#     flat_tokenized = [e for sub_l in tokenized for e in sub_l]
+#     tagged = tagger.tag(flat_tokenized)
+#     tagged_sent = []
+#     now_sent = []
+#     count = 0
+#     for length in lengths:
+#         if tagged == []:
+#             break
+#         else:
+#             now_sent = tagged[:length]
+#             tagged_sent += [now_sent]
+#             tagged = tagged[length:]
+#     return ids, tagged_sent
     
 def split_sentence_id(lines):
     # splits ids and rest of text
@@ -63,7 +104,7 @@ def write_tags(ids, sents, output=None):
             print()
 
 def main(args):
-    # input must be proof.tsv
+    # input must be sent**.tsv
     for fd in args.files:
         print(fd)
         with Pool(processes=args.cores) as p:

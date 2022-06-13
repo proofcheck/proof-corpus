@@ -11,7 +11,7 @@ from load_ontonotes_pos import *
 from train_tagger import *
 
 
-def fixed_experiments(args):
+def do_fixed_iteration_experiments(args):
     # Prints accuracy, number of VBs mistakenly tagged as NPP, number of mislabelled tokens overall
     # for default and trained taggers 
     # Tests tagger on args.test and WSJ corpus
@@ -48,10 +48,10 @@ def fixed_experiments(args):
         
     i = 0
     while i < args.num:
-        do_one_fixed_experiment(testing, training, wsj_train, args.nr_itr)
+        do_one_iteration_experiment(testing, training, wsj_train, args.nr_itr)
         i+= 1
 
-def do_one_fixed_experiment(testing, training, wsj_train, nr_itr):
+def do_one_iteration_experiment(testing, training, wsj_train, nr_itr):
     with open(args.output, "a") as o:
         trained_tagger = train_tagger(training, wsj_train, nr_itr)
         trained_confusion = trained_tagger.confusion(testing)
@@ -64,7 +64,7 @@ def do_one_fixed_experiment(testing, training, wsj_train, nr_itr):
         o.write("\n")
 
 def main(args):
-    fixed_experiments(args)
+    do_fixed_iteration_experiments(args)
 
 if __name__ == '__main__':
     nicer.make_nice()

@@ -5,7 +5,7 @@ import nicer
 from multiprocessing import Pool
 from itertools import repeat
 
-from load_tagged_sent import load_one_sent
+from load_tagged_sent import load_one_sent_tags
 
 def results(args, ids, sentences):
     zipped = zip(ids, sentences)
@@ -43,7 +43,7 @@ def read_one(fn):
     return ids, sents
 
 def check_one_sent(sent, word):
-    sent_id, sent_tags = load_one_sent(sent)
+    sent_id, sent_tags = load_one_sent_tags(sent)
     if sent_tags[0][0] == word:
         return sent
 
@@ -59,24 +59,36 @@ def extract_sents_from_lines(args):
         args.extension = ""
 
     for word in word_list:
-        file_name = "word_bins/unique/" + word + args.extension + ".txt"
-        unique_sents = set()
+        if args.unique:
+            file_name_unique = "word_bins/unique/" + word + args.extension + ".txt"
+            unique_sents = set()
+            unique_output = open(file_name_unique, "w")
+        else:
+            file_name = "word_bins/" + word + args.extension + ".txt"
+            output = open(file_name, "w")
         with open(args.file, "r") as fd:
-            with open(file_name, "w") as output:
-                with Pool(processes=args.cores) as p:          
-                    for line in p.starmap(
-                        check_one_sent,
-                        zip(
-                            fd.readlines(),
-                            repeat(word),
-                            ),
-                                1000,
-                        ):
-                            if line:
-                                sent = line.split("\t")[1]
+            with Pool(processes=args.cores) as p:          
+                for line in p.starmap(
+                    check_one_sent,
+                    zip(
+                        fd.readlines(),
+                        repeat(word),
+                        ),
+                            50,
+                    ):
+                        if line:
+                            sent = line.split("\t")[1]
+                            if args.unique:
                                 if sent not in unique_sents:
                                     unique_sents.add(sent)
-                                    output.write(sent)
+                                    unique_output.write(sent)
+                            else:
+                                output.write(sent)
+
+                if args.unique:
+                    unique_output.close()
+                else:
+                    output.close()
 
 def previous_main(args):
     if args.word:
@@ -97,7 +109,7 @@ def previous_main(args):
                                     zip(args.list,
                                         repeat(word_list)
                                     ),
-                                1000
+                                250
                             )
                             if len(return_list[0][0]) == 1:
                                 ids = []
@@ -139,6 +151,11 @@ if __name__ == '__main__':
     
     parser.add_argument("--word_file", "-wf", type=argparse.FileType('r'),
                             help="txt file to read word list from")
+    
+    parser.add_argument("--unique", "-u", action="store_true",
+                            help="store unique sentences")
+
+                            
     
     
     args = parser.parse_args()
