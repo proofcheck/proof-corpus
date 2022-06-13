@@ -59,7 +59,7 @@ def make_fixed_sents(lines, n=None, compare=[], output=None):
     return fix_NNP(sents)
 
 def fix_NNP(tags):
-    # changes the tag of the first word from NNP to VB
+    # changes the tag of the first word from to VB
     # input: list of tagged sentences
     for sent in tags:
         first_word = sent[0][0]
@@ -94,6 +94,11 @@ def num_mislabelings(confusion):
     # counts the number of mislabeled tokens from confusion matrix
     mislabelings = confusion._total - confusion._correct
     return mislabelings 
+
+def mislabeled_vb(confusion):
+    i = confusion._indices['VB']
+    sum_vb = sum(confusion._confusion[i]) - confusion['VB', 'VB']
+    return sum_vb
 
 def make_training_set(train_lines, train_num=None, sample_all=False, testing=[], output=None):
     if sample_all:

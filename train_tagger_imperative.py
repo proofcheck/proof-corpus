@@ -30,7 +30,8 @@ from train_tagger_loop_fixed_sentences import do_one_iteration_experiment
 TRAIN_NUM_LIST = [5, 10, 20, 50, 100]
 ITER_NUM_LIST = [5, 10, 20]
 
-def get_train_test_files(train_word_list):
+def get_train_test_files(word_list, num):
+    train_word_list = word_list[:num]
     path="word_bins/unique"
     
     train_list = []
@@ -64,13 +65,6 @@ def make_testing_from_bin(test_files):
 
     return testing_set
 
-def sum_vb(confusion):
-    sum_vb = 0
-    for test in confusion.test:
-        sum_vb += confusion['VB', test]
-    
-    return sum_vb
-
 def do_experiments(args):
     # Prints accuracy, number of VBs mistakenly tagged as NPP, number of mislabelled tokens overall
     # for default and trained taggers 
@@ -79,16 +73,17 @@ def do_experiments(args):
     iter_num_list = ITER_NUM_LIST
 
     if args.save_sentences:
-        save = args.output
+        save = args.save_sentences
     else:
         save = None
     
     nltk.data.clear_cache()
     wsj_train = make_wsj_train()
+    wsj_test = make_wsj_test()
 
-    with open(args.train_word_file, "r") as wl:
-        train_word_list = wl.readlines()
-    train_files, test_files = get_train_test_files(train_word_list)
+    with open(args.train, "r") as wl:
+        word_list = wl.readlines()
+    train_files, test_files = get_train_test_files(word_list, args.numtr)
     training_set = make_training_from_bin(train_files, train_num_list, output=save)
     testing = make_testing_from_bin(test_files)
 
@@ -98,9 +93,15 @@ def do_experiments(args):
 
     default_results = [default_tagger.accuracy(testing), 
                     default_confusion['VB', 'NNP'],
-                    sum_vb(default_confusion),
+                    mislabeled_vb(default_confusion),
                     num_mislabelings(default_confusion),
                 ]
+    
+    output_default = "experiments/experiment_defaulttagger_test" + args.extension + ".txt"
+    with open(output_default, "w") as o:
+        for num in default_results:
+            o.write(str(num)+"\t")
+            o.write("\n")
 
     for num in train_num_list:
         training = []
@@ -108,98 +109,35 @@ def do_experiments(args):
             training += imperative_verb[:num]
         
         for nr_itr in iter_num_list:
+            output_wsj = "experiments/experiment_" + str(num) + "sents_" + str(nr_itr) + "iters_wsj_" + args.extension + ".txt"
+            output_test = "experiments/experiment_" + str(num) + "sents_" + str(nr_itr) + "iters_test_" + args.extension + ".txt"
+
             i = 0
             while i < 10:
-                do_one_iteration_experiment(testing, training, wsj_train, nr_itr)
+                trained_tagger = train_tagger(training, wsj_train, args.nr_itr)
+                do_one_iteration_experiment(testing, trained_tagger, output_test)
+                do_one_iteration_experiment(wsj_test, trained_tagger, output_wsj)
                 i += 1
 
 
-    default_results, trained_results = do_one_experiment(testing, trained_tagger, default_tagger, args.numtest, training, save)
-    print_results(default_results, trained_results, args.numtrain, args.output)
-
-    default_results, trained_results = do_one_experiment(None, trained_tagger, default_tagger, args.numtest, training, save)
-    print_results(default_results, trained_results, args.numtrain, args.output)
-
-
-def do_one_experiment(test_file, trained_tagger, default_tagger, numtest=None, compare=[], output=None):
-    # creates testing set
-    if test_file == None:
-        testing = [sent for sent in make_wsj_test() if sent not in compare]
-        if numtest:
-             print("Testing on {} sentences from WSJ".format(numtest))
-        else:
-            print("Testing on all sentences from WSJ")
-
-    else:
-        test_lines = test_file.readlines()
-        test_file.close()
-        testing = make_fixed_sents(test_lines, numtest, compare)
-        if numtest:
-            print("Testing on {} sentences from {}".format(numtest, test_file.name))
-        else:
-            print("Testing on all sentences from", test_file.name)
-    
-    default_confusion = default_tagger.confusion(testing)
-    default_results = [default_tagger.accuracy(testing), 
-                    default_confusion['VB', 'NNP'],
-                    num_mislabelings(default_confusion),
-                ]
-    trained_confusion = trained_tagger.confusion(testing)
-    results = [trained_tagger.accuracy(testing), 
-                    trained_confusion['VB', 'NNP'],
-                    num_mislabelings(trained_confusion),
-                ]
-    
-    if output:
-        with open(output, "a") as o:
-            if test_file:
-                o.write("\n"+test_file.name+"\n")
-            else:
-                o.write("\nWSJ\n")
-
-    return default_results, results
-
-
-
 def main(args):
-    if args.output:
-        with open(args.output, "a") as o:
-            o.write("\n----------------------------------------------------------------------------------------------------------------\n")
-    do_experiments(args)
+   do_experiments(args)
 
 if __name__ == '__main__':
     nicer.make_nice()
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--train", "-tr",type=argparse.FileType('r'), nargs='*',
-                            help="txt file to read training sentences from")
-    
-    parser.add_argument("--test", "-te", type=argparse.FileType('r'), nargs='*', default=None,
-                            help="txt file to read testing sentences from")
+    parser.add_argument("--train", "-tr",type=argparse.FileType('r'),
+                            help="txt file to read imperative verbs from")
     
     parser.add_argument("--numtrain", "-ntr",type=int, default=None,
-                            help="number of training sentences")
+                            help="number of training words")
     
-    parser.add_argument("--numtest", "-nte", default=None,
-                            help="number of testing sentences")
-    
-    parser.add_argument("--sample_all", "-sa", action='store_true',
-                            help="sample sentences randomly across files")
-    
-    parser.add_argument("--combine_wsj", "-c", action='store_true',
-                            help="combine wsj training set")
-    
-    parser.add_argument("--save_sentences", "-s", action='store_true',
-                            help="save training set")
+    parser.add_argument("--save_sentences", "-s",
+                            help="file to save sentences")
 
-    parser.add_argument("--output", "-o",
-                            help="txt file to write confusion matrices and sentences to")
-
-    parser.add_argument("--word", "-w",
-                            help="Word to check for in keys")
-
-    parser.add_argument("--compare_weights", "-cw", action='store_true',
-                            help="compare weights dictionary")
+    parser.add_argument("--extension", "-e",
+                            help="file extension")
 
 
     args = parser.parse_args()
