@@ -868,13 +868,12 @@ def cleanup(
 
     return proof
 
-URL = re.compile(r"""\b(?:https?|ftp|gopher)\s?:\s?/{1,3}\s?(?:[-a-z0-9_%@']+[.])+[-a-z0-9_%@]+(?:[:][0-9]+)?(?:\s*[/]\s*[.a-z0-9_%#~&@*()'-]*)*[a-z0-9_%#~&@*()'-]/?""",
+URL = re.compile(r"""\b(?:https?|ftp|gopher)\s?:\s?/{1,3}\s?(?:[-a-z0-9_%@']+[.])+[-a-z0-9_%@]+(?:[:][0-9]+)?(?:\s*[/]\s*[.a-z0-9_%#~&@*()'~-]*)*\s*(?:[/]\s*[a-z0-9_%#~&@*()'~-]*[/]|[/][a-z0-9_%#~&@*()'~-]*)""",
                  re.IGNORECASE)
 
 def urls(proof, debug=False):
     # Don't let it end with a period
-    proof = re.sub(URL, " URL ", proof)
-    proof = re.sub(r"\(\s*URL\s*\)", " URL ", proof)
+    proof = re.sub(URL, " REF ", proof)
     return proof
 
 def clean_proof(

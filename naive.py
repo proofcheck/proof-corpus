@@ -1336,7 +1336,11 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         if cmd == "\\^":
             return ["".join(get_arg(words)) + "\u0302"]
         if cmd == "\\~":
-            return ["".join(get_arg(words)) + "\u0303"]
+            arg = "".join(get_arg(words))
+            if arg.strip():
+                return [arg + "\u0303"]
+            else:
+                return "~"
         if cmd == "\\=":
             return ["".join(get_arg(words)) + "\u0304"]
         if cmd == "\\u" and cmd not in macros:
