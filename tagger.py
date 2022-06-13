@@ -10,6 +10,7 @@ import pickle
 from load_tagged_sent import load_tags
 from load_ontonotes_pos import *
 
+
 def make_wsj_train():
     # creates training set from WSJ
     sentences = []
@@ -48,14 +49,15 @@ def make_default_tagger():
 
     return default_tagger
 
-tagger = make_default_tagger()
+DEFAULT_TAGGER = make_default_tagger()
 
 def sent_tagger(line):
     # input: one line from sent**.tsv
     # returns: id, tagged sentence
+    
     sent_id, sent = line.split("\t")
     tokenized = sent.strip().split(" ")
-    tagged = tagger.tag(tokenized)
+    tagged = DEFAULT_TAGGER.tag(tokenized)
     return sent_id, tagged
 
 # def proof_pos_tagger(line):
