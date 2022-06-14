@@ -137,7 +137,7 @@ TEX_REFS = {
     # 1504/1504.06475
     "\\wref": 1,
     # 0209/math-ph0209020
-    "\\itemref": 1
+    "\\itemref": 1,
 }
 
 # Set of LaTeX \cite-like commands
@@ -421,7 +421,7 @@ IGNORED_INCLUDES = {
     "floatmodif",  # 1402/1402.4958
     "hyperref",
     "jltmac2e",  # 0007/math0007039
-    "moveproofs", # 1806/1806.03205
+    "moveproofs",  # 1806/1806.03205
     "myfloat",  # 0603/math0603228
     "myurl",  # 0110/cs0110030
     "psfig",
@@ -456,6 +456,7 @@ IGNORED_INCLUDES = {
 # Non-ASCII ٪ character appears in 1901/1901.05588
 TEX_COMMENT = re.compile(r"((?<!\\)(\\\\)+|(?<!\\))[%٪].*?\n[ \t]*")
 
+
 def decomment(tex_source: str) -> str:
     """
     Delete all TeX comments from multiline source code.
@@ -475,7 +476,9 @@ def fixup(filename: str, tex_source: str) -> str:
     directory floating around on different computers.
     """
     if "solpara-arxiv-2" in filename:
-        tex_source = tex_source.replace("\\providecommand{ }[1]{\\textcolor{blue}{#1}}", "")
+        tex_source = tex_source.replace(
+            "\\providecommand{ }[1]{\\textcolor{blue}{#1}}", ""
+        )
     return tex_source
 
 
@@ -544,8 +547,8 @@ def tokenize_string(filename: str, tex_source: str):
             # It's tempting to peek ahead for another "$" and return "$$", but
             # $\alpha$$\beta$ needs to show up as four single $'s.
             pass
-        elif word == "~":
-            word = " "
+        # elif word == "~":
+        #    word = " "
         elif word == "#":
             # Make #1 through #9 into single tokens
             d = chars.peek("!")
@@ -1008,7 +1011,9 @@ def skip_rest_math(
                 raise SkipThisProof
 
             if debug:
-                print(f"skip_rest_math {single_dollar=} saw: {w} {w in macros}")
+                print(
+                    f"skip_rest_math {single_dollar=} saw: {w} {w in macros}"
+                )
                 print("   ", "".join(words[:20]))
                 if verbose:
                     print("    ", words[:10])
@@ -1088,7 +1093,9 @@ def skip_rest_math(
                 pass
 
             elif w.startswith("\\") or w in macros:
-                execute(w, words, macros, nomath=False, debug=debug, inproof=False)
+                execute(
+                    w, words, macros, nomath=False, debug=debug, inproof=False
+                )
 
     return final_period
 
@@ -1221,9 +1228,9 @@ def try_assign(words, allow_space: bool = False) -> bool:
             # print("TA: no 1")
             return False
     # print("ta: ", " ".join(words[:15]))
-    if words.peek("x").isdigit() or \
-         (words.peek("x") in ["-", "."]
-         and words[:2][-1].isdigit()):
+    if words.peek("x").isdigit() or (
+        words.peek("x") in ["-", "."] and words[:2][-1].isdigit()
+    ):
 
         skip_glue(words)
         # if words.peek("x") != ".":
@@ -1336,7 +1343,11 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         if cmd == "\\^":
             return ["".join(get_arg(words)) + "\u0302"]
         if cmd == "\\~":
-            return ["".join(get_arg(words)) + "\u0303"]
+            arg = "".join(get_arg(words))
+            if arg.strip():
+                return [arg + "\u0303"]
+            else:
+                return "~"
         if cmd == "\\=":
             return ["".join(get_arg(words)) + "\u0304"]
         if cmd == "\\u" and cmd not in macros:
@@ -1411,6 +1422,7 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         "\\noeqref",
     }:
         # ignore these (and their argument)
+        skip_optional_arg(words, macros)
         get_arg(words)
         return []
 
@@ -1692,6 +1704,17 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         words.prepend(*w1)
         return []
 
+    if cmd == "\\ifstrequal" or cmd == "\\ifnumequal":
+        a1 = "".join(get_arg(words))
+        a2 = "".join(get_arg(words))
+        if a1 == a2:
+            then_arg = get_arg(words)
+            get_arg(words)  # skip else
+            words.prepend(*then_arg)
+        else:
+            get_arg(words)
+            # leave the else alone (in braces)
+
     if cmd == "\\write":
         if words.peek("q").isdigit():
             while words.peek("q").isdigit():
@@ -1754,7 +1777,7 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
             get_arg(words)
             return []  # will emit the text argument normally
 
-    if cmd == "\\color":
+    if cmd in {"\\color", "\\textcolor", "\\colorbox"}:
         skip_optional_arg(words, macros)
         get_arg(words)  # color
         return []
@@ -1765,13 +1788,13 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         get_arg(words)
         return []
 
-    if cmd == "\\colorlet":   # tikz
+    if cmd == "\\colorlet":  # tikz
         get_arg(words)
         get_arg(words)
         return []
 
     if cmd == "\\tikzset":
-        get_arg(words) # ignore argument
+        get_arg(words)  # ignore argument
         return []
 
     if cmd == "\\adjustimage":
@@ -1779,8 +1802,16 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         get_arg(words)
         return [" "]
 
-    if cmd in {"\\AxiomC" , "\\UnaryInfC", "\\BinaryInfC", "\\TrinaryInfC",
-               "\\QuaternaryInfC", "\\QuinaryInfC", "\\LeftLabel", "\\RightLabel"}:
+    if cmd in {
+        "\\AxiomC",
+        "\\UnaryInfC",
+        "\\BinaryInfC",
+        "\\TrinaryInfC",
+        "\\QuaternaryInfC",
+        "\\QuinaryInfC",
+        "\\LeftLabel",
+        "\\RightLabel",
+    }:
         # bussproofs, e.g., 1708/1708.05896
         get_arg(words)
         return [""]
@@ -1794,7 +1825,7 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         return [""]
 
     if cmd == "\\adjustbox":
-        get_arg(words) # ignore scaling
+        get_arg(words)  # ignore scaling
         # implicitly leave the content alone
         return []
 
@@ -1834,11 +1865,30 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         skip_optional_arg(words, macros)
         return []
 
-
     if cmd == "\\xspace":
-        XSPACE_EXCEPTIONS = {",", ".", "’", "'", "/", "?", ";", ":", "!", "~",
-                            "-", ")", "\\ ", "\\/", "\\bgroup", "\\egroup",
-                            "\\@sptoken", "\\space", "\\@xobeysp", "\\footnote", "\\footnotemark"}
+        XSPACE_EXCEPTIONS = {
+            ",",
+            ".",
+            "’",
+            "'",
+            "/",
+            "?",
+            ";",
+            ":",
+            "!",
+            "~",
+            "-",
+            ")",
+            "\\ ",
+            "\\/",
+            "\\bgroup",
+            "\\egroup",
+            "\\@sptoken",
+            "\\space",
+            "\\@xobeysp",
+            "\\footnote",
+            "\\footnotemark",
+        }
         upcoming = words.peek(".")
         if upcoming not in XSPACE_EXCEPTIONS:
             return [" "]
@@ -1867,7 +1917,7 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
     if cmd == "\\catcode":
         # 1504/1504.0647
         # Terrible hack to check for german shorthands
-        if words[:5] == ["`",'"',"=","1","3"]:
+        if words[:5] == ["`", '"', "=", "1", "3"]:
             macros["german shorthands"] = True
             for i in range(5):
                 next(words)
@@ -1898,9 +1948,18 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         )
         raise SkipThisProof(f"oops: encountered {cmd}")
 
-    if inproof and cmd in {"\\psset", "\\psline", "\\rput", "\\uput", "\\pspolyline", "\\newrgbcolor", "\\pscircle", "\\qline", "\\ncline"}:
+    if inproof and cmd in {
+        "\\psset",
+        "\\psline",
+        "\\rput",
+        "\\uput",
+        "\\pspolyline",
+        "\\newrgbcolor",
+        "\\pscircle",
+        "\\qline",
+        "\\ncline",
+    }:
         raise SkipThisProof(f"oops: encountered {cmd}")
-
 
     if try_assign(words):
         return []
@@ -1959,7 +2018,7 @@ def get_proofs(
     words,
     directory,
     macros,
-    proofs : List[str],
+    proofs: List[str],
     verbose=False,
     debug=False,
     strip=True,
@@ -1990,6 +2049,11 @@ def get_proofs(
             #     f" UPCOMING: {''.join(words[:60])}"
             # )
             # print(",".join(list(macros.keys())))
+
+        if w == "~" and w not in macros:
+            if proof_nesting > 0:
+                current_proof_words.append(" ")
+                continue
 
         if w in [
             "\\def",
@@ -2334,7 +2398,12 @@ def get_proofs(
                 # proof we're extracting, there's no need to
                 # crash.
                 potential_output = execute(
-                    w, words, macros, nomath=(proof_nesting > 0), debug=debug, inproof=(proof_nesting > 0)
+                    w,
+                    words,
+                    macros,
+                    nomath=(proof_nesting > 0),
+                    debug=debug,
+                    inproof=(proof_nesting > 0),
                 )
             else:
                 potential_output = [w]
