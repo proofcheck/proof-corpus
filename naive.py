@@ -544,8 +544,8 @@ def tokenize_string(filename: str, tex_source: str):
             # It's tempting to peek ahead for another "$" and return "$$", but
             # $\alpha$$\beta$ needs to show up as four single $'s.
             pass
-        elif word == "~":
-            word = " "
+        #elif word == "~":
+        #    word = " "
         elif word == "#":
             # Make #1 through #9 into single tokens
             d = chars.peek("!")
@@ -1297,6 +1297,9 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
                 nesting -= 1
                 if nesting == 0:
                     break
+        return [" "]
+
+    if cmd == "~" and cmd not in macros:
         return [" "]
 
     if cmd == "\\pspicture":
