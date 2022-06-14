@@ -49,15 +49,16 @@ def do_fixed_iteration_experiments(args):
         trained_tagger = train_tagger(training, wsj_train, args.nr_itr)
         trained_results += [get_one_iteration_results(testing, trained_tagger)]
         i+= 1
-        
+
     save_results(trained_results, args.output)
 
 def save_results(results, output):
     with open(output, "w") as o:
-        for num in results:
-            o.write(str(num)+"\t")
-            o.write("\n")
-    
+        result_string = ""
+        for trial in results:
+            str_trial = [str(num) for num in trial]
+            result_string += "\t".join(str_trial) + "\n"            
+        o.write(result_string)
 
 def get_one_iteration_results(testing, tagger):
     trained_confusion = tagger.confusion(testing)
