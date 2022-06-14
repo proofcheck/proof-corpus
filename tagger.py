@@ -7,15 +7,14 @@ from multiprocessing import Pool
 import sys
 import pickle
 
+from sent_tools import *
 from load_tagged_sent import load_tags
 from load_ontonotes_pos import *
-
 
 def make_wsj_train():
     # creates training set from WSJ
     sentences = []
     file_path = "wsj_train.txt"
-
     try:
         with open(file_path, "r") as resource:
             sentences = list(load_tags(resource, cores=50)[1])
@@ -78,19 +77,10 @@ DEFAULT_TAGGER = make_default_tagger()
 def sent_tagger(line):
     # input: one line from sent**.tsv
     # returns: id, tagged sentence
-    
-    sent_id, sent = line.split("\t")
-    tokenized = sent.strip().split(" ")
+    sent_id, sent = split_sentence_id(line)
+    tokenized = tokenizer(sent)
     tagged = DEFAULT_TAGGER.tag(tokenized)
     return sent_id, tagged
-
-def split_sentence_id(lines):
-    # splits ids and rest of text
-    # input: list of lines
-    # output: ids, text
-    ids = [line.split("\t")[0] for line in lines if "\t" in line]
-    sents = [line.split("\t")[1] if "\t" in line else line for line in lines ]
-    return ids, sents
 
 def write_tags(ids, sents, output=None):    
     for i in range(len(sents)):

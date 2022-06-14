@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-
 def split_sentence_id(line):
     line = line.strip()
     if "\t" in line:

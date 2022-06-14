@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 import argparse
+
 import nicer
 from multiprocessing import Pool
 from itertools import repeat
 
 from nltk.util import ngrams
 from nltk.probability import FreqDist
+
+from sent_tools import *
 
 # Writes top 10000 ngrams using nltk
 # Input : sent**.tsv, number of max ngrams
@@ -21,9 +24,11 @@ def results(f, dist):
             output.write("\n")
         output.write("\n")
 
+
 def read_one_sent(sent): 
     # Takes one sentence (string) and creates a list
-    split_sentences = sent.split("\t")[-1].split()
+    sent_id, sent = split_sentence_id(sent)
+    split_sentences = tokenize(sent)
     return split_sentences
 
 def return_ngrams(sent, n):
