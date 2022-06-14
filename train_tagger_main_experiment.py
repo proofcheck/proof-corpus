@@ -7,7 +7,7 @@ import os
 
 from load_ontonotes_pos import *
 from train_tagger import *
-from train_tagger_loop_fixed_sentences import do_one_iteration_results
+from train_tagger_loop_fixed_sentences import get_one_iteration_results, save_results
 
 # Trains on n sentences (element in TRAIN_NUM_LIST) from num_train bins
 # Iterates for nr_itr times (element in ITER_NUM_LIST)
@@ -108,6 +108,7 @@ def do_experiments(args):
     train_num_list_zip = train_num_list*len(iter_num_list)
     iter_num_list_zip = iter_num_list*len(train_num_list)
     zipped_args = zip(train_num_list_zip, iter_num_list_zip)
+    print(list(zipped_args))
 
     with Pool(processes=args.cores) as p:
         p.starmap(
@@ -133,11 +134,16 @@ def do_one_iteration(testing, training_set, zipped_arg, extension=""):
     output_test = "experiments/experiment_" + str(num_train_sent) + "sents_" + str(nr_iter) + "iters_test_" + extension + ".txt"
 
     i = 0
+    trained_results_test = []
+    trained_results_wsj = []
     while i < 10:
         trained_tagger = train_tagger(training, nr_iter=nr_iter)
-        do_one_iteration_results(testing, trained_tagger, output_test)
-        do_one_iteration_results(WSJ_TEST, trained_tagger, output_wsj)
+        trained_results_test += [get_one_iteration_results(testing, trained_tagger, output_test)]
+        trained_results_wsj += [get_one_iteration_results(WSJ_TEST, trained_tagger, output_wsj)]
         i += 1
+
+    save_results(trained_results_test, output_test)
+    save_results(trained_results_wsj, output_wsj)
 
 def main(args):
     if args.wordlist:
