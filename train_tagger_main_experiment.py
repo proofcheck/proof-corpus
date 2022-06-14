@@ -60,7 +60,7 @@ def do_experiments(args):
     iter_num_list = ITER_NUM_LIST
 
     if args.save_sentences:
-        save = args.save_sentences
+        save = "training_set/" + args.extension + ".txt"
     else:
         save = None
     
@@ -68,7 +68,7 @@ def do_experiments(args):
 
     with open(args.train, "r") as wl:
         word_list = wl.readlines()
-    train_files, test_files = get_train_test_files(word_list, args.numtr)
+    train_files, test_files = get_train_test_files(word_list, args.num_train_bins)
     training_set = make_training_from_bin(train_files, train_num_list, output=save)
     testing = make_testing_from_bin(test_files)
 
@@ -128,15 +128,14 @@ if __name__ == '__main__':
     parser.add_argument("--train", "-tr",type=argparse.FileType('r'),
                             help="txt file to read imperative verbs from")
     
-    parser.add_argument("--numtrain", "-ntr",type=int, default=45,
+    parser.add_argument("--num_train_bins", "-ntr",type=int, default=45,
                             help="number of training words")
     
-    parser.add_argument("--save_sentences", "-s",
-                            help="file to save sentences")
+    parser.add_argument("--save_sentences", "-s", action='store_true',
+                            help="save sentences")
 
     parser.add_argument("--extension", "-e",
                             help="file extension")
-
 
     args = parser.parse_args()
 

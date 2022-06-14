@@ -8,16 +8,18 @@ from nltk.util import ngrams
 from nltk.probability import FreqDist
 
 # Writes top 10000 ngrams using nltk
+# Input : sent**.tsv, number of max ngrams
 
-def results(output, dist):
+def results(f, dist):
     # Writes top 10000 ngrams in file
-    common_list = dist.most_common(10000)
-    for ind, gram in enumerate(common_list):
-        if ind%100 == 0:
-            print("{}".format(ind))
-        output.write(str(gram[0]) + '  ' + str(gram[1]))
+    with open(f, "w") as output:
+        common_list = dist.most_common(10000)
+        for ind, gram in enumerate(common_list):
+            if ind%100 == 0:
+                print("{}".format(ind))
+            output.write(str(gram[0]) + '  ' + str(gram[1]))
+            output.write("\n")
         output.write("\n")
-    output.write("\n")
 
 def read_one_sent(sent): 
     # Takes one sentence (string) and creates a list
@@ -45,21 +47,22 @@ def update_dist(sent, n, dist):
 
 def main(args): 
     dist = FreqDist()
-    for fd in args.files:
-        print(fd)
-        with Pool(processes=args.cores) as p:
-            for grams in p.starmap(
-                        return_ngrams,
-                        zip(
-                            fd.readlines(), 
-                            repeat(args.ngrams),
-                            #repeat(dist),
-                        ),
-                        10000
-                ):
-                    dist.update(grams)
-    results(args.output, dist)
-    args.output.close()
+    for n in len(range(args.ngrams)):
+        for fd in args.files:
+            print(fd)
+            with Pool(processes=args.cores) as p:
+                for grams in p.starmap(
+                            return_ngrams,
+                            zip(
+                                fd.readlines(), 
+                                repeat(n),
+                                #repeat(dist),
+                            ),
+                            250
+                    ):
+                        dist.update(grams)
+        output = "ngrams/" + str(n) + "grams_top_10000_" + args.extension + ".txt"
+        results(output, dist)
 
 if __name__ == '__main__':
     nicer.make_nice()
@@ -69,10 +72,10 @@ if __name__ == '__main__':
                             help="txt file to read proof from")
 
     parser.add_argument("--ngrams", "-n", type=int, nargs='?', default=2,
-                            help="specifies (n)grams")
+                            help="max number of ngrams")
     
-    parser.add_argument("--output", "-o", type=argparse.FileType('w'),
-                            help="txt file to write results to")
+    parser.add_argument("--extension", "-e",
+                            help="extension for file name")
 
     parser.add_argument( "--cores", "-c",
                             help="Number of cores to use", type=int, default=4)

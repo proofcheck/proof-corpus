@@ -36,12 +36,12 @@ def make_fixed_sents(lines, n=None, compare=[], output=None):
     
     if n:
         sampled_lines = random.sample(lines, n)
+        
     else:
         sampled_lines = lines
     
     if output:
         with open(output, "a") as o:
-            o.write("\n")
             for lines in sampled_lines:
                 o.write(lines)
 
@@ -74,7 +74,7 @@ def fix_NNP(tags):
 def num_mislabelings(confusion):
     # counts the number of mislabeled tokens from confusion matrix
     mislabelings = confusion._total - confusion._correct
-    return mislabelings 
+    return mislabelings
 
 def mislabeled_vb(confusion):
     i = confusion._indices['VB']
