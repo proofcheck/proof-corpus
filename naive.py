@@ -1415,6 +1415,7 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         "\\noeqref",
     }:
         # ignore these (and their argument)
+        skip_optional_arg(words, macros)
         get_arg(words)
         return []
 
