@@ -16,6 +16,10 @@ from train_tagger_loop_fixed_sentences import get_one_iteration_results, save_re
 
 TRAIN_NUM_LIST = [5, 10, 20, 50, 100]
 ITER_NUM_LIST = [5, 10, 20]
+
+TRAIN_NUM_LIST_SMALL = range(1, 11)
+ITER_NUM_LIST_SMALL = [5, 10]
+
 PATH = "word_bins/unique/"
 
 def get_train_test_files(word_list, num):
@@ -53,7 +57,7 @@ def make_testing_from_bin(test_files, output=None):
     return testing_set
 
 def make_train_test(args):
-    train_num_list = TRAIN_NUM_LIST
+    train_num_list = TRAIN_NUM_LIST_SMALL
     if args.save_sentences:
         save_train = "training_set/" + args.extension + ".txt"
         save_test = "testing_set/" + args.extension + ".txt"
@@ -91,8 +95,8 @@ def do_experiments(args):
     # Prints accuracy, number of VBs mistakenly tagged as NPP, number of mislabelled tokens overall
     # for default and trained taggers 
     # Tests tagger on args.test and WSJ corpus
-    train_num_list = TRAIN_NUM_LIST
-    iter_num_list = ITER_NUM_LIST
+    train_num_list = TRAIN_NUM_LIST_SMALL
+    iter_num_list = ITER_NUM_LIST_SMALL
 
     if args.debug:
         args.extension = args.extension + "_test"
@@ -118,32 +122,39 @@ def do_experiments(args):
                 repeat(training_set),
                 zipped_args,
                 repeat(args.extension),
+                repeat(args.trial_num),
+                repeat(args.wsj_test),
             ),
             1,
         )
     args.train.close()
     args.test.close()
 
-def do_one_iteration(testing, training_set, zipped_arg, extension=""):
+def do_one_iteration(testing, training_set, zipped_arg, extension="", trial_num=10, wsj_test=False):
     num_train_sent, nr_iter = zipped_arg
     training = []
     for imperative_verb in training_set:
         training += imperative_verb[:num_train_sent]
-        
-    output_wsj = "experiments/experiment_" + str(num_train_sent) + "sents_" + str(nr_iter) + "iters_wsj_" + extension + ".txt"
+    
+    if wsj_test:
+        output_wsj = "experiments/experiment_" + str(num_train_sent) + "sents_" + str(nr_iter) + "iters_wsj_" + extension + ".txt"
+        trained_results_wsj = []
+
     output_test = "experiments/experiment_" + str(num_train_sent) + "sents_" + str(nr_iter) + "iters_test_" + extension + ".txt"
+    trained_results_test = []
 
     i = 0
-    trained_results_test = []
-    trained_results_wsj = []
-    while i < 10:
+    while i < trial_num:
         trained_tagger = train_tagger(training, nr_iter=nr_iter)
         trained_results_test += [get_one_iteration_results(testing, trained_tagger, output_test)]
-        trained_results_wsj += [get_one_iteration_results(WSJ_TEST, trained_tagger, output_wsj)]
+        if wsj_test:
+            trained_results_wsj += [get_one_iteration_results(WSJ_TEST, trained_tagger, output_wsj)]
         i += 1
 
     save_results(trained_results_test, output_test)
-    save_results(trained_results_wsj, output_wsj)
+
+    if wsj_test:
+        save_results(trained_results_wsj, output_wsj)
 
 def main(args):
     if args.wordlist:
@@ -178,6 +189,12 @@ if __name__ == '__main__':
     
     parser.add_argument("--wordlist", "-wl",type=argparse.FileType('r'),
                             help="txt file to read imperative verbs")
+
+    parser.add_argument("--trial_num", "-tn",type=int, default=10,
+                            help="number of trials")
+
+    parser.add_argument("--wsj_test", "-wt", action='store_true',
+                            help="test on WSJ?")
 
     args = parser.parse_args()
 
