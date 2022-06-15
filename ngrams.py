@@ -52,7 +52,7 @@ def update_dist(sent, n, dist):
 
 def main(args): 
     dist = FreqDist()
-    for n in len(range(args.ngrams)):
+    for n in range(args.ngrams):
         for fd in args.files:
             print(fd)
             with Pool(processes=args.cores) as p:
