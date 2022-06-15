@@ -24,6 +24,7 @@ PATH = "word_bins/unique/"
 
 def get_train_test_files(word_list, num):
     train_word_list = word_list[:num]
+    test_word_list = word_list[num:]
     path = PATH
     
     train_list = []
@@ -34,7 +35,7 @@ def get_train_test_files(word_list, num):
             verb = f.split(".")[0]
             if verb in train_word_list:
                 train_list += [f]
-            else:
+            elif verb in test_word_list:
                 test_list += [f]
     
     return train_list, test_list
@@ -50,10 +51,16 @@ def make_training_from_bin(train_files, train_num_list, output=None):
 
 def make_testing_from_bin(test_files, output=None):
     testing_set = []
+    num_lines_one_file = 5000 // len(test_files)
+
     for test_file in test_files:
         with open(PATH + test_file, "r") as f:
             lines_one_file = f.readlines()
-            testing_set += make_fixed_sents(lines_one_file, 1000, output=output)
+            if len(lines_one_file) < num_lines_one_file:
+                num_lines_this_file = None
+            else:
+                num_lines_this_file = num_lines_one_file
+            testing_set += make_fixed_sents(lines_one_file, n=num_lines_this_file, output=output)
     return testing_set
 
 def make_train_test(args):
@@ -72,6 +79,7 @@ def make_train_test(args):
 
     word_list = args.wordlist.read().splitlines()
     train_files, test_files = get_train_test_files(word_list, args.num_train_bins)
+
     training_set = make_training_from_bin(train_files, train_num_list, output=save_train)
     testing = make_testing_from_bin(test_files, output=save_test)
 
