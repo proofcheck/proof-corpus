@@ -455,6 +455,11 @@ def cleanup(
         # (sketch) -> ""
         proof = re.sub("\\(\\s*(?i:sketch)\\s*\\)", " ", proof)
 
+        #(Base case) -> REF (then likely to CASE: later)
+        proof = re.sub(r"\(\s*(?i:base)\s*(?i:case).{0,5}\s*\)", "REF", proof)
+
+        proof = re.sub(r"Base\s*(?i:case)", "REF", proof)
+
 
     # Case 1: -> CASE
     proof = re.sub(r"[cC]ase\s*([0-9]*|MATH|REF)\s*(:)", "REF", proof)
