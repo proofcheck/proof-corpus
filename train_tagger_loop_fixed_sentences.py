@@ -44,22 +44,30 @@ def do_fixed_iteration_experiments(args):
         o.write("\n")
         
     i = 0
+    trained_results = []
     while i < args.num:
         trained_tagger = train_tagger(training, wsj_train, args.nr_itr)
-        do_one_iteration_results(testing, trained_tagger, args.output)
+        trained_results += [get_one_iteration_results(testing, trained_tagger)]
         i+= 1
 
-def do_one_iteration_results(testing, tagger, output):
-    with open(output, "a") as o:
-        trained_confusion = tagger.confusion(testing)
-        trained_results = [tagger.accuracy(testing), 
+    save_results(trained_results, args.output)
+
+def save_results(results, output):
+    with open(output, "w") as o:
+        result_string = ""
+        for trial in results:
+            str_trial = [str(num) for num in trial]
+            result_string += "\t".join(str_trial) + "\n"            
+        o.write(result_string)
+
+def get_one_iteration_results(testing, tagger):
+    trained_confusion = tagger.confusion(testing)
+    trained_results = [tagger.accuracy(testing), 
                         trained_confusion['VB', 'NNP'],
                         mislabeled_vb(trained_confusion),
                         num_mislabelings(trained_confusion),
                     ]
-        for num in trained_results:
-            o.write(str(num)+"\t")
-        o.write("\n")
+    return trained_results
 
 def main(args):
     do_fixed_iteration_experiments(args)

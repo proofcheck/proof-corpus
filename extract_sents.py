@@ -6,19 +6,11 @@ from multiprocessing import Pool
 from itertools import repeat
 
 from load_tagged_sent import load_one_sent_tags
-from tagger import split_sentence_id
+from sent_tools import *
 
 # Extracts sentences and tags that begin with words in word_file
 # from tagged sentences
 
-def read_one(fn):
-    # Input: file of sentences/proofs
-    # Returns list of ids and sentences
-    f = open(fn, "r")
-    lines = f.readlines()
-    ids, sents = split_sentence_id(lines)
-    f.close()
-    return ids, sents
 
 def check_first_word(sent, word):
     # Input: sentence with tags (connected by _ ), word

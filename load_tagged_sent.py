@@ -88,6 +88,8 @@ def is_sent(sent):
 
 
 def main(args):
+    # DO NOT RUN!
+    # Super memory intensive
     dist = nnp_dist(args.file, args.cores)
     dist_output(args, dist)
     
