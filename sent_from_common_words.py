@@ -33,36 +33,53 @@ punctuation = {
     "="
 }
 
-f = open("common_words.txt", "r")
-common_words = f.readlines()
-f.close()
-common_words = common_words[1:]
-common_words = [x.split("\t")[1][:-1] for x in common_words]
-common_words = common_words[:50]
-punctuation.update(common_words)
+# f = open("common_words.txt", "r")
+# common_words = f.readlines()
+# f.close()
+# common_words = common_words[1:]
+# common_words = [x.split("\t")[1][:-1] for x in common_words]
+# common_words = common_words[:50]
+# punctuation.update(common_words)
 # print(punctuation)
 
 
 def main(args):
-    counts = {}
-    for x in range(56):
-        counts[x] = 0
+    c = 0
+    # print(args.com_words)
+    amounts = [int(x) for x in args.com_words[0][1:-1].split(",")]
+    common_words = [{p for p in punctuation} for x in amounts]
+    f = open("common_words.txt", "r")
+    common = f.readlines()
+    f.close()
+    common = common[1:]
+    common = [x.split("\t")[1][:-1] for x in common]
+    for n, x in enumerate(amounts):
+        common_words[n].update(common[:x])
+    # punctuation.update(common_words)
+    counts = [{} for x in amounts]
+    for y in counts:
+        for x in range(56):
+            y[x] = 0
     for fd in args.files:
         for line in fd:
-            proofID, text = line.strip().split("\t")
-            words = set([w.lower() if w not in aliases else w
-                    for w in text.split(" ")
-                    if (w.lower() not in punctuation and w not in punctuation)])
-            if len(words) in counts:
-                counts[len(words)] += 1
-            else:
-                counts[len(words)] = 1
-        counts["Total"] = 38041358
-    for x in range(150):
-        if x in counts and counts[x] > 5:
-            print(f"{x} {counts[x]}")
+            for x in range(len(counts)):
 
-
+                proofID, text = line.strip().split("\t")
+                text = text.split(" ")
+                # text = line.strip(' ').split(" ")[1:-1]
+                words = set([w.lower() if w not in aliases else w
+                        for w in text
+                        if (w not in common_words[x] and w.lower() not in common_words[x])])
+                if len(words) in counts[x]:
+                    counts[x][len(words)] += 1
+                else:
+                    counts[x][len(words)] = 1
+            # counts[x]["Total"] = 38041358
+    for y in counts:
+        for x in range(150):
+            if x in y and y[x] > 5:
+               print(f"{x} {y[x]}")
+    
     print(counts)
     # for proofID, words in word_dict.items():
     #     print(f"{proofID}\t{' '.join(list(words))}")
@@ -70,7 +87,15 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-
+    
+    parser.add_argument(
+        "com_words",
+        nargs=1,
+        default="100",
+        type=ascii,
+        help="number of common words to use",
+    )
+    
     parser.add_argument(
         "files",
         nargs="*",
