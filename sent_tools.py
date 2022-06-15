@@ -86,6 +86,6 @@ def read_files_tokenized(files, cores):
                     250
                 ):
                 ids += id_sent[0]
-                sents += id_sent[1]
+                sents += [id_sent[1]]
         fd.close()
     return ids, sents

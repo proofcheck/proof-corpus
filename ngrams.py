@@ -17,25 +17,16 @@ def results(f, dist):
     # Writes top 10000 ngrams in file
     with open(f, "w") as output:
         common_list = dist.most_common(10000)
+        print(common_list[:100])
         for ind, gram in enumerate(common_list):
             if ind%100 == 0:
                 print("{}".format(ind))
-            output.write(str(gram[0]) + '  ' + str(gram[1]))
-            output.write("\n")
-        output.write("\n")
-
-
-def read_one_sent(sent): 
-    # Takes one sentence (string) and creates a list
-    sent_id, sent = split_sentence_id(sent)
-    split_sentences = tokenize(sent)
-    return split_sentences
+            output.write(str(gram[0]) + '\t' + str(gram[1]) + '\n')
 
 def return_ngrams(sent, n):
-    # Creates ngrams from a sentence (string)
-    # Input : sentence (string)
-    sents = read_one_sent(sent)
-    grams = ngrams(sents, n)
+    # Creates ngrams from a sentence (list)
+    # Input : sentence (list)
+    grams = ngrams(sent, n)
     return grams
 
 def update_dist(sent, n, dist):
@@ -51,21 +42,22 @@ def update_dist(sent, n, dist):
     return dist
 
 def main(args): 
-    dist = FreqDist()
-    for n in range(args.ngrams):
-        for fd in args.files:
-            print(fd)
-            with Pool(processes=args.cores) as p:
-                for grams in p.starmap(
-                            return_ngrams,
-                            zip(
-                                fd.readlines(), 
-                                repeat(n),
-                                #repeat(dist),
-                            ),
-                            250
-                    ):
-                        dist.update(grams)
+    ids, sents = read_files_tokenized(args.files, args.cores)
+
+    for n in range(1, args.ngrams+1):
+        print("n",n)
+        print("sents", sents[:10])
+        dist = FreqDist()
+        with Pool(processes=args.cores) as p:
+            for grams in p.starmap(
+                        return_ngrams,
+                        zip(
+                            sents, 
+                            repeat(n),
+                        ),
+                        250
+                ):
+                    dist.update(grams)
         output = "ngrams/" + str(n) + "grams_top_10000_" + args.extension + ".txt"
         results(output, dist)
 
