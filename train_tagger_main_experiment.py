@@ -105,10 +105,6 @@ def do_experiments(args):
     # Tests tagger on args.test and WSJ corpus
     train_num_list = TRAIN_NUM_LIST_SMALL
     iter_num_list = ITER_NUM_LIST_SMALL
-    word_list = args.wordlist.read().splitlines()
-    num_train_bins = len(word_list) - args.num_test_bins
-    train_word_list = word_list[:num_train_bins]
-    test_word_list = word_list[num_train_bins:]
 
     if args.debug:
         args.extension = args.extension + "_test"
