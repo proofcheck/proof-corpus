@@ -56,15 +56,19 @@ def load_one_sent_tags(line):
     tags = [tuple(word.split('_')) for word in tokenized]
     return sent_id, tags
     
-def load_tag_lines(lines):
-    ids = []
-    sents = []
-    for line in lines:
-        sent_id, sent = load_one_sent_tags(line)
-        ids += sent_id
-        sents += [sent]
+def load_tag_lines(lines, cores=5):
+    with Pool(processes=cores) as p:
+            tags = p.imap(
+                load_one_sent_tags,
+                lines,
+                250,
+            )
+            all_tags = list(zip(*tags))
+            ids = all_tags[0]
+            sents = all_tags[1]
+
     return ids, sents
-    
+
 def load_tags(tagfile, cores=5):
     # Loads tags from file of tagged sentences
     all_tags = []
