@@ -17,7 +17,6 @@ def results(f, dist):
     # Writes top 10000 ngrams in file
     with open(f, "w") as output:
         common_list = dist.most_common(10000)
-        print(common_list[:100])
         for ind, gram in enumerate(common_list):
             if ind%100 == 0:
                 print("{}".format(ind))
@@ -45,8 +44,6 @@ def main(args):
     ids, sents = read_files_tokenized(args.files, args.cores)
 
     for n in range(1, args.ngrams+1):
-        print("n",n)
-        print("sents", sents[:10])
         dist = FreqDist()
         with Pool(processes=args.cores) as p:
             for grams in p.starmap(
