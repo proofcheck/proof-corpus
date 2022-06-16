@@ -59,7 +59,7 @@ def make_wsj_test():
 
 def make_default_tagger():
     # Creates default tagger by training on WSJ
-    file_path = "default_tagger.pickle"
+    file_path = "default_tagger.pk"
     try:
         with open(file_path, "rb") as resource:
             default_tagger = pickle.load(resource)
