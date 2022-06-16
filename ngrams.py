@@ -13,28 +13,6 @@ from sent_tools import *
 # Writes top 10000 ngrams using nltk
 # Input : sent**.tsv, number of max ngrams
 
-punctuation = {
-    ",",
-    ";",
-    "'",
-    '"',
-    "-",
-    "(",
-    ")",
-    "{",
-    "}",
-    "[",
-    "]",
-    "`",
-    "–",
-    "''",
-    '""',
-    "``",
-    "...",
-    "…",
-    "="
-}
-
 
 def results(f, dist):
     # Writes top 10000 ngrams in file
