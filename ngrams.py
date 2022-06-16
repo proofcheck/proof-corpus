@@ -43,7 +43,7 @@ def update_dist(sent, n, dist):
 def main(args): 
     ids, sents = read_files_tokenized(args.files, args.cores)
 
-    for n in range(1, args.ngrams+1):
+    for n in range(args.start, args.stop+1):
         dist = FreqDist()
         with Pool(processes=args.cores) as p:
             for grams in p.starmap(
@@ -65,7 +65,10 @@ if __name__ == '__main__':
     parser.add_argument("--files", "-f", nargs='*', type=argparse.FileType('r'),
                             help="txt file to read proof from")
 
-    parser.add_argument("--ngrams", "-n", type=int, nargs='?', default=2,
+    parser.add_argument("--start", type=int, nargs='?', default=2,
+                            help="min number of ngrams")
+
+    parser.add_argument("--stop", type=int, nargs='?', default=2,
                             help="max number of ngrams")
     
     parser.add_argument("--extension", "-e",
