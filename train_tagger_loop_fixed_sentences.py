@@ -27,7 +27,8 @@ def do_fixed_iteration_experiments(args):
     default_results = []
     test_lines = args.test.readlines()
     args.test.close()
-    testing = make_fixed_sents(test_lines)
+    sents = pick_sents(test_lines)
+    testing = fix_sents(sents)
     nltk.data.clear_cache()
     default_tagger = make_default_tagger()
     default_confusion = default_tagger.confusion(testing)

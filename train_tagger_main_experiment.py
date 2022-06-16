@@ -42,16 +42,16 @@ def get_train_test_files(word_list_tags, num):
     
     return train_list, test_list
 
-def make_training_from_bin(train_files, train_num_list, output=None): 
+def make_training_from_bin(train_files, train_num_list, output, word_list=[]): 
     training_set = []
     for train_file in train_files:
         with open(PATH + train_file, "r") as f:
             lines_one_file = f.readlines()
-            training_set += [make_fixed_sents(lines_one_file, train_num_list[-1], output=output)]
+            training_set += pick_sents(lines_one_file, train_num_list[-1])
     
-    return training_set
+    write_fixed_sents(training_set, output, word_list)
 
-def make_testing_from_bin(test_files, output=None):
+def make_testing_from_bin(test_files, output, word_list):
     testing_set = []
     num_lines_one_file = 5000 // len(test_files)
 
@@ -62,28 +62,26 @@ def make_testing_from_bin(test_files, output=None):
                 num_lines_this_file = None
             else:
                 num_lines_this_file = num_lines_one_file
-            testing_set += make_fixed_sents(lines_one_file, n=num_lines_this_file, output=output)
+            testing_set += pick_sents(lines_one_file, n=num_lines_this_file)
+    write_fixed_sents(testing_set, output, word_list)
     return testing_set
 
 def make_train_test(args):
     train_num_list = TRAIN_NUM_LIST_SMALL
-    if args.save_sentences:
-        save_train = "training_set/" + args.extension + ".txt"
-        save_test = "testing_set/" + args.extension + ".txt"
+    
+    save_train = "training_set/" + args.extension + ".txt"
+    save_test = "testing_set/" + args.extension + ".txt"
 
-        if os.path.exists(save_train) or os.path.exists(save_test):
-            print("Exists")
-            return 0
-
-    else:
-        save_train = None
-        save_test = None
+    if os.path.exists(save_train) or os.path.exists(save_test):
+        print("Exists")
+        return 0
 
     word_list = args.wordlist.read().splitlines()
-    train_files, test_files = get_train_test_files(word_list, args.num_train_bins)
+    num_train_bins = len(word_list) - args.num_test_bins
+    train_files, test_files = get_train_test_files(word_list, num_train_bins)
 
-    training_set = make_training_from_bin(train_files, train_num_list, output=save_train)
-    testing = make_testing_from_bin(test_files, output=save_test)
+    make_training_from_bin(train_files, train_num_list, save_train, word_list)
+    testing = make_testing_from_bin(test_files, save_test, word_list)
 
     nltk.data.clear_cache()
     default_tagger = make_default_tagger()
@@ -100,7 +98,6 @@ def make_train_test(args):
         for num in default_results:
             o.write(str(num)+"\t")
 
-
 def do_experiments(args):
     # Prints accuracy, number of VBs mistakenly tagged as NPP, number of mislabelled tokens overall
     # for default and trained taggers 
@@ -108,19 +105,18 @@ def do_experiments(args):
     train_num_list = TRAIN_NUM_LIST_SMALL
     iter_num_list = ITER_NUM_LIST_SMALL
     word_list = args.wordlist.read().splitlines()
-    train_wod_list = word_list[:args.num_train_bins]
-    test_word_list = word_list[args.num_train_bins:]
+    num_train_bins = len(word_list) - args.num_test_bins
+    train_word_list = word_list[:num_train_bins]
+    test_word_list = word_list[num_train_bins:]
 
     if args.debug:
         args.extension = args.extension + "_test"
     
-    training_pre = args.train.read().splitlines()
-    training_single_list = make_fixed_sents(training_pre, train_word_list)
+    training_all = args.train.read().splitlines()
     num_lines_verb = train_num_list[-1]
-    training_set = [training_single_list[x:x+num_lines_verb] for x in range(0, len(training_pre), num_lines_verb)]
-
-    testing_pre = args.test.read().splitlines()
-    testing = make_fixed_sents(testing_pre, test_word_list)
+    training_set = [training_all[x:x+num_lines_verb] for x in range(0, len(training_all), num_lines_verb)]
+    
+    testing = args.test.read().splitlines()
 
     train_num_list_zip = train_num_list*len(iter_num_list)
     iter_num_list_zip = [num for num in iter_num_list for i in range(len(train_num_list))]
@@ -168,7 +164,7 @@ def do_one_iteration(testing, training_set, zipped_arg, extension="", trial_num=
         save_results(trained_results_wsj, output_wsj)
 
 def main(args):
-    if args.wordlist:
+    if args.save_sentences:
         make_train_test(args)
     else:
         do_experiments(args)
@@ -183,7 +179,7 @@ if __name__ == '__main__':
     parser.add_argument("--test", "-te",type=argparse.FileType('r'),
                             help="txt file to read testing set")
     
-    parser.add_argument("--num_train_bins", "-ntr",type=int, default=45,
+    parser.add_argument("--num_test_bins", "-nte",type=int, default=45,
                             help="number of training words")
     
     parser.add_argument("--save_sentences", "-s", action='store_true',

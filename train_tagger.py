@@ -28,7 +28,7 @@ WSJ_TEST = make_wsj_test()
 
 #random.seed(42)
 
-def make_fixed_sents(lines, word_list=[], n=None, compare=[], output=None):
+def pick_sents(lines, n=None, compare=[]):
     # Creates a random list of n tagged sentences
     # Input: lines (unique lines from tagged file)
     #        number of random sentences
@@ -39,11 +39,6 @@ def make_fixed_sents(lines, word_list=[], n=None, compare=[], output=None):
         
     else:
         sampled_lines = lines
-    
-    if output:
-        with open(output, "a") as o:
-            for lines in sampled_lines:
-                o.write(lines)
 
     if compare == []:
         sents = [load_one_sent_tags(line)[1] for line in sampled_lines if is_sent(load_one_sent_tags(line)[1])]
@@ -59,7 +54,7 @@ def make_fixed_sents(lines, word_list=[], n=None, compare=[], output=None):
                 if new_sent not in sents and new_sent not in compare and is_sent(new_tagged_sent):
                     test_sents += new_tagged_sent
     
-    return fix_NNP(sents, word_list)
+    return sents
 
 def make_tag_dict(word_list):
     tag_dict = {}
@@ -68,7 +63,7 @@ def make_tag_dict(word_list):
         tag_dict[token] = tag
     return tag_dict
 
-def fix_NNP(tags, word_list=[]):
+def fix_sents(tags, word_list=[]):
     # changes the tag of the first word from to VB
     # input: list of tagged sentences
     if word_list:
@@ -83,7 +78,11 @@ def fix_NNP(tags, word_list=[]):
 
     return tags
 
-
+def write_fixed_sents(sents, output, word_list=[]):
+    fixed_sents = fix_sents(sents, word_list)
+    if output:
+        with open(output, "w") as o:
+            write_tags([], sents, o)
 
 def num_mislabelings(confusion):
     # counts the number of mislabeled tokens from confusion matrix
@@ -97,14 +96,15 @@ def mislabeled_vb(confusion):
 
 def make_training_set(train_lines, train_num=None, sample_all=False, testing=[], output=None):
     if sample_all:
-        training_set = make_fixed_sents(train_lines, train_num, testing, output)
+        sents = pick_sents(train_lines, train_num, testing, output)
+        training_set = fix_sents(sents)
         
     else:    
         training_set = []
 
         for lines_one_file in train_lines:
-            training_set += make_fixed_sents(lines_one_file, train_num, testing, output)
-    print(len(training_set))
+            sents = pick_sents(lines_one_file, train_num, testing, output)
+            training_set += fix_sents(sents)
     return training_set
 
 def do_experiments(args):
@@ -233,7 +233,8 @@ def do_one_basic_experiment(test_file, trained_tagger, default_tagger, numtest=N
     else:
         test_lines = test_file.readlines()
         test_file.close()
-        testing = make_fixed_sents(test_lines, numtest, compare)
+        sents = pick_sents(test_lines, numtest, compare)
+        testing = fix_sents(sents)
         if numtest:
             print("Testing on {} sentences from {}".format(numtest, test_file.name))
         else:
