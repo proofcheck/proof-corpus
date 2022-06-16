@@ -13,6 +13,29 @@ from sent_tools import *
 # Writes top 10000 ngrams using nltk
 # Input : sent**.tsv, number of max ngrams
 
+punctuation = {
+    ",",
+    ";",
+    "'",
+    '"',
+    "-",
+    "(",
+    ")",
+    "{",
+    "}",
+    "[",
+    "]",
+    "`",
+    "–",
+    "''",
+    '""',
+    "``",
+    "...",
+    "…",
+    "="
+}
+
+
 def results(f, dist):
     # Writes top 10000 ngrams in file
     with open(f, "w") as output:
@@ -25,7 +48,8 @@ def results(f, dist):
 def return_ngrams(sent, n):
     # Creates ngrams from a sentence (list)
     # Input : sentence (list)
-    grams = ngrams(sent, n)
+    lower = [word.lower() for word in sent]
+    grams = ngrams(lower, n)
     return grams
 
 def update_dist(sent, n, dist):
