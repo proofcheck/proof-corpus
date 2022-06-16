@@ -17,7 +17,7 @@ from train_tagger_loop_fixed_sentences import get_one_iteration_results, save_re
 TRAIN_NUM_LIST = [5, 10, 20, 50, 100]
 ITER_NUM_LIST = [5, 10, 20]
 
-TRAIN_NUM_LIST_SMALL = range(1, 11)
+TRAIN_NUM_LIST_SMALL = list(range(1, 11))
 ITER_NUM_LIST_SMALL = [5, 10]
 
 PATH = "word_bins/unique/"
@@ -120,7 +120,6 @@ def do_experiments(args):
     train_num_list_zip = train_num_list*len(iter_num_list)
     iter_num_list_zip = iter_num_list*len(train_num_list)
     zipped_args = zip(train_num_list_zip, iter_num_list_zip)
-    print(list(zipped_args))
 
     with Pool(processes=args.cores) as p:
         p.starmap(
@@ -150,7 +149,6 @@ def do_one_iteration(testing, training_set, zipped_arg, extension="", trial_num=
 
     output_test = "experiments/experiment_" + str(num_train_sent) + "sents_" + str(nr_iter) + "iters_test_" + extension + ".txt"
     trained_results_test = []
-
     i = 0
     while i < trial_num:
         trained_tagger = train_tagger(training, nr_iter=nr_iter)
