@@ -56,7 +56,15 @@ def load_one_sent_tags(line):
     tags = [tuple(word.split('_')) for word in tokenized]
     return sent_id, tags
     
-
+def load_tag_lines(lines):
+    ids = []
+    sents = []
+    for line in lines:
+        sent_id, sent = load_one_sent_tags(line)
+        ids += sent_id
+        sents += [sent]
+    return ids, sents
+    
 def load_tags(tagfile, cores=5):
     # Loads tags from file of tagged sentences
     all_tags = []

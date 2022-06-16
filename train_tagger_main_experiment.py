@@ -8,6 +8,7 @@ import os
 from load_ontonotes_pos import *
 from train_tagger import *
 from train_tagger_loop_fixed_sentences import get_one_iteration_results, save_results
+from load_tagged_sent import load_tag_lines
 
 # Trains on n sentences (element in TRAIN_NUM_LIST) from num_train bins
 # Iterates for nr_itr times (element in ITER_NUM_LIST)
@@ -112,11 +113,13 @@ def do_experiments(args):
     if args.debug:
         args.extension = args.extension + "_test"
     
-    training_all = args.train.read().splitlines()
+    training_lines = args.train.read().splitlines()
+    training_loaded = load_tag_lines(training_lines)[1]
     num_lines_verb = train_num_list[-1]
-    training_set = [training_all[x:x+num_lines_verb] for x in range(0, len(training_all), num_lines_verb)]
+    training_set = [training_loaded[x:x+num_lines_verb] for x in range(0, len(training_lines), num_lines_verb)]
     
-    testing = args.test.read().splitlines()
+    testing_lines = args.test.read().splitlines()
+    testing = load_tag_lines(testing_lines)[1]
 
     train_num_list_zip = train_num_list*len(iter_num_list)
     iter_num_list_zip = [num for num in iter_num_list for i in range(len(train_num_list))]
