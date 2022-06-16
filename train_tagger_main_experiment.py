@@ -22,10 +22,12 @@ ITER_NUM_LIST_SMALL = [5, 10]
 
 PATH = "word_bins/unique/"
 
-def get_train_test_files(word_list, num):
+def get_train_test_files(word_list_tags, num):
+    word_list = [word.split('_')[0] for word in word_list_tags]
     train_word_list = word_list[:num]
     test_word_list = word_list[num:]
     path = PATH
+
     
     train_list = []
     test_list = []
@@ -105,20 +107,23 @@ def do_experiments(args):
     # Tests tagger on args.test and WSJ corpus
     train_num_list = TRAIN_NUM_LIST_SMALL
     iter_num_list = ITER_NUM_LIST_SMALL
+    word_list = args.wordlist.read().splitlines()
+    train_wod_list = word_list[:args.num_train_bins]
+    test_word_list = word_list[args.num_train_bins:]
 
     if args.debug:
         args.extension = args.extension + "_test"
     
     training_pre = args.train.read().splitlines()
-    training_single_list = make_fixed_sents(training_pre)
+    training_single_list = make_fixed_sents(training_pre, train_word_list)
     num_lines_verb = train_num_list[-1]
     training_set = [training_single_list[x:x+num_lines_verb] for x in range(0, len(training_pre), num_lines_verb)]
 
     testing_pre = args.test.read().splitlines()
-    testing = make_fixed_sents(testing_pre)
+    testing = make_fixed_sents(testing_pre, test_word_list)
 
     train_num_list_zip = train_num_list*len(iter_num_list)
-    iter_num_list_zip = iter_num_list*len(train_num_list)
+    iter_num_list_zip = [num for num in iter_num_list for i in range(len(train_num_list))]
     zipped_args = zip(train_num_list_zip, iter_num_list_zip)
 
     with Pool(processes=args.cores) as p:
@@ -152,9 +157,9 @@ def do_one_iteration(testing, training_set, zipped_arg, extension="", trial_num=
     i = 0
     while i < trial_num:
         trained_tagger = train_tagger(training, nr_iter=nr_iter)
-        trained_results_test += [get_one_iteration_results(testing, trained_tagger, output_test)]
+        trained_results_test += [get_one_iteration_results(testing, trained_tagger)]
         if wsj_test:
-            trained_results_wsj += [get_one_iteration_results(WSJ_TEST, trained_tagger, output_wsj)]
+            trained_results_wsj += [get_one_iteration_results(WSJ_TEST, trained_tagger)]
         i += 1
 
     save_results(trained_results_test, output_test)

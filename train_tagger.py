@@ -28,7 +28,7 @@ WSJ_TEST = make_wsj_test()
 
 #random.seed(42)
 
-def make_fixed_sents(lines, n=None, compare=[], output=None):
+def make_fixed_sents(lines, word_list=[], n=None, compare=[], output=None):
     # Creates a random list of n tagged sentences
     # Input: lines (unique lines from tagged file)
     #        number of random sentences
@@ -59,14 +59,28 @@ def make_fixed_sents(lines, n=None, compare=[], output=None):
                 if new_sent not in sents and new_sent not in compare and is_sent(new_tagged_sent):
                     test_sents += new_tagged_sent
     
-    return fix_NNP(sents)
+    return fix_NNP(sents, word_list)
 
-def fix_NNP(tags):
+def make_tag_dict(word_list):
+    tag_dict = {}
+    for word in word_list:
+        token, tag = tuple(word.split('_'))
+        tag_dict[token] = tag
+    return tag_dict
+
+def fix_NNP(tags, word_list=[]):
     # changes the tag of the first word from to VB
     # input: list of tagged sentences
+    if word_list:
+        tag_dict = make_tag_dict(word_list)
+    else:
+        tag_dict = {}
+
     for sent in tags:
         first_word = sent[0][0]
-        sent[0] = first_word, 'VB'
+        tag = tag_dict.get(first_word, 'VB')
+        sent[0] = first_word, tag
+
     return tags
 
 
