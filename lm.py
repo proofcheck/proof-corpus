@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
-import argparse
+import os
+os.environ['OPENBLAS_NUM_THREADS'] = '1'
 
+import argparse
 from more_itertools import flatten
 
 import nicer
@@ -45,7 +47,7 @@ def length_sent(sent):
     return len(tokenized)
 
 def unigram_lp(lm, sent):
-    score = 1
+    score = 0
     tokenized = tokenize(sent)
     for token in tokenized:
         score += lp_word(lm, token)
@@ -54,11 +56,10 @@ def unigram_lp(lm, sent):
 def lp_sent(lm, sent, n):
     tokenized = tokenize(sent)
     sent_ngram = list(ngrams(tokenized, n))
-    return lm.entropy(sent_ngram) * (-len(sent_ngram))
+    return lm.entropy(sent_ngram) * (-len(tokenized))
 
 def mean_lp(lm, sent, n):
     return lp_sent(lm, sent, n) / length_sent(sent)
-
 
 def norm_lp_div(lm, sent, n):
     return - lp_sent(lm, sent, n) / unigram_lp(lm, sent)
@@ -85,21 +86,34 @@ def word_ranker(lm, prob_function, sentences):
 
     return log_prob_dict, log_prob_sorted
 
+def sort_by_prob():
+    # Make 0 and inf return default value instead
+    return
+
 def experiment(args):
+    if args.output:
+        results = ""
+
     with open(args.lm, 'rb') as fin:
         lm = pickle.load(fin)
         
-        with open(args.sentences, "r") as s:
-            sents = s.read().splitlines()
+    with open(args.sentences, "r") as s:
+        sents = s.read().splitlines()
 
-        prob_dict, sorted_list = sentence_ranker(lm, sents, lp_sent, 2)
+    for prob_func in [lp_sent, mean_lp, norm_lp_div, norm_lp_sub, slor]:
+        prob_dict, sorted_list = sentence_ranker(lm, sents, prob_func, 2)
+        if args.output:
+            results += "\n" + prob_func.__name__ + "\n"
+        print(prob_func.__name__)
         for sent in sorted_list:
             print(sent)
             print(prob_dict[sent])
             if args.output:
-                with open(args.output, "w") as o:
-                    o.write(sent + "\t" + str(prob_dict[sent]))
+                results += sent + "\t" + str(prob_dict[sent]) + "\n"
 
+    if args.output:
+        with open(args.output, "w") as o:
+            o.write(results)
 
 def main(args):
     if args.files:
