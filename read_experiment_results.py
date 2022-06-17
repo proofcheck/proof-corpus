@@ -3,18 +3,20 @@
 import argparse
 import nicer
 import numpy as np
+import os
 
 def read_one_result(fname):
     with open(fname, "r") as fd:
-        results_from_file = fd.read().splitlines()
-    trial_results = np.array([[float(num) for num in trial.split("\t")[:-1]] for trial in results_from_file ])
+        results_str_list = fd.read().splitlines()
+    trial_results = np.array([[float(num) for num in trial.split("\t")] for trial in results_str_list])
     averages = np.mean(trial_results, axis=0)
     standard_deviations = np.std(trial_results, axis=0)
     summary = np.column_stack((averages, standard_deviations))
     return summary
 
 def main(args):
-    for f in args.results_files:
+    file_list = list(filter(lambda x: os.path.getsize(x)>1, args.results_files))
+    for f in file_list:
         conditions = f.split("_")
         condition = "_".join(conditions[1:4])
         summary_list = read_one_result(f).tolist()
