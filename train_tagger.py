@@ -3,19 +3,16 @@
 import argparse
 import nicer
 import random
-import re
-from multiprocessing import Pool
-from itertools import repeat
-import pickle
+
 import os
 os.environ['OPENBLAS_NUM_THREADS'] = '1'
 
-from nltk.tag.perceptron import PerceptronTagger, load
+from nltk.tag.perceptron import PerceptronTagger
 import nltk
 
-from tagger import DEFAULT_TAGGER, write_tags, make_default_tagger, make_wsj_train, make_wsj_test
+from tagger import DEFAULT_TAGGER, write_tags, make_wsj_train, make_wsj_test
 
-from load_tagged_sent import load_one_sent_tags, load_tags, is_sent
+from load_tagged_sent import load_one_sent_tags, is_sent
 from load_ontonotes_pos import *
 
 WSJ_TRAIN = make_wsj_train()
@@ -57,6 +54,8 @@ def pick_sents(lines, n=None, compare=[]):
     return sents
 
 def make_tag_dict(word_list):
+    # makes word to tag dictionary based on word list
+    # input: list of tagged words (eg: Suppose_VB)
     tag_dict = {}
     for word in word_list:
         token, tag = tuple(word.split('_'))
@@ -79,6 +78,7 @@ def fix_sents(tags, word_list=[]):
     return tags
 
 def write_fixed_sents(sents, output, word_list=[]):
+    # Writes fixed sentences to output
     fixed_sents = fix_sents(sents, word_list)
     if output:
         with open(output, "w") as o:
@@ -90,11 +90,14 @@ def num_mislabelings(confusion):
     return mislabelings
 
 def mislabeled_vb(confusion):
+    # counts the number of mislabeled verbs
     i = confusion._indices['VB']
     sum_vb = sum(confusion._confusion[i]) - confusion['VB', 'VB']
     return sum_vb
 
 def make_training_set(train_lines, train_num=None, sample_all=False, testing=[], output=None):
+    # makes training set
+    # input : lines from training files, number of sentences in training set, take sample from all sentences?, testing set, output
     if sample_all:
         sents = pick_sents(train_lines, train_num, testing, output)
         training_set = fix_sents(sents)
@@ -156,10 +159,12 @@ def do_experiments(args):
         print_results(default_results, trained_results, args.numtrain, args.output)
 
 def get_word_key(model_dict, word):
+    # get keys in the model_weights dictionary that have the word in them
     word_key = [key for key in model_dict.keys() if word.lower() in key]
     return word_key
 
 def compare_weights(default_tagger, trained_tagger, word, output=None):
+    # compare weights of the default vs trained tagger based
     default_dict = default_tagger.model.weights
     #default_keys = get_word_key(default_dict, word)
     default_keys = default_dict.keys()
@@ -187,13 +192,12 @@ def compare_weights(default_tagger, trained_tagger, word, output=None):
             with open(output, "a") as o:
                 o.write(output_string)
             
-        
         else:
             print(output_string)
 
 
 def print_results(default_results, trained_results, num, output=None):
-    
+    # print results
     print("Training on {} sentences from each file".format(num))
     print("Default vs Trained")
     print("Accuracy :\t{} \t{}".format(default_results[0], trained_results[0]))
@@ -211,6 +215,7 @@ def print_results(default_results, trained_results, num, output=None):
             o.write("Mislabeled words overall :\t{} \t{}\n".format(default_results[2], trained_results[2]))
 
 def train_tagger(training, wsj_train=True, nr_iter=5):
+    # train tagger on training data
     nltk.data.clear_cache()
     tagger = PerceptronTagger(load=False)
     print("training")

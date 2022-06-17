@@ -6,9 +6,10 @@ import os
 os.environ['OPENBLAS_NUM_THREADS'] = '1'
 
 import nltk
-
 from load_ontonotes_pos import *
 from train_tagger import *
+
+from main_experiment import get_one_iteration_results, save_results
 
 
 def do_fixed_iteration_experiments(args):
@@ -30,7 +31,7 @@ def do_fixed_iteration_experiments(args):
     sents = pick_sents(test_lines)
     testing = fix_sents(sents)
     nltk.data.clear_cache()
-    default_tagger = make_default_tagger()
+    default_tagger = DEFAULT_TAGGER
     default_confusion = default_tagger.confusion(testing)
     default_results = [default_tagger.accuracy(testing), 
                     default_confusion['VB', 'NNP'],
@@ -52,23 +53,6 @@ def do_fixed_iteration_experiments(args):
         i+= 1
 
     save_results(trained_results, args.output)
-
-def save_results(results, output):
-    with open(output, "w") as o:
-        result_string = ""
-        for trial in results:
-            str_trial = [str(num) for num in trial]
-            result_string += "\t".join(str_trial) + "\n"            
-        o.write(result_string)
-
-def get_one_iteration_results(testing, tagger):
-    trained_confusion = tagger.confusion(testing)
-    trained_results = [tagger.accuracy(testing), 
-                        trained_confusion['VB', 'NNP'],
-                        mislabeled_vb(trained_confusion),
-                        num_mislabelings(trained_confusion),
-                    ]
-    return trained_results
 
 def main(args):
     do_fixed_iteration_experiments(args)
