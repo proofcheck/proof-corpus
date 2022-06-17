@@ -82,7 +82,7 @@ def write_fixed_sents(sents, output, word_list=[]):
     fixed_sents = fix_sents(sents, word_list)
     if output:
         with open(output, "w") as o:
-            write_tags([], sents, o)
+            write_tags([], fixed_sents, o)
 
 def num_mislabelings(confusion):
     # counts the number of mislabeled tokens from confusion matrix
