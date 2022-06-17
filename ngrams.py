@@ -1,6 +1,9 @@
 #!/usr/bin/env python
-import argparse
 
+import os
+os.environ['OPENBLAS_NUM_THREADS'] = '1'
+
+import argparse
 import nicer
 from multiprocessing import Pool
 from itertools import repeat
@@ -9,6 +12,7 @@ from nltk.util import ngrams
 from nltk.probability import FreqDist
 
 from sent_tools import *
+from quick_unigrams import *
 
 # Writes top 10000 ngrams using nltk
 # Input : sent**.tsv, number of max ngrams
@@ -26,8 +30,7 @@ def results(f, dist):
 def return_ngrams(sent, n):
     # Creates ngrams from a sentence (list)
     # Input : sentence (list)
-    lower = [word.lower() for word in sent]
-    grams = ngrams(lower, n)
+    grams = ngrams(sent, n)
     return grams
 
 def update_dist(sent, n, dist):
@@ -43,7 +46,18 @@ def update_dist(sent, n, dist):
     return dist
 
 def main(args): 
-    ids, sents = read_files_tokenized(args.files, args.cores)
+    sentences = []
+    for fd in args.files:
+        sentences.extend(
+            (
+                [
+                    w.lower() if w not in aliases else w
+                    for w in s.split("\t")[-1].split()
+                ]
+                for s in fd.readlines()
+            )
+        )
+        print("done", fd)
 
     for n in range(args.start, args.stop+1):
         dist = FreqDist()
@@ -51,7 +65,7 @@ def main(args):
             for grams in p.starmap(
                         return_ngrams,
                         zip(
-                            sents, 
+                            sentences, 
                             repeat(n),
                         ),
                         250
