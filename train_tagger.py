@@ -26,10 +26,10 @@ WSJ_TEST = make_wsj_test()
 #random.seed(42)
 
 def pick_sents(lines, n=None, compare=[]):
-    # Creates a random list of n tagged sentences
+    # Creates a random list of n sentences with words as tuples
     # Input: lines (unique lines from tagged file)
     #        number of random sentences
-    #        list of tagged sentences (if we need to make sure there are no overlaps)
+    #        list of sentences (if we need to make sure there are no overlaps)
     
     if n:
         sampled_lines = random.sample(lines, n)
@@ -42,14 +42,15 @@ def pick_sents(lines, n=None, compare=[]):
 
     else:
         # compare the random sentences to ensure there are no overlapping sentences
-        sents = [load_one_sent_tags(line)[1] for line in sampled_lines if line not in compare and is_sent(load_one_sent_tags(line)[1])]
+        clean_compare = clean_sents(compare)
+        sents = [load_one_sent_tags(line)[1] for line in sampled_lines if clean_sent(line) not in clean_compare and is_sent(load_one_sent_tags(line)[1])]
 
         if n:
             while len(sents) < n:
                 new_sent = random.sample(lines, 1)[0]
                 new_tagged_sent = load_one_sent_tags(new_sent)[1]
                 if new_sent not in sents and new_sent not in compare and is_sent(new_tagged_sent):
-                    test_sents += new_tagged_sent
+                    sents += [new_tagged_sent]
     
     return sents
 
@@ -70,19 +71,50 @@ def fix_sents(tags, word_list=[]):
     else:
         tag_dict = {}
 
+    
+            
     for sent in tags:
+        first_tag = sent[0][1]
         first_word = sent[0][0]
         tag = tag_dict.get(first_word, 'VB')
-        sent[0] = first_word, tag
+        if first_tag != tag:
+            #print(sent)
+            sent[0] = first_word, tag
 
     return tags
 
+def clean_sent(line):
+    tags = load_one_sent_tags(line)[1]
+    words = list(zip(*tags))[0]
+    return " ".join(words)
+
+def clean_sents(lines):
+    sents = []
+    for line in lines:
+        sents += [clean_sent(line)]
+    return sents
+
+def unfix_lines(lines):
+    new_lines = []
+    for line in lines:
+        words = line.split(" ")
+        first_word, _ = words[0].split("_")
+        new_first_word = first_word + "_NNP"
+        new_line = " ".join([new_first_word] + words[1:])
+        new_lines += [new_line]
+
+    return new_lines
+
 def write_fixed_sents(sents, output, word_list=[]):
     # Writes fixed sentences to output
+    for sent in sents:
+        if type(sent) == tuple or len(sent) == 2:
+            print(sent)
     fixed_sents = fix_sents(sents, word_list)
     if output:
         with open(output, "w") as o:
             write_tags([], fixed_sents, o)
+    return fixed_sents
 
 def num_mislabelings(confusion):
     # counts the number of mislabeled tokens from confusion matrix
@@ -104,7 +136,6 @@ def make_training_set(train_lines, train_num=None, sample_all=False, testing=[],
         
     else:    
         training_set = []
-
         for lines_one_file in train_lines:
             sents = pick_sents(lines_one_file, train_num, testing, output)
             training_set += fix_sents(sents)

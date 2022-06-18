@@ -35,8 +35,8 @@ def make_training_from_bin(train_files, train_num, output, word_list=[], test_li
             lines_one_file = f.readlines()
             training_set += pick_sents(lines_one_file, n=train_num, compare=test_lines)
     
-    write_fixed_sents(training_set, output, word_list)
-    return training_set
+    return write_fixed_sents(training_set, output, word_list)
+     
 
 def make_testing_from_bin(test_files, output, word_list, train_lines=[]):
     testing_set = []
@@ -44,14 +44,15 @@ def make_testing_from_bin(test_files, output, word_list, train_lines=[]):
 
     for test_file in test_files:
         with open(PATH + test_file, "r") as f:
-            lines_one_file = f.readlines()
+            lines_one_file = f.read().splitlines()
             if len(lines_one_file) < num_lines_one_file:
                 num_lines_this_file = None
             else:
                 num_lines_this_file = num_lines_one_file
+            
             testing_set += pick_sents(lines_one_file, n=num_lines_this_file, compare=train_lines)
-    write_fixed_sents(testing_set, output, word_list)
-    return testing_set
+    
+    return write_fixed_sents(testing_set, output, word_list) 
 
 def make_train_test(args):
     word_list = args.word_list.read().splitlines()
@@ -72,12 +73,21 @@ def make_train_test(args):
             return 0
 
         training = make_training_from_bin(train_files, args.num_train_sents, save_train, word_list)
-        training_lines = flatten(training)
-
+        
+        fixed_training_lines = []
+        for tf in train_files:
+            with open(f, "o") as f:
+                fixed_training_lines += f.read().splitlines()
+        fixed_training_lines = flatten(fixed_training_lines)
+    
     else:
-        training_lines = args.train.read().splitlines()
+        fixed_training_lines = args.train.read().splitlines()
+    testing = make_testing_from_bin(test_files, save_test, word_list, fixed_training_lines)
 
-    testing = fix_sents(make_testing_from_bin(test_files, save_test, word_list, training_lines))
+    # for sent in testing:
+    #     if not is_sent(sent):
+    #         print(sent)
+
 
     nltk.data.clear_cache()
     default_tagger = DEFAULT_TAGGER

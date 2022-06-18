@@ -35,9 +35,6 @@ def do_experiments(args):
     # Tests tagger on args.test and WSJ corpus
     train_num_list = [int(num) for num in args.train_num_list.split(",")]
     iter_num_list = [int(num) for num in args.iter_num_list.split(",")]
-
-    if args.debug:
-        args.extension = args.extension + "_test"
     
     training_lines = args.train.read().splitlines()
     training_loaded = load_tag_lines(training_lines)[1]
@@ -59,7 +56,7 @@ def do_experiments(args):
                 repeat(training_set),
                 zipped_args,
                 repeat(args.extension),
-                repeat(args.trial_num),
+                repeat(args.num_trials),
                 repeat(args.wsj_test),
             ),
             1,
@@ -67,7 +64,7 @@ def do_experiments(args):
     args.train.close()
     args.test.close()
 
-def do_one_iteration(testing, training_set, zipped_arg, extension="", trial_num=10, wsj_test=False):
+def do_one_iteration(testing, training_set, zipped_arg, extension="", num_trials=10, wsj_test=False):
     num_train_sent, nr_iter = zipped_arg
     training = []
     for imperative_verb in training_set:
@@ -80,7 +77,7 @@ def do_one_iteration(testing, training_set, zipped_arg, extension="", trial_num=
     output_test = "experiments/experiment_" + str(num_train_sent) + "sents_" + str(nr_iter) + "iters_test_" + extension + ".txt"
     trained_results_test = []
     i = 0
-    while i < trial_num:
+    while i < num_trials:
         trained_tagger = train_tagger(training, nr_iter=nr_iter)
         trained_results_test += [get_one_iteration_results(testing, trained_tagger)]
         if wsj_test:
