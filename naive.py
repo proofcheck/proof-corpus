@@ -1688,7 +1688,7 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
     if cmd == "\\S":
         return ["Section "]
 
-    if cmd == "\\ifthenelse" or cmd == "\\IfFileExists":
+    if cmd in {"\\ifthenelse", "\\IfFileExists", "\\iftoggle"}:
         # Assume the conditional is false;
         # remove braces around the result
         get_arg(words)
