@@ -1590,11 +1590,11 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
 
     if cmd == "\\item":
         skip_optional_arg(words, macros)
-        return ["CASE: "]
+        return [" CASE: "]
 
     if cmd in ["\\paragraph", "\\subparagraph"]:
         get_arg(words)
-        return ["CASE: "]
+        return [" CASE: "]
 
     if cmd in ["\\includegraphics", "\\marginpar", "\\adjincludegraphics"]:
         skip_optional_arg(words, macros)
@@ -1752,7 +1752,7 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         #    so they get glommed on to the first sentence of the
         #    section/paragraph itself.
         get_arg(words)
-        return ["CASE: "]
+        return [" CASE: "]
 
     if cmd == "\\htmladdnormallink":
         # Ignore the second argument, but not the first.
