@@ -2228,25 +2228,29 @@ def get_proofs(
                 # than one such argument, but just in case...
                 while words.peek() == "{":
                     get_arg(words)
-            elif env_name == "adjustbox":
-                # ignore scaling argument
-                get_arg(words)
-
             elif env_name.rstrip("*") in MATH_ENVS:
                 fp = skip_rest_env(words, macros)
                 if proof_nesting > 0:
                     current_proof_words.append(" MATH ")
                     if fp:
                         current_proof_words.append(" . ")
-            elif env_name.rstrip("*") in DELETE_ENVS:
-                skip_rest_env(words, macros)
-            elif env_name.rstrip("*") in DELETE_UNINTERPRETED_ENVS:
-                skip_rest_env(words, {}, stop_at=env_name)
-            elif env_name == "step+":
-                # 0109/math0109152/walks
-                # (step+ environment takes an extra label argument that
-                #  shouldn't appear in the output)
-                get_arg(words)
+            else:
+                if env_name == "adjustbox":
+                    # ignore scaling argument
+                    get_arg(words)
+                elif env_name.rstrip("*") in DELETE_ENVS:
+                    skip_rest_env(words, macros)
+                elif env_name.rstrip("*") in DELETE_UNINTERPRETED_ENVS:
+                    skip_rest_env(words, {}, stop_at=env_name)
+                elif env_name == "step+":
+                    # 0109/math0109152/walks
+                    # (step+ environment takes an extra label argument that
+                    #  shouldn't appear in the output)
+                    get_arg(words)
+
+                if proof_nesting > 0:
+                    current_proof_words.append(" ")
+                    continue
 
         elif w == "\\end":
             skip_ws(words)
@@ -2269,6 +2273,10 @@ def get_proofs(
                             print("***", proof)
             elif env_name == "document":
                 break
+            else:
+                if proof_nesting > 0:
+                    current_proof_words.append(" ")
+                    continue
 
         elif w == "\\enddocument":
             break
