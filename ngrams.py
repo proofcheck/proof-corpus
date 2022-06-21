@@ -1,6 +1,9 @@
 #!/usr/bin/env python
-import argparse
 
+import os
+os.environ['OPENBLAS_NUM_THREADS'] = '1'
+
+import argparse
 import nicer
 from multiprocessing import Pool
 from itertools import repeat
@@ -9,15 +12,26 @@ from nltk.util import ngrams
 from nltk.probability import FreqDist
 
 from sent_tools import *
+from quick_unigrams import *
 
 # Writes top 10000 ngrams using nltk
 # Input : sent**.tsv, number of max ngrams
+
+def my_ngrams(sent, n):
+    zip_list = []
+    # Create list of lists to zip for creating ngrams
+    for i in range(n):
+        if i == n-1:
+            zip_list += [sent[i:]]
+        else:
+            zip_list += [sent[i:i-n+1]]
+    ngram_list = zip(*zip_list)
+    return ngram_list
 
 def results(f, dist):
     # Writes top 10000 ngrams in file
     with open(f, "w") as output:
         common_list = dist.most_common(10000)
-        print(common_list[:100])
         for ind, gram in enumerate(common_list):
             if ind%100 == 0:
                 print("{}".format(ind))
@@ -26,7 +40,9 @@ def results(f, dist):
 def return_ngrams(sent, n):
     # Creates ngrams from a sentence (list)
     # Input : sentence (list)
-    grams = ngrams(sent, n)
+
+    #grams = ngrams(sent, n)
+    grams = my_ngrams(sent, n)
     return grams
 
 def update_dist(sent, n, dist):
@@ -41,23 +57,31 @@ def update_dist(sent, n, dist):
 
     return dist
 
-def main(args): 
-    ids, sents = read_files_tokenized(args.files, args.cores)
+def process_for_grams(s):
+    tokenized = split_sentence_id_tokenized(s)[1]
+    return [w.lower() if w not in aliases else w for w in tokenized]
 
-    for n in range(1, args.ngrams+1):
-        print("n",n)
-        print("sents", sents[:10])
-        dist = FreqDist()
+def main(args): 
+    sentences = []
+    for fd in args.files:
         with Pool(processes=args.cores) as p:
-            for grams in p.starmap(
-                        return_ngrams,
-                        zip(
-                            sents, 
-                            repeat(n),
-                        ),
+            this_file_sents = p.imap(
+                        process_for_grams,
+                        fd.readlines(),
                         250
-                ):
-                    dist.update(grams)
+                        )
+            sentences.extend(this_file_sents)
+
+        print("done", fd)
+        fd.close()
+
+    for n in range(args.start, args.stop+1):
+        dist = FreqDist()
+       
+        for sent in sentences:
+            grams = return_ngrams(sent, n)
+            dist.update(grams)
+
         output = "ngrams/" + str(n) + "grams_top_10000_" + args.extension + ".txt"
         results(output, dist)
 
@@ -68,7 +92,10 @@ if __name__ == '__main__':
     parser.add_argument("--files", "-f", nargs='*', type=argparse.FileType('r'),
                             help="txt file to read proof from")
 
-    parser.add_argument("--ngrams", "-n", type=int, nargs='?', default=2,
+    parser.add_argument("--start", type=int, nargs='?', default=2,
+                            help="min number of ngrams")
+
+    parser.add_argument("--stop", type=int, nargs='?', default=2,
                             help="max number of ngrams")
     
     parser.add_argument("--extension", "-e",

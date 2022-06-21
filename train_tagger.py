@@ -3,20 +3,18 @@
 import argparse
 import nicer
 import random
-import re
-from multiprocessing import Pool
-from itertools import repeat
-import pickle
+
 import os
 os.environ['OPENBLAS_NUM_THREADS'] = '1'
 
-from nltk.tag.perceptron import PerceptronTagger, load
+from nltk.tag.perceptron import PerceptronTagger
 import nltk
 
-from tagger import DEFAULT_TAGGER, write_tags, make_default_tagger, make_wsj_train, make_wsj_test
+from tagger import DEFAULT_TAGGER, write_tags, make_wsj_train, make_wsj_test
 
-from load_tagged_sent import load_one_sent_tags, load_tags, is_sent
+from load_tagged_sent import load_one_sent_tags, is_sent
 from load_ontonotes_pos import *
+from sent_tools import *
 
 WSJ_TRAIN = make_wsj_train()
 WSJ_TEST = make_wsj_test()
@@ -28,48 +26,102 @@ WSJ_TEST = make_wsj_test()
 
 #random.seed(42)
 
-def make_fixed_sents(lines, n=None, compare=[], output=None):
-    # Creates a random list of n tagged sentences
+def pick_sents(lines, n=None, compare=[]):
+    # Creates a random list of n sentences with words as tuples
     # Input: lines (unique lines from tagged file)
     #        number of random sentences
-    #        list of tagged sentences (if we need to make sure there are no overlaps)
+    #        list of sentences (if we need to make sure there are no overlaps)
     
     if n:
         sampled_lines = random.sample(lines, n)
         
     else:
         sampled_lines = lines
-    
-    if output:
-        with open(output, "a") as o:
-            for lines in sampled_lines:
-                o.write(lines)
 
     if compare == []:
         sents = [load_one_sent_tags(line)[1] for line in sampled_lines if is_sent(load_one_sent_tags(line)[1])]
 
     else:
         # compare the random sentences to ensure there are no overlapping sentences
-        sents = [load_one_sent_tags(line)[1] for line in sampled_lines if line not in compare and is_sent(load_one_sent_tags(line)[1])]
+        clean_compare = clean_sents(compare)
+        sents = []
+        for line in sampled_lines:
+            cleaned_sent = clean_sent(line)
+            if cleaned_sent not in clean_compare and is_sent(load_one_sent_tags(line)[1]):
+                sents += [load_one_sent_tags(line)[1]]
+                clean_compare += [clean_sent]
 
         if n:
             while len(sents) < n:
                 new_sent = random.sample(lines, 1)[0]
                 new_tagged_sent = load_one_sent_tags(new_sent)[1]
-                if new_sent not in sents and new_sent not in compare and is_sent(new_tagged_sent):
-                    test_sents += new_tagged_sent
+                cleaned_sent = clean_sent(new_sent)
+                if cleaned_sent not in clean_compare and is_sent(new_tagged_sent):
+                    sents += [new_tagged_sent]
+                    clean_compare += [cleaned_sent]
     
-    return fix_NNP(sents)
+    return sents
 
-def fix_NNP(tags):
+def make_tag_dict(word_list):
+    # makes word to tag dictionary based on word list
+    # input: list of tagged words (eg: Suppose_VB)
+    tag_dict = {}
+    for word in word_list:
+        token, tag = tuple(word.split('_'))
+        tag_dict[token] = tag
+    return tag_dict
+
+def fix_sents(tags, word_list=[]):
     # changes the tag of the first word from to VB
     # input: list of tagged sentences
+    if word_list:
+        tag_dict = make_tag_dict(word_list)
+    else:
+        tag_dict = {}
+            
     for sent in tags:
+        first_tag = sent[0][1]
         first_word = sent[0][0]
-        sent[0] = first_word, 'VB'
+        tag = tag_dict.get(first_word, 'VB')
+        if first_tag != tag:
+            #print(sent)
+            sent[0] = first_word, tag
+
     return tags
 
+def clean_sent(line):
+    tokenized = tokenize(line)
+    words = [word.split("_")[0] for word in tokenized]
 
+    return " ".join(words)
+
+def clean_sents(lines):
+    sents = []
+    for line in lines:
+        sents += [clean_sent(line)]
+    return sents
+
+def unfix_lines(lines):
+    new_lines = []
+    for line in lines:
+        words = line.split(" ")
+        first_word, _ = words[0].split("_")
+        new_first_word = first_word + "_NNP"
+        new_line = " ".join([new_first_word] + words[1:])
+        new_lines += [new_line]
+
+    return new_lines
+
+def write_fixed_sents(sents, output, word_list=[]):
+    # Writes fixed sentences to output
+    for sent in sents:
+        if type(sent) == tuple or len(sent) == 2:
+            print(sent)
+    fixed_sents = fix_sents(sents, word_list)
+    if output:
+        with open(output, "w") as o:
+            write_tags([], fixed_sents, o)
+    return fixed_sents
 
 def num_mislabelings(confusion):
     # counts the number of mislabeled tokens from confusion matrix
@@ -77,20 +129,23 @@ def num_mislabelings(confusion):
     return mislabelings
 
 def mislabeled_vb(confusion):
+    # counts the number of mislabeled verbs
     i = confusion._indices['VB']
     sum_vb = sum(confusion._confusion[i]) - confusion['VB', 'VB']
     return sum_vb
 
 def make_training_set(train_lines, train_num=None, sample_all=False, testing=[], output=None):
+    # makes training set
+    # input : lines from training files, number of sentences in training set, take sample from all sentences?, testing set, output
     if sample_all:
-        training_set = make_fixed_sents(train_lines, train_num, testing, output)
+        sents = pick_sents(train_lines, train_num, testing, output)
+        training_set = fix_sents(sents)
         
     else:    
         training_set = []
-
         for lines_one_file in train_lines:
-            training_set += make_fixed_sents(lines_one_file, train_num, testing, output)
-    print(len(training_set))
+            sents = pick_sents(lines_one_file, train_num, testing, output)
+            training_set += fix_sents(sents)
     return training_set
 
 def do_experiments(args):
@@ -142,10 +197,12 @@ def do_experiments(args):
         print_results(default_results, trained_results, args.numtrain, args.output)
 
 def get_word_key(model_dict, word):
+    # get keys in the model_weights dictionary that have the word in them
     word_key = [key for key in model_dict.keys() if word.lower() in key]
     return word_key
 
 def compare_weights(default_tagger, trained_tagger, word, output=None):
+    # compare weights of the default vs trained tagger based
     default_dict = default_tagger.model.weights
     #default_keys = get_word_key(default_dict, word)
     default_keys = default_dict.keys()
@@ -173,13 +230,12 @@ def compare_weights(default_tagger, trained_tagger, word, output=None):
             with open(output, "a") as o:
                 o.write(output_string)
             
-        
         else:
             print(output_string)
 
 
 def print_results(default_results, trained_results, num, output=None):
-    
+    # print results
     print("Training on {} sentences from each file".format(num))
     print("Default vs Trained")
     print("Accuracy :\t{} \t{}".format(default_results[0], trained_results[0]))
@@ -197,6 +253,7 @@ def print_results(default_results, trained_results, num, output=None):
             o.write("Mislabeled words overall :\t{} \t{}\n".format(default_results[2], trained_results[2]))
 
 def train_tagger(training, wsj_train=True, nr_iter=5):
+    # train tagger on training data
     nltk.data.clear_cache()
     tagger = PerceptronTagger(load=False)
     print("training")
@@ -219,7 +276,8 @@ def do_one_basic_experiment(test_file, trained_tagger, default_tagger, numtest=N
     else:
         test_lines = test_file.readlines()
         test_file.close()
-        testing = make_fixed_sents(test_lines, numtest, compare)
+        sents = pick_sents(test_lines, numtest, compare)
+        testing = fix_sents(sents)
         if numtest:
             print("Testing on {} sentences from {}".format(numtest, test_file.name))
         else:

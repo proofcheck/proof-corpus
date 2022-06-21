@@ -59,7 +59,7 @@ def make_wsj_test():
 
 def make_default_tagger():
     # Creates default tagger by training on WSJ
-    file_path = "default_tagger.pickle"
+    file_path = "default_tagger.pk"
     try:
         with open(file_path, "rb") as resource:
             default_tagger = pickle.load(resource)
@@ -78,11 +78,11 @@ def sent_tagger(line):
     # input: one line from sent**.tsv
     # returns: id, tagged sentence
     sent_id, sent = split_sentence_id(line)
-    tokenized = tokenizer(sent)
+    tokenized = tokenize(sent)
     tagged = DEFAULT_TAGGER.tag(tokenized)
     return sent_id, tagged
 
-def write_tags(ids, sents, output=None):    
+def write_tags(ids, sents, output=None): 
     for i in range(len(sents)):
         save_sent = ""
         if ids != []:

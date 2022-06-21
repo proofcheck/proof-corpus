@@ -7,6 +7,7 @@ from itertools import repeat
 from nltk.probability import FreqDist
 
 from first_word import make_dist
+from sent_tools import *
 
 def dist_output(dist, output):
     # Writes distribution to output depending in order of frequency
@@ -50,17 +51,23 @@ def check_one_sent_tag(this_id, this_sent, tag):
 
 def load_one_sent_tags(line):
     # Loads one sentence of tags
-    line = line.strip()
-    if "\t" in line:
-        this_id = line.split('\t')[0]
-        sentence = line.split('\t')[1]
-    else:
-        this_id = ""
-        sentence = line
+    sent_id, sent = split_sentence_id(line)
+    tokenized = tokenize(sent)
+    tags = [tuple(word.split('_')) for word in tokenized]
+    return sent_id, tags
     
-    tags = [tuple(word.split('_')) for word in sentence.split(" ") ]
-    return this_id, tags
-    
+def load_tag_lines(lines, cores=5):
+    with Pool(processes=cores) as p:
+            tags = p.imap(
+                load_one_sent_tags,
+                lines,
+                250,
+            )
+            all_tags = list(zip(*tags))
+            ids = all_tags[0]
+            sents = all_tags[1]
+
+    return ids, sents
 
 def load_tags(tagfile, cores=5):
     # Loads tags from file of tagged sentences
