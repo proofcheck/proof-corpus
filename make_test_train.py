@@ -94,7 +94,7 @@ def make_train_test(args):
                         num_mislabelings(default_confusion),
                       ]
     
-    output_default = "experiments/experiment_default_tagger_test_" + args.extension + ".txt"
+    output_default = "experiments/experiment_default_tagger_" + args.extension + ".txt"
     with open(output_default, "w") as o:
         str_results = list(map(str, default_results))
         o.write("\t".join(str_results))
