@@ -72,31 +72,16 @@ def main(args):
                         )
             sentences.extend(this_file_sents)
 
-        """sentences.extend(
-                (
-                    [
-                        w.lower() if w not in aliases else w
-                        for w in s.split("\t")[-1].split()
-                    ]
-                    for s in fd.readlines()
-                )
-        )"""
-
         print("done", fd)
         fd.close()
 
     for n in range(args.start, args.stop+1):
         dist = FreqDist()
-        with Pool(processes=args.cores) as p:
-            for grams in p.starmap(
-                        return_ngrams,
-                        zip(
-                            sentences, 
-                            repeat(n),
-                        ),
-                        250
-                ):
-                    dist.update(grams)
+       
+        for sent in sentences:
+            grams = return_ngrams(sent, n)
+            dist.update(grams)
+
         output = "ngrams/" + str(n) + "grams_top_10000_" + args.extension + ".txt"
         results(output, dist)
 
