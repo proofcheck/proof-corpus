@@ -14,6 +14,7 @@ from tagger import DEFAULT_TAGGER, write_tags, make_wsj_train, make_wsj_test
 
 from load_tagged_sent import load_one_sent_tags, is_sent
 from load_ontonotes_pos import *
+from sent_tools import *
 
 WSJ_TRAIN = make_wsj_train()
 WSJ_TEST = make_wsj_test()
@@ -43,14 +44,21 @@ def pick_sents(lines, n=None, compare=[]):
     else:
         # compare the random sentences to ensure there are no overlapping sentences
         clean_compare = clean_sents(compare)
-        sents = [load_one_sent_tags(line)[1] for line in sampled_lines if clean_sent(line) not in clean_compare and is_sent(load_one_sent_tags(line)[1])]
+        sents = []
+        for line in sampled_lines:
+            cleaned_sent = clean_sent(line)
+            if cleaned_sent not in clean_compare and is_sent(load_one_sent_tags(line)[1]):
+                sents += [load_one_sent_tags(line)[1]]
+                clean_compare += [clean_sent]
 
         if n:
             while len(sents) < n:
                 new_sent = random.sample(lines, 1)[0]
                 new_tagged_sent = load_one_sent_tags(new_sent)[1]
-                if new_sent not in sents and new_sent not in compare and is_sent(new_tagged_sent):
+                cleaned_sent = clean_sent(new_sent)
+                if cleaned_sent not in clean_compare and is_sent(new_tagged_sent):
                     sents += [new_tagged_sent]
+                    clean_compare += [cleaned_sent]
     
     return sents
 
@@ -70,8 +78,6 @@ def fix_sents(tags, word_list=[]):
         tag_dict = make_tag_dict(word_list)
     else:
         tag_dict = {}
-
-    
             
     for sent in tags:
         first_tag = sent[0][1]
@@ -84,8 +90,9 @@ def fix_sents(tags, word_list=[]):
     return tags
 
 def clean_sent(line):
-    tags = load_one_sent_tags(line)[1]
-    words = list(zip(*tags))[0]
+    tokenized = tokenize(line)
+    words = [word.split("_")[0] for word in tokenized]
+
     return " ".join(words)
 
 def clean_sents(lines):

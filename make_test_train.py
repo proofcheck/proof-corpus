@@ -9,7 +9,7 @@ import os
 from load_ontonotes_pos import *
 from train_tagger import *
 
-PATH = "word_bins/unique/"
+PATH = "/mnt/research/proofcheck/noda/proof-corpus/word_bins/unique/"
 
 def get_train_test_files(word_list_tags, num):
     word_list = [word.split('_')[0] for word in word_list_tags]
@@ -19,8 +19,8 @@ def get_train_test_files(word_list_tags, num):
     train_list = []
     test_list = []
     
-    for (root, dirs, file) in os.walk(path):
-        for f in file:
+    for (root, dirs, files) in os.walk(path):
+        for f in files:
             verb = f.split(".")[0]
             if verb in train_word_list:
                 train_list += [f]
@@ -31,10 +31,11 @@ def get_train_test_files(word_list_tags, num):
 def make_training_from_bin(train_files, train_num, output, word_list=[], test_lines=[]): 
     training_set = []
     for train_file in train_files:
-        with open(PATH + train_file, "r") as f:
-            lines_one_file = f.readlines()
+        path_to_file = PATH + train_file
+        with open(path_to_file, "r") as f:
+            f.seek(0)
+            lines_one_file = f.read().splitlines()
             training_set += pick_sents(lines_one_file, n=train_num, compare=test_lines)
-    
     return write_fixed_sents(training_set, output, word_list)
      
 
@@ -73,13 +74,8 @@ def make_train_test(args):
             return 0
 
         training = make_training_from_bin(train_files, args.num_train_sents, save_train, word_list)
-        
-        fixed_training_lines = []
-        for tf in train_files:
-            with open(f, "o") as f:
-                fixed_training_lines += f.read().splitlines()
-        fixed_training_lines = flatten(fixed_training_lines)
-    
+        with open(save_train, "r") as train:
+            fixed_training_lines = train.read().splitlines()
     else:
         fixed_training_lines = args.train.read().splitlines()
     testing = make_testing_from_bin(test_files, save_test, word_list, fixed_training_lines)
@@ -87,7 +83,6 @@ def make_train_test(args):
     # for sent in testing:
     #     if not is_sent(sent):
     #         print(sent)
-
 
     nltk.data.clear_cache()
     default_tagger = DEFAULT_TAGGER
@@ -119,7 +114,7 @@ if __name__ == '__main__':
                             help="number of training sentences")
     
     parser.add_argument("--num_test_bins", "-nte",type=int, default=1,
-                            help="number of training word bins")
+                            help="number of testing word bins")
     
     parser.add_argument("--save_sentences", "-s", action='store_true',
                             help="save sentences")

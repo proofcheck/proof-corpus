@@ -17,6 +17,16 @@ from quick_unigrams import *
 # Writes top 10000 ngrams using nltk
 # Input : sent**.tsv, number of max ngrams
 
+def my_ngrams(sent, n):
+    zip_list = []
+    # Create list of lists to zip for creating ngrams
+    for i in range(n):
+        if i == n-1:
+            zip_list += [sent[i:]]
+        else:
+            zip_list += [sent[i:i-n+1]]
+    ngram_list = zip(*zip_list)
+    return ngram_list
 
 def results(f, dist):
     # Writes top 10000 ngrams in file
@@ -30,7 +40,9 @@ def results(f, dist):
 def return_ngrams(sent, n):
     # Creates ngrams from a sentence (list)
     # Input : sentence (list)
-    grams = ngrams(sent, n)
+
+    #grams = ngrams(sent, n)
+    grams = my_ngrams(sent, n)
     return grams
 
 def update_dist(sent, n, dist):
@@ -45,19 +57,33 @@ def update_dist(sent, n, dist):
 
     return dist
 
+def process_for_grams(s):
+    tokenized = split_sentence_id_tokenized(s)[1]
+    return [w.lower() if w not in aliases else w for w in tokenized]
+
 def main(args): 
     sentences = []
     for fd in args.files:
-        sentences.extend(
-            (
-                [
-                    w.lower() if w not in aliases else w
-                    for w in s.split("\t")[-1].split()
-                ]
-                for s in fd.readlines()
-            )
-        )
+        with Pool(processes=args.cores) as p:
+            this_file_sents = p.imap(
+                        process_for_grams,
+                        fd.readlines(),
+                        250
+                        )
+            sentences.extend(this_file_sents)
+
+        """sentences.extend(
+                (
+                    [
+                        w.lower() if w not in aliases else w
+                        for w in s.split("\t")[-1].split()
+                    ]
+                    for s in fd.readlines()
+                )
+        )"""
+
         print("done", fd)
+        fd.close()
 
     for n in range(args.start, args.stop+1):
         dist = FreqDist()
