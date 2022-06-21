@@ -463,7 +463,19 @@ def decomment(tex_source: str) -> str:
 
     Assumes every line (including the last) ends with \n.
     """
-    result = re.sub(TEX_COMMENT, "", tex_source)
+    # Special case: if a line ends with \foo%
+    # we don't want to completely dekete the newline
+    # and the space starting the next line because
+    #    \foo%
+    #    bar
+    # will then be iterpreted as \foobar rather than foo{}bar
+    # In this case, we replace the comment with a space (which will be
+    # harmlessly consumed when we read the \foo)
+    print(tex_source)
+    result = re.sub("(\\\\[A-Za-z]+)[%٪].*?\n[ \t]*", r"\1 ", tex_source)
+    print(result)
+    result = re.sub(TEX_COMMENT, "", result)
+    print(result)
     return result
 
 
@@ -1590,11 +1602,11 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
 
     if cmd == "\\item":
         skip_optional_arg(words, macros)
-        return ["CASE: "]
+        return [" CASE: "]
 
     if cmd in ["\\paragraph", "\\subparagraph"]:
         get_arg(words)
-        return ["CASE: "]
+        return [" CASE: "]
 
     if cmd in ["\\includegraphics", "\\marginpar", "\\adjincludegraphics"]:
         skip_optional_arg(words, macros)
@@ -1688,7 +1700,7 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
     if cmd == "\\S":
         return ["Section "]
 
-    if cmd == "\\ifthenelse" or cmd == "\\IfFileExists":
+    if cmd in {"\\ifthenelse", "\\IfFileExists", "\\iftoggle"}:
         # Assume the conditional is false;
         # remove braces around the result
         get_arg(words)
@@ -1752,7 +1764,7 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         #    so they get glommed on to the first sentence of the
         #    section/paragraph itself.
         get_arg(words)
-        return ["CASE: "]
+        return [" CASE: "]
 
     if cmd == "\\htmladdnormallink":
         # Ignore the second argument, but not the first.
@@ -2216,25 +2228,29 @@ def get_proofs(
                 # than one such argument, but just in case...
                 while words.peek() == "{":
                     get_arg(words)
-            elif env_name == "adjustbox":
-                # ignore scaling argument
-                get_arg(words)
-
             elif env_name.rstrip("*") in MATH_ENVS:
                 fp = skip_rest_env(words, macros)
                 if proof_nesting > 0:
                     current_proof_words.append(" MATH ")
                     if fp:
                         current_proof_words.append(" . ")
-            elif env_name.rstrip("*") in DELETE_ENVS:
-                skip_rest_env(words, macros)
-            elif env_name.rstrip("*") in DELETE_UNINTERPRETED_ENVS:
-                skip_rest_env(words, {}, stop_at=env_name)
-            elif env_name == "step+":
-                # 0109/math0109152/walks
-                # (step+ environment takes an extra label argument that
-                #  shouldn't appear in the output)
-                get_arg(words)
+            else:
+                if env_name == "adjustbox":
+                    # ignore scaling argument
+                    get_arg(words)
+                elif env_name.rstrip("*") in DELETE_ENVS:
+                    skip_rest_env(words, macros)
+                elif env_name.rstrip("*") in DELETE_UNINTERPRETED_ENVS:
+                    skip_rest_env(words, {}, stop_at=env_name)
+                elif env_name == "step+":
+                    # 0109/math0109152/walks
+                    # (step+ environment takes an extra label argument that
+                    #  shouldn't appear in the output)
+                    get_arg(words)
+
+                if proof_nesting > 0:
+                    current_proof_words.append(" ")
+                    continue
 
         elif w == "\\end":
             skip_ws(words)
@@ -2257,6 +2273,10 @@ def get_proofs(
                             print("***", proof)
             elif env_name == "document":
                 break
+            else:
+                if proof_nesting > 0:
+                    current_proof_words.append(" ")
+                    continue
 
         elif w == "\\enddocument":
             break
