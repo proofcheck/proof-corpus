@@ -540,7 +540,7 @@ def cleanup(
 
         proof = re.sub(r"\(\s*([-0-9]+|[a-zA-Z])(\s*,\s*([0-9.,'-]+|[a-zA-Z])\s*)+\)", "MATH", proof)
 
-        proof = re.sub(r"(?i:fig)\s*[.]?\s*[0-9]*", "REF ", proof)
+        proof = re.sub(r"(?i:(figure|fig))\s*[.]?\s*[0-9]*(\s*REF)?", "REF", proof)
 
     # eliminate extra spaces
     proof = re.sub("[ ]+", " ", proof)
