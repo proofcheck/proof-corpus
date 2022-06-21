@@ -19,8 +19,6 @@ def save_results(results, output):
             str_trial = [str(num) for num in trial]
             result_string += "\t".join(str_trial) + "\n"            
         o.write(result_string)
-        print("save_results")
-        print(result_string)
 
 def get_one_condition_results(testing, tagger):
     trained_confusion = tagger.confusion(testing)
@@ -50,20 +48,6 @@ def do_experiments(args):
     iter_num_list_zip = [num for num in iter_num_list for i in range(len(train_num_list))]
     zipped_args = zip(train_num_list_zip, iter_num_list_zip)
 
-    """with Pool(processes=args.cores) as p:
-        p.starmap(
-            do_one_condition,
-            zip(
-                repeat(testing),
-                repeat(training_set),
-                zipped_args,
-                repeat(args.extension),
-                repeat(args.num_trials),
-                repeat(args.wsj_test),
-                repeat(args.cores)
-            ),
-            1,
-        )"""
     for arg in zipped_args:
         do_one_condition(testing, training_set, arg, args.extension, 
                             args.num_trials, args.wsj_test, args.cores)
@@ -82,7 +66,6 @@ def do_one_condition(testing, training_set, zipped_arg, extension="", num_trials
         trained_results_wsj = []
 
     output_test = "experiments/experiment_" + str(num_train_sent) + "sents_" + str(nr_iter) + "iters_" + extension + ".txt"
-    print(output_test)
     trained_results_wsj = []
     trained_results = []
     with Pool(processes=cores) as p:
@@ -100,7 +83,6 @@ def do_one_condition(testing, training_set, zipped_arg, extension="", num_trials
                 trained_results_wsj += [wsj]
             trained_results += [trained]
     
-    print(trained_results)
     save_results(trained_results, output_test)
     
     if wsj_test:
@@ -117,7 +99,6 @@ def do_one_trial(training, nr_iter, testing, wsj_test=False):
         wsj = None
 
     return trained, wsj
-
 
 def main(args):
     do_experiments(args)
