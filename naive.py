@@ -471,11 +471,8 @@ def decomment(tex_source: str) -> str:
     # will then be iterpreted as \foobar rather than foo{}bar
     # In this case, we replace the comment with a space (which will be
     # harmlessly consumed when we read the \foo)
-    print(tex_source)
     result = re.sub("(\\\\[A-Za-z]+)[%٪].*?\n[ \t]*", r"\1 ", tex_source)
-    print(result)
     result = re.sub(TEX_COMMENT, "", result)
-    print(result)
     return result
 
 
