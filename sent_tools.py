@@ -3,8 +3,8 @@
 from multiprocessing import Pool
 import nicer
 
-aliases = {"CASE", "CITE", "MATH", "NAME", "REF", "VERBATIM"}
-punctuation = {
+ALIASES = {"CASE", "CITE", "MATH", "NAME", "REF", "VERBATIM"}
+PUNCTUATION = {
     ".",
     ",",
     ":",
