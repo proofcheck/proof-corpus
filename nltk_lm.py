@@ -135,7 +135,7 @@ if __name__ == '__main__':
     nicer.make_nice()
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--files", "-f", nargs='*',type=argparse.FileType("r"),
+    parser.add_argument( "--files", "-f", nargs='*',type=argparse.FileType("r"),
                             help="List of txt files to read sentences from (for generating lm)")
 
     parser.add_argument( "--cores", "-c",
@@ -147,10 +147,10 @@ if __name__ == '__main__':
     parser.add_argument( "--ngrams", "-n", type=int, default=2,
                             help="ngrams to use")
 
-    parser.add_argument("--sentences", "-s",
+    parser.add_argument( "--sentences", "-s",
                             help="txt file to read sentences from (for testing on lm)")
 
-    parser.add_argument("--output", "-o", 
+    parser.add_argument( "--output", "-o", 
                             help="txt file to write resuls to")
 
 
