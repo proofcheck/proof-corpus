@@ -3,6 +3,33 @@
 from multiprocessing import Pool
 import nicer
 
+aliases = {"CASE", "CITE", "MATH", "NAME", "REF", "VERBATIM"}
+punctuation = {
+    ".",
+    ",",
+    ":",
+    ";",
+    "'",
+    '"',
+    "-",
+    "?",
+    "!",
+    "(",
+    ")",
+    "{",
+    "}",
+    "[",
+    "]",
+    "`",
+    "–",
+    "''",
+    '""',
+    "``",
+    "...",
+    "…",
+    "="
+}
+
 def split_sentence_id(line):
     line = line.strip()
     if "\t" in line:
