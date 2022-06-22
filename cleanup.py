@@ -71,7 +71,7 @@ theoremNumber = (
 
 # Prop, Th., Theorem, Formula, ...
 theorem_word = (
-    r"(?:(?i:(?:\b(?:Props?|Thms?|Cor|Th|Lem|Rem|Eqs?|Defs?|Ex|Alg)(?:\b|\.))"
+    r"(?:(?i:(?:\b(?:Props?|Prps?|prps?|Thms?|Cor|Th|Lem|Rem|Eqs?|Defs?|Ex|Alg)(?:\b|\.))"
     r"|"
     r"(?:\b(?:Propositions?|Theorems?|Corollar(?:y|ies)|Lemm(?:a|as|e|ata)|"
     r"Remarks?|Equations?|Diagrams?|Claims?|Statements?|Axioms?|Conditions?|"
@@ -445,6 +445,15 @@ def cleanup(
         )
 
     if aggressive:
+        # .. -> .
+        # . . -> .
+        proof = re.sub(r"(\.\s*)+\.", ".",proof)
+
+        # MATH.1 to MATH
+        # REF.1 to REF
+        proof = re.sub(r"(MATH|CASE|REF|CITE)\.([0-9]){0,3}", r"\1", proof)
+        
+
         # (iii 'a-ds,.) -> REF
         proof = re.sub(
             r"\((\s*(SII|[iI]+)([0-9]|[A-Za-z]|['.,-–]|\s){0,10}\s*)+\)",
@@ -531,7 +540,7 @@ def cleanup(
 
         proof = re.sub(r"\(\s*([-0-9]+|[a-zA-Z])(\s*,\s*([0-9.,'-]+|[a-zA-Z])\s*)+\)", "MATH", proof)
 
-        proof = re.sub(r"(?i:fig)\s*[.]?\s*[0-9]*", "REF ", proof)
+        proof = re.sub(r"(?i:(figure|fig))\s*[.]?\s*[0-9]*(\s*REF)?", "REF", proof)
 
     # eliminate extra spaces
     proof = re.sub("[ ]+", " ", proof)
@@ -809,11 +818,10 @@ def cleanup(
     # an MATH -> a MATH
     proof = re.sub("\\b([Aa])n[ ]MATH\\b", r"\1 MATH", proof)
 
-    # MATH, MATH, MATH -> MATH
-    # MATH and MATH -> MATH
+    # MATH MATH -> MATH
     # MATHMATH -> MATH
-    proof = re.sub(r"(MATH\s*,\s*|MATH\s*((?i:and)|&)\s*)+MATH", "MATH ", proof)
-    proof = re.sub(r"(MATH)+MATH", "MATH", proof)
+    # proof = re.sub(r"(MATH\s*,\s*|MATH\s*((?i:and)|&)\s*)+MATH", "MATH ", proof)
+    proof = re.sub(r"(MATH\s*)+MATH", "MATH", proof)
 
 
     # figure REF ii -> REF
@@ -843,6 +851,10 @@ def cleanup(
 
     if debug:
         print(9890, proof)
+
+    # MATH.1 to MATH
+    # REF.1 to REF
+    proof = re.sub(r"(MATH|CASE|REF|CITE)\.([\.A-Za-z0-9]){0,5}", r"\1", proof)
 
 
     proof = re.sub(r"([Ss]ub)?[Cc]ase\s*([0-9]|[A-Za-z]|[',-–]|\s){0,5}([.,])\s*", "REF\\2 ", proof)
