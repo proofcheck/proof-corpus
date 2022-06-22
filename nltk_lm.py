@@ -22,7 +22,7 @@ SENTS = ["Suppose MATH .",
         "Inferring MATH from REF , MATH holds .",
         "三角形 の 内角 の 和 は 百八十度 で ある 。",
         "Suppose that hence MATH , MATH .",
-        "People won't talk like this in proofs .",
+        "People won't talk like this .",
         "We can assume without a loss of generality that MATH , since there exists MATH such that MATH ."
         
         ]
@@ -50,7 +50,7 @@ def output(args):
 
 def length_sent(line):
     tokenized = tokenize(line)
-    return len(tokenized)
+    return len(tokenized) + 2
 
 def nltk_word_lp(lm, token):
     return lm.logscore(token)
@@ -65,7 +65,7 @@ def unigram_lp(lm, line, lp_word=nltk_word_lp, lp_sent=None, n=None):
 def nltk_sent_lp(lm, line, lp_word=None, sent_lp=None, n=None):
     tokenized = tokenize(line)
     sent_ngram = ngrams(tokenized, n)
-    return lm.entropy(sent_ngram) * (-len(tokenized))
+    return lm.entropy(sent_ngram) * (-length_sent(line))
 
 def mean_lp(lm, line, lp_word=None, lp_sent=nltk_sent_lp, n=None):
     return lp_sent(lm, line, n=n) / length_sent(line)
@@ -80,12 +80,8 @@ def slor(lm, line, lp_word=nltk_word_lp, lp_sent=nltk_sent_lp, n=None):
     return norm_lp_sub(lm, line, lp_word, lp_sent, n) / length_sent(line)
 
 def sentence_ranker(lm, sentences, prob_function, lp_word=nltk_word_lp, lp_sent=nltk_sent_lp, n=None):
-    if prob_function in [norm_lp_sub, slor]:
-        prob_reverse = False
-    else:
-        prob_reverse = True
     log_prob_dict = {sent : prob_function(lm, sent, lp_word, lp_sent, n) for sent in sentences}
-    log_prob_sorted = sorted(log_prob_dict.keys(), key=lambda x:log_prob_dict[x], reverse=prob_reverse)
+    log_prob_sorted = sorted(log_prob_dict.keys(), key=lambda x:log_prob_dict[x], reverse=True)
 
     return log_prob_dict, log_prob_sorted
 
@@ -95,6 +91,14 @@ def word_ranker(lm, prob_function, sentences):
     log_prob_sorted = sorted(log_prob_dict.keys(), key=lambda x:log_prob_dict[x], reverse=True)
 
     return log_prob_dict, log_prob_sorted
+
+def rank_sentences_from_file(lm, sentence_file, prob_function, lp_word=nltk_word_lp, lp_sent=nltk_sent_lp, n=None):
+    with open(sentence_file, "r") as sent_file:
+        sentences = sent_file.read().splitlines()
+    
+    log_prob_dict, log_prob_sorted = sentence_ranker(lm, sentences, prob_function, lp_word, lp_sent, n)
+    for sent in log_prob_sorted:
+        print(log_prob_dict[sent], "\t", sent)
 
 def experiment(args):
     if args.output:
