@@ -93,8 +93,6 @@ if __name__ == '__main__':
                             help="store unique sentences")
 
                             
-    
-    
     args = parser.parse_args()
 
     main(args)

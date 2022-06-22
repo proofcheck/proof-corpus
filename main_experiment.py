@@ -8,6 +8,7 @@ from itertools import repeat
 
 from load_ontonotes_pos import *
 from train_tagger import *
+
 from load_tagged_sent import load_tag_lines
 
 PATH = "word_bins/unique/"
@@ -20,13 +21,14 @@ def save_results(results, output):
             result_string += "\t".join(str_trial) + "\n"            
         o.write(result_string)
 
-def get_one_condition_results(testing, tagger):
+def get_one_condition_results(testing, tagger, output=None):
     trained_confusion = tagger.confusion(testing)
     trained_results = [tagger.accuracy(testing), 
                         trained_confusion['VB', 'NNP'],
                         mislabeled_vb(trained_confusion),
                         num_mislabelings(trained_confusion),
                     ]
+    
     return trained_results
 
 def do_experiments(args):
@@ -50,12 +52,12 @@ def do_experiments(args):
 
     for arg in zipped_args:
         do_one_condition(testing, training_set, arg, args.extension, 
-                            args.num_trials, args.wsj_test, args.cores)
+                            args.num_trials, args.wsj_test, args.cores, args.print_mislabels)
 
     args.train.close()
     args.test.close()
 
-def do_one_condition(testing, training_set, zipped_arg, extension="", num_trials=10, wsj_test=False, cores=5):
+def do_one_condition(testing, training_set, zipped_arg, extension="", num_trials=10, wsj_test=False, cores=5, print_mislabels=False):
     num_train_sent, nr_iter = zipped_arg
     training = []
     for imperative_verb in training_set:
@@ -76,6 +78,7 @@ def do_one_condition(testing, training_set, zipped_arg, extension="", num_trials
                 [nr_iter]*num_trials,
                 [testing]*num_trials,
                 [wsj_test]*num_trials,
+                repeat(print_mislabels),
             ),
             1,
         ):
@@ -88,9 +91,17 @@ def do_one_condition(testing, training_set, zipped_arg, extension="", num_trials
     if wsj_test:
         save_results(trained_results_wsj, output_wsj)
 
-def do_one_trial(training, nr_iter, testing, wsj_test=False):
+def do_one_trial(training, nr_iter, testing, wsj_test=False, print_mislabels=False):
     trained_tagger = train_tagger(training, nr_iter)
     trained = get_one_condition_results(testing, trained_tagger)
+
+    if print_mislabels:
+        for sent in testing:
+            tokens = get_tokens_from_tags(sent)
+            tags = trained_tagger.tag(tokens)
+            if tags[0][1] not in {'VB', 'VBG', 'VBN'}:
+                print(tokens)
+                print(tags[0][1])
 
     if wsj_test:
         wsj = get_one_condition_results(WSJ_TEST, trained_tagger)
@@ -99,6 +110,10 @@ def do_one_trial(training, nr_iter, testing, wsj_test=False):
         wsj = None
 
     return trained, wsj
+
+def get_tokens_from_tags(tags):
+    tokens = [word[0] for word in tags]
+    return tokens
 
 def main(args):
     do_experiments(args)
@@ -130,6 +145,9 @@ if __name__ == '__main__':
 
     parser.add_argument("--wsj_test", "-wt", action='store_true',
                             help="test on WSJ?")
+
+    parser.add_argument("--print_mislabels", "-p", action='store_true',
+                            help="print non-VB tags?")
 
     args = parser.parse_args()
 
