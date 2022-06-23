@@ -12,7 +12,6 @@ from nltk.util import ngrams
 from nltk.probability import FreqDist
 
 from sent_tools import *
-from quick_unigrams import *
 
 # Writes top 10000 ngrams using nltk
 # Input : sent**.tsv, number of max ngrams
@@ -59,7 +58,7 @@ def update_dist(sent, n, dist):
 
 def process_for_grams(s):
     tokenized = split_sentence_id_tokenized(s)[1]
-    return [w.lower() if w not in aliases else w for w in tokenized]
+    return [w.lower() if w not in ALIASES else w for w in tokenized]
 
 def main(args): 
     sentences = []

@@ -16,9 +16,15 @@ from nltk.lm import MLE, KneserNeyInterpolated
 from sent_tools import *
 
 SENTS = ["Suppose MATH .",
-                "Let MATH .",
-                "Using MATH , we know that MATH is MATH .",
-                "Set the value of MATH to be MATH ."
+        "Let MATH .",
+        "Using MATH , we know that MATH is MATH .",
+        "Set the value of MATH to be MATH .",
+        "Inferring MATH from REF , MATH holds .",
+        "三角形 の 内角 の 和 は 百八十度 で ある 。",
+        "Suppose that hence MATH , MATH .",
+        "People won't talk like this .",
+        "We can assume without a loss of generality that MATH , since there exists MATH such that MATH ."
+        
         ]
 
 """Using mle_bigrams.pk
@@ -42,39 +48,39 @@ def output(args):
     with open(args.lm, 'wb') as fout:
         pickle.dump(lm, fout)
 
-def length_sent(sent):
-    tokenized = tokenize(sent)
-    return len(tokenized)
+def length_sent(line):
+    tokenized = tokenize(line)
+    return len(tokenized) + 2
 
-def unigram_lp(lm, sent):
+def nltk_word_lp(lm, token):
+    return lm.logscore(token)
+
+def unigram_lp(lm, line, lp_word=nltk_word_lp, lp_sent=None, n=None):
     score = 0
-    tokenized = tokenize(sent)
+    tokenized = tokenize(line)
     for token in tokenized:
         score += lp_word(lm, token)
     return score
 
-def lp_sent(lm, sent, n):
-    tokenized = tokenize(sent)
-    sent_ngram = list(ngrams(tokenized, n))
-    return lm.entropy(sent_ngram) * (-len(tokenized))
+def nltk_sent_lp(lm, line, lp_word=None, sent_lp=None, n=None):
+    tokenized = tokenize(line)
+    sent_ngram = ngrams(tokenized, n)
+    return lm.entropy(sent_ngram) * (-length_sent(line))
 
-def mean_lp(lm, sent, n):
-    return lp_sent(lm, sent, n) / length_sent(sent)
+def mean_lp(lm, line, lp_word=None, lp_sent=nltk_sent_lp, n=None):
+    return lp_sent(lm, line, n=n) / length_sent(line)
 
-def norm_lp_div(lm, sent, n):
-    return - lp_sent(lm, sent, n) / unigram_lp(lm, sent)
+def norm_lp_div(lm, line, lp_word=nltk_word_lp, lp_sent=nltk_sent_lp, n=None):
+    return - lp_sent(lm, line, n) / unigram_lp(lm, line, lp_word)
 
-def norm_lp_sub(lm, sent, n):
-    return lp_sent(lm, sent, n) - unigram_lp(lm, sent)
+def norm_lp_sub(lm, line, lp_word=nltk_word_lp, lp_sent=nltk_sent_lp, n=None):
+    return lp_sent(lm, line, n) - unigram_lp(lm, line, lp_word)
 
-def slor(lm, sent, n):
-    return norm_lp_sub(lm, sent, n) / length_sent(sent)
+def slor(lm, line, lp_word=nltk_word_lp, lp_sent=nltk_sent_lp, n=None):
+    return norm_lp_sub(lm, line, lp_word, lp_sent, n) / length_sent(line)
 
-def lp_word(lm, token):
-    return lm.logscore(token)
-
-def sentence_ranker(lm, sentences, prob_function, n):
-    log_prob_dict = {sent : prob_function(lm, sent, n) for sent in sentences}
+def sentence_ranker(lm, sentences, prob_function, lp_word=nltk_word_lp, lp_sent=nltk_sent_lp, n=None):
+    log_prob_dict = {sent : prob_function(lm, sent, lp_word, lp_sent, n) for sent in sentences}
     log_prob_sorted = sorted(log_prob_dict.keys(), key=lambda x:log_prob_dict[x], reverse=True)
 
     return log_prob_dict, log_prob_sorted
@@ -86,9 +92,13 @@ def word_ranker(lm, prob_function, sentences):
 
     return log_prob_dict, log_prob_sorted
 
-def sort_by_prob():
-    # Make 0 and inf return default value instead
-    return
+def rank_sentences_from_file(lm, sentence_file, prob_function, lp_word=nltk_word_lp, lp_sent=nltk_sent_lp, n=None):
+    with open(sentence_file, "r") as sent_file:
+        sentences = sent_file.read().splitlines()
+    
+    log_prob_dict, log_prob_sorted = sentence_ranker(lm, sentences, prob_function, lp_word, lp_sent, n)
+    for sent in log_prob_sorted:
+        print(log_prob_dict[sent], "\t", sent)
 
 def experiment(args):
     if args.output:
@@ -100,7 +110,7 @@ def experiment(args):
     with open(args.sentences, "r") as s:
         sents = s.read().splitlines()
 
-    for prob_func in [lp_sent, mean_lp, norm_lp_div, norm_lp_sub, slor]:
+    for prob_func in [lp_sent, unigram_lp, mean_lp, norm_lp_div, norm_lp_sub, slor]:
         prob_dict, sorted_list = sentence_ranker(lm, sents, prob_func, 2)
         if args.output:
             results += "\n" + prob_func.__name__ + "\n"
@@ -125,7 +135,7 @@ if __name__ == '__main__':
     nicer.make_nice()
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--files", "-f", nargs='*',type=argparse.FileType("r"),
+    parser.add_argument( "--files", "-f", nargs='*',type=argparse.FileType("r"),
                             help="List of txt files to read sentences from (for generating lm)")
 
     parser.add_argument( "--cores", "-c",
@@ -137,10 +147,10 @@ if __name__ == '__main__':
     parser.add_argument( "--ngrams", "-n", type=int, default=2,
                             help="ngrams to use")
 
-    parser.add_argument("--sentences", "-s",
+    parser.add_argument( "--sentences", "-s",
                             help="txt file to read sentences from (for testing on lm)")
 
-    parser.add_argument("--output", "-o", 
+    parser.add_argument( "--output", "-o", 
                             help="txt file to write resuls to")
 
 

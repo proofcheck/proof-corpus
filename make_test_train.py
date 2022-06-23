@@ -37,7 +37,6 @@ def make_training_from_bin(train_files, train_num, output, word_list=[], test_li
             lines_one_file = f.read().splitlines()
             training_set += pick_sents(lines_one_file, n=train_num, compare=test_lines)
     return write_fixed_sents(training_set, output, word_list)
-     
 
 def make_testing_from_bin(test_files, output, word_list, train_lines=[]):
     testing_set = []
@@ -78,11 +77,8 @@ def make_train_test(args):
             fixed_training_lines = train.read().splitlines()
     else:
         fixed_training_lines = args.train.read().splitlines()
+    
     testing = make_testing_from_bin(test_files, save_test, word_list, fixed_training_lines)
-
-    # for sent in testing:
-    #     if not is_sent(sent):
-    #         print(sent)
 
     nltk.data.clear_cache()
     default_tagger = DEFAULT_TAGGER
@@ -94,7 +90,7 @@ def make_train_test(args):
                         num_mislabelings(default_confusion),
                       ]
     
-    output_default = "experiments/experiment_default_tagger_test_" + args.extension + ".txt"
+    output_default = "experiments/experiment_default_tagger_" + args.extension + ".txt"
     with open(output_default, "w") as o:
         str_results = list(map(str, default_results))
         o.write("\t".join(str_results))
