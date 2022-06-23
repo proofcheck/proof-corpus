@@ -110,7 +110,7 @@ def experiment(args):
     with open(args.sentences, "r") as s:
         sents = s.read().splitlines()
 
-    for prob_func in [lp_sent, unigram_lp, mean_lp, norm_lp_div, norm_lp_sub, slor]:
+    for prob_func in [nltk_sent_lp, unigram_lp, mean_lp, norm_lp_div, norm_lp_sub, slor]:
         prob_dict, sorted_list = sentence_ranker(lm, sents, prob_func, 2)
         if args.output:
             results += "\n" + prob_func.__name__ + "\n"
