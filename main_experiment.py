@@ -2,10 +2,10 @@
 
 import argparse
 
-
 import nicer
 from multiprocessing import Pool
 from itertools import repeat
+import pickle
 
 from load_ontonotes_pos import *
 from train_tagger import *
@@ -19,17 +19,22 @@ def save_results(results, output):
         result_string = ""
         for trial in results:
             str_trial = [str(num) for num in trial]
-            result_string += "\t".join(str_trial) + "\n"            
+            result_string += "trial" + "\t".join(str_trial) + "\n"            
         o.write(result_string)
 
-def get_one_condition_results(testing, tagger, output=None):
+def get_one_trial_results(testing, tagger, trial_id, dump_file=None):
     trained_confusion = tagger.confusion(testing)
-    trained_results = [tagger.accuracy(testing), 
+    trained_results = [ trial_id,
+                        tagger.accuracy(testing), 
                         trained_confusion['VB', 'NNP'],
                         mislabeled_vb(trained_confusion),
                         num_mislabelings(trained_confusion),
                     ]
-    
+    if dump_file:
+        dump_file = dump_file + "_" + str(trial_id) + ".pk"
+        with open(dump_file, "wb") as resource:
+            pickle.dump(tagger, resource)
+
     return trained_results
 
 def do_experiments(args):
@@ -53,17 +58,23 @@ def do_experiments(args):
 
     for arg in zipped_args:
         do_one_condition(testing, training_set, arg, args.extension, 
-                            args.num_trials, args.wsj_test, args.cores, args.print_mislabels)
+                            args.num_trials, args.wsj_test, args.cores, args.print_mislabels, args.dump)
 
     args.train.close()
     args.test.close()
 
-def do_one_condition(testing, training_set, zipped_arg, extension="", num_trials=10, wsj_test=False, cores=5, print_mislabels=False):
+def do_one_condition(testing, training_set, zipped_arg, extension="", num_trials=10, wsj_test=False, cores=5, print_mislabels=False, dump=False):
     num_train_sent, nr_iter = zipped_arg
     training = []
     for imperative_verb in training_set:
         training += imperative_verb[:num_train_sent]
-    
+
+    if dump:
+        output_dump = "tagger/" + str(num_train_sent) + "sents_" + str(nr_iter) + "iters_" + extension
+
+    else:
+        output_dump = None
+
     if wsj_test:
         output_wsj = "experiments/experiment_" + str(num_train_sent) + "sents_" + str(nr_iter) + "iters_" + extension + "-wsj.txt"
         trained_results_wsj = []
@@ -79,8 +90,10 @@ def do_one_condition(testing, training_set, zipped_arg, extension="", num_trials
                 [training]*num_trials,
                 [nr_iter]*num_trials,
                 [testing]*num_trials,
+                list(range(1, num_trials+1)),
                 [wsj_test]*num_trials,
                 repeat(print_mislabels),
+                repeat(output_dump),
             ),
             1,
         ):
@@ -100,13 +113,14 @@ def do_one_condition(testing, training_set, zipped_arg, extension="", num_trials
 
     if print_mislabels:
         output_mislabels = "experiments/experiment_" + str(num_train_sent) + "sents_" + str(nr_iter) + "iters_" + extension + "_mislabels" + ".txt"
-        output_string = "\n".join(mislabeled)
+        output_string = "\n".join(mislabellings)
         with open(output_mislabels, "w") as o:
             o.write(output_string)
 
-def do_one_trial(training, nr_iter, testing, wsj_test=False, print_mislabels=False):
+def do_one_trial(training, nr_iter, testing, trial_id=None, wsj_test=False, print_mislabels=False, dump_file=None):
     trained_tagger = train_tagger(training, nr_iter)
-    trained = get_one_condition_results(testing, trained_tagger)
+    
+    trained = get_one_trial_results(testing, trained_tagger, trial_id, dump_file)
 
     if print_mislabels:
         output_string = ""
@@ -122,7 +136,7 @@ def do_one_trial(training, nr_iter, testing, wsj_test=False, print_mislabels=Fal
         output_string = None
             
     if wsj_test:
-        wsj = get_one_condition_results(WSJ_TEST, trained_tagger)
+        wsj = get_one_trial_results(WSJ_TEST, trained_tagger, trial_id)
 
     else:
         wsj = None
@@ -165,8 +179,12 @@ if __name__ == '__main__':
                             help="test on WSJ?")
 
     parser.add_argument("--print_mislabels", "-p", action='store_true',
-                            help="output for non-VB tags")
+                            help="output non-VB tags?")
+
+    parser.add_argument("--dump", "-d", action='store_true',
+                            help="dump tagger?")
 
     args = parser.parse_args()
 
     main(args)
+
