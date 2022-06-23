@@ -28,13 +28,20 @@ def my_ngrams(sent, n):
     return ngram_list
 
 def results(f, dist):
-    # Writes top 10000 ngrams in file
     with open(f, "w") as output:
-        common_list = dist.most_common(10000)
-        for ind, gram in enumerate(common_list):
+        sorted_keys = sorted(dist.keys(), key=lambda x: dist[x], reverse=True)
+        for ind, key in enumerate(sorted_keys):
             if ind%100 == 0:
                 print("{}".format(ind))
-            output.write(str(gram[0]) + '\t' + str(gram[1]) + '\n')
+            
+            freq = dist[key]
+
+            if freq > 10:
+                grams = " ".join(key)
+                output.write(str(freq) + '\t' + grams + '\n')
+            
+            else:
+                break
 
 def return_ngrams(sent, n):
     # Creates ngrams from a sentence (list)
@@ -81,7 +88,7 @@ def main(args):
             grams = return_ngrams(sent, n)
             dist.update(grams)
 
-        output = "ngrams/" + str(n) + "grams_top_10000_" + args.extension + ".txt"
+        output = "ngrams/" + str(n) + "grams_" + args.extension + ".txt"
         results(output, dist)
 
 if __name__ == '__main__':
