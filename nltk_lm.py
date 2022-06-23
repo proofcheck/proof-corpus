@@ -151,7 +151,7 @@ if __name__ == '__main__':
                             help="txt file to read sentences from (for testing on lm)")
 
     parser.add_argument( "--output", "-o", 
-                            help="txt file to write resuls to")
+                            help="txt file to write results to")
 
 
 

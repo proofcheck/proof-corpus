@@ -98,7 +98,6 @@ def make_train_test(args):
 def main(args):
     make_train_test(args)
 
-
 if __name__ == '__main__':
     nicer.make_nice()
     parser = argparse.ArgumentParser()
@@ -111,9 +110,6 @@ if __name__ == '__main__':
     
     parser.add_argument("--num_test_bins", "-nte",type=int, default=1,
                             help="number of testing word bins")
-    
-    parser.add_argument("--save_sentences", "-s", action='store_true',
-                            help="save sentences")
 
     parser.add_argument("--extension", "-e",
                             help="file extension")

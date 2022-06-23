@@ -47,10 +47,10 @@ if __name__ == '__main__':
                             help="Number of cores to use", type=int, default=4)
 
     parser.add_argument( "--output", "-o", type=argparse.FileType("w"),
-                            help="txt file to write resuls to")
+                            help="txt file to write results to")
     
     parser.add_argument( "--keep_punct", "-p", action="store_true",
-                            help="store unique sentences")
+                            help="keep punctuation?")
 
     args = parser.parse_args()
     main(args)
