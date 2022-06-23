@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+from email.policy import default
 
 import nicer
 from multiprocessing import Pool
@@ -11,63 +12,74 @@ from load_ontonotes_pos import *
 from train_tagger import *
 
 from load_tagged_sent import load_tag_lines
-from main_experiment import save_results, get_one_trial_results
+from main_experiment import save_results, get_one_trial_results, get_tokens_from_tags
 
 PATH = "word_bins/unique/"
 
 def do_dumped_experiments(args):
-    
     testing_lines = args.test.read().splitlines()
     testing = load_tag_lines(testing_lines)[1]
        
     args.test.close()
 
-    if wsj_test:
-        output_wsj = "experiments/experiment_" + str(num_train_sent) + "sents_" + str(nr_iter) + "iters_" + extension + "-wsj.txt"
+    conditions = "_".join(args.tagger[0].split("/")[-1].split(".")[0].split("_")[:-1]) + "_"
+
+    if args.wsj_test:
+        output_wsj = "experiments/experiment_" + conditions + args.extension + "-wsj.txt"
         trained_results_wsj = []
 
-    output_test = "experiments/experiment_" + str(num_train_sent) + "sents_" + str(nr_iter) + "iters_" + extension + ".txt"
+    output_test = "experiments/experiment_" + conditions + args.extension + ".txt"
     
     trained_results_wsj = []
     trained_results = []
+
+
+    default_tagger = DEFAULT_TAGGER
+    default_confusion = default_tagger.confusion(testing)
+    default_results = ["default", default_tagger.accuracy(testing), 
+                        default_confusion['VB', 'NNP'],
+                        mislabeled_vb(default_confusion),
+                        num_mislabelings(default_confusion),
+                      ]
+    trained_results += [default_results]
     mislabellings = []
     
-    with Pool(processes=cores) as p:
+    with Pool(processes=args.cores) as p:
         for trained, wsj, mislabeled in p.starmap(
-            do_one_trial,
+            do_dumped_trial,
             zip(
                 args.tagger,
-                [testing]*num_trials,
-                list(range(1, num_trials+1)),
-                [wsj_test]*num_trials,
-                repeat(print_mislabels),
+                repeat(testing),
+                repeat(args.wsj_test),
+                repeat(args.print_mislabels),
             ),
             1,
         ):
-            if wsj_test:
+            if args.wsj_test:
                 trained_results_wsj += [wsj]
 
-            if print_mislabels:
+            if args.print_mislabels:
                 mislabellings += [mislabeled]
 
             trained_results += [trained]
-
+    
     save_results(trained_results, output_test)
     
-    if wsj_test:
+    if args.wsj_test:
         save_results(trained_results_wsj, output_wsj)
 
-    if print_mislabels:
-        output_mislabels = "experiments/experiment_" + str(num_train_sent) + "sents_" + str(nr_iter) + "iters_" + extension + "_mislabels" + ".txt"
+    if args.print_mislabels:
+        output_mislabels = "experiments/experiment_" + conditions + args.extension + "_mislabels" + ".txt"
         output_string = "\n".join(mislabellings)
         with open(output_mislabels, "w") as o:
             o.write(output_string)
 
-def do_dumped_trial(tagger_file, testing, trial_id=None, wsj_test=False, print_mislabels=False, dump_file=None):
+def do_dumped_trial(tagger_file, testing, wsj_test=False, print_mislabels=False):
     with open(tagger_file, "rb") as resource:
         trained_tagger = pickle.load(resource)
 
-    trained = get_one_trial_results(testing, trained_tagger, trial_id, dump_file)
+    trial_id = "trial" + tagger_file.split("/")[-1].split(".")[0].split("_")[-1]
+    trained = get_one_trial_results(testing, trained_tagger, trial_id)
 
     if print_mislabels:
         output_string = ""
@@ -97,7 +109,7 @@ if __name__ == '__main__':
     nicer.make_nice()
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--tagger", "-ta",type=argparse.FileType('r'), nargs="*",
+    parser.add_argument("--tagger", "-ta", nargs="*",
                             help="txt files to read tagger")
 
     parser.add_argument("--test", "-te",type=argparse.FileType('r'),

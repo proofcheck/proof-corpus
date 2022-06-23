@@ -17,9 +17,11 @@ PATH = "word_bins/unique/"
 def save_results(results, output):
     with open(output, "w") as o:
         result_string = ""
-        for trial in results:
-            str_trial = [str(num) for num in trial]
-            result_string += "trial" + "\t".join(str_trial) + "\n"            
+
+        sorted_results = [results[0]] + sorted(results[1:], key=lambda x: int(x[0].split("trial")[-1]))
+        for trial in sorted_results:
+            str_trial = [str(item) if type(item) is not str else item for item in trial]
+            result_string += "\t".join(str_trial) + "\n"            
         o.write(result_string)
 
 def get_one_trial_results(testing, tagger, trial_id, dump_file=None):
@@ -38,9 +40,6 @@ def get_one_trial_results(testing, tagger, trial_id, dump_file=None):
     return trained_results
 
 def do_experiments(args):
-    # Prints accuracy, number of VBs mistakenly tagged as NPP, number of mislabelled tokens overall
-    # for default and trained taggers 
-    # Tests tagger on args.test and WSJ corpus
     train_num_list = [int(num) for num in args.train_num_list.split(",")]
     iter_num_list = [int(num) for num in args.iter_num_list.split(",")]
     
@@ -119,7 +118,7 @@ def do_one_condition(testing, training_set, zipped_arg, extension="", num_trials
 
 def do_one_trial(training, nr_iter, testing, trial_id=None, wsj_test=False, print_mislabels=False, dump_file=None):
     trained_tagger = train_tagger(training, nr_iter)
-    
+    trial_id = "trial" +  str(trial_id)
     trained = get_one_trial_results(testing, trained_tagger, trial_id, dump_file)
 
     if print_mislabels:
