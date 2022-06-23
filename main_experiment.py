@@ -2,6 +2,7 @@
 
 import argparse
 
+
 import nicer
 from multiprocessing import Pool
 from itertools import repeat
@@ -70,8 +71,9 @@ def do_one_condition(testing, training_set, zipped_arg, extension="", num_trials
     output_test = "experiments/experiment_" + str(num_train_sent) + "sents_" + str(nr_iter) + "iters_" + extension + ".txt"
     trained_results_wsj = []
     trained_results = []
+    mislabellings = []
     with Pool(processes=cores) as p:
-        for trained, wsj in p.starmap(
+        for trained, wsj, mislabeled in p.starmap(
             do_one_trial,
             zip(
                 [training]*num_trials,
@@ -84,32 +86,48 @@ def do_one_condition(testing, training_set, zipped_arg, extension="", num_trials
         ):
             if wsj_test:
                 trained_results_wsj += [wsj]
+
+            if print_mislabels:
+                mislabellings += [mislabeled]
+
             trained_results += [trained]
-    
+
+            
     save_results(trained_results, output_test)
     
     if wsj_test:
         save_results(trained_results_wsj, output_wsj)
+
+    if print_mislabels:
+        output_mislabels = "experiments/experiment_" + str(num_train_sent) + "sents_" + str(nr_iter) + "iters_" + extension + "_mislabels" + ".txt"
+        output_string = "\n".join(mislabeled)
+        with open(output_mislabels, "w") as o:
+            o.write(output_string)
 
 def do_one_trial(training, nr_iter, testing, wsj_test=False, print_mislabels=False):
     trained_tagger = train_tagger(training, nr_iter)
     trained = get_one_condition_results(testing, trained_tagger)
 
     if print_mislabels:
+        output_string = ""
         for sent in testing:
             tokens = get_tokens_from_tags(sent)
             tags = trained_tagger.tag(tokens)
             if tags[0][1] not in {'VB', 'VBG', 'VBN'}:
-                print(tokens)
-                print(tags[0][1])
+                output_string += " ".join(tokens) + "\t" + tags[0][1] + "\n"
+            
+        output_string += "----------------\n"
 
+    else:
+        output_string = None
+            
     if wsj_test:
         wsj = get_one_condition_results(WSJ_TEST, trained_tagger)
 
     else:
         wsj = None
 
-    return trained, wsj
+    return trained, wsj, output_string
 
 def get_tokens_from_tags(tags):
     tokens = [word[0] for word in tags]
@@ -147,7 +165,7 @@ if __name__ == '__main__':
                             help="test on WSJ?")
 
     parser.add_argument("--print_mislabels", "-p", action='store_true',
-                            help="print non-VB tags?")
+                            help="output for non-VB tags")
 
     args = parser.parse_args()
 
