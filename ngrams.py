@@ -13,7 +13,7 @@ from nltk.probability import FreqDist
 
 from sent_tools import *
 
-# Writes top 10000 ngrams using nltk
+# Writes ngrams using nltk
 # Input : sent**.tsv, number of max ngrams
 
 def my_ngrams(sent, n):
@@ -67,6 +67,15 @@ def process_for_grams(s):
     tokenized = split_sentence_id_tokenized(s)[1]
     return [w.lower() if w not in ALIASES else w for w in tokenized]
 
+def write_ngrams(sentences, n, extension=""):
+    dist = FreqDist()
+    for sent in sentences:
+        grams = return_ngrams(sent, n)
+        dist.update(grams)
+
+    output = "ngrams/" + str(n) + "grams_" + extension + ".txt"
+    results(output, dist)
+
 def main(args): 
     sentences = []
     for fd in args.files:
@@ -90,6 +99,18 @@ def main(args):
 
         output = "ngrams/" + str(n) + "grams_" + args.extension + ".txt"
         results(output, dist)
+
+    # with Pool(processes=args.cores) as p:
+    #     p.starmap(
+    #         write_ngrams,
+    #         zip(
+    #             repeat(sentences),
+    #             list(range(args.start, args.stop+1)),
+    #             repeat(args.extension)
+    #         ),
+    #         1
+    #     )
+
 
 if __name__ == '__main__':
     nicer.make_nice()
