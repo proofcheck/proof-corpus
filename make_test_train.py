@@ -59,14 +59,14 @@ def make_train_test(args):
     num_train_bins = len(word_list) - args.num_test_bins
     train_files, test_files = get_train_test_files(word_list, num_train_bins)
 
-    save_test = "testing_set/" + args.extension + ".txt"
+    save_test = "testing_set/" + args.test_extension + ".txt"
 
     if os.path.exists(save_test):
         print("Testing exists")
         return 0
 
     if not args.train: 
-        save_train = "training_set/" + args.extension + ".txt"
+        save_train = "training_set/" + args.train_extension + ".txt"
     
         if os.path.exists(save_train):
             print("Training exists")
@@ -90,7 +90,7 @@ def make_train_test(args):
                         num_mislabelings(default_confusion),
                       ]
     
-    output_default = "experiments/experiment_default_tagger_" + args.extension + ".txt"
+    output_default = "experiments/experiment_default_tagger_" + args.test_extension + ".txt"
     with open(output_default, "w") as o:
         str_results = list(map(str, default_results))
         o.write("\t".join(str_results))
@@ -111,7 +111,10 @@ if __name__ == '__main__':
     parser.add_argument("--num_test_bins", "-nte",type=int, default=1,
                             help="number of testing word bins")
 
-    parser.add_argument("--extension", "-e",
+    parser.add_argument("--train_extension", "-tr_e",
+                            help="file extension")
+
+    parser.add_argument("--test_extension", "-te_e",
                             help="file extension")
     
     parser.add_argument("--word_list", "-wl",type=argparse.FileType('r'),
