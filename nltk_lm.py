@@ -97,6 +97,7 @@ def rank_sentences_from_file(lm, sentence_file, prob_function, lp_word=nltk_word
         sentences = sent_file.read().splitlines()
     
     log_prob_dict, log_prob_sorted = sentence_ranker(lm, sentences, prob_function, lp_word, lp_sent, n)
+    
     for sent in log_prob_sorted:
         print(log_prob_dict[sent], "\t", sent)
 

@@ -49,7 +49,7 @@ if __name__ == '__main__':
     parser.add_argument( "--output", "-o", type=argparse.FileType("w"),
                             help="txt file to write results to")
     
-    parser.add_argument( "--keep_punct", "-p", action="store_true",
+    parser.add_argument( "--keep_punct", "-k", action="store_true",
                             help="keep punctuation?")
 
     args = parser.parse_args()
