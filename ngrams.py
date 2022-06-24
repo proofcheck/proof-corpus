@@ -47,7 +47,8 @@ def return_ngrams(sent, n):
     # Creates ngrams from a sentence (list)
     # Input : sentence (list)
 
-    #grams = ngrams(sent, n)
+    # Don't use nltk ngrams (Memory Error!)
+    # grams = ngrams(sent, n)
     grams = my_ngrams(sent, n)
     return grams
 
