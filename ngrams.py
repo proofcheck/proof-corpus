@@ -5,6 +5,7 @@ os.environ['OPENBLAS_NUM_THREADS'] = '1'
 
 import argparse
 import nicer
+import gc
 from multiprocessing import Pool
 from itertools import repeat
 
@@ -80,13 +81,8 @@ def write_ngrams(sentences, n, extension=""):
 def main(args): 
     sentences = []
     for fd in args.files:
-        with Pool(processes=args.cores) as p:
-            this_file_sents = p.imap(
-                        process_for_grams,
-                        fd.readlines(),
-                        250
-                        )
-            sentences.extend(this_file_sents)
+        for line in fd.readlines():
+            sentences.extend([process_for_grams(line)])
 
         print("done", fd)
         fd.close()
@@ -100,6 +96,8 @@ def main(args):
 
         output = "ngrams/" + str(n) + "grams_" + args.extension + ".txt"
         results(output, dist)
+        del dist
+        gc.collect()
 
     # with Pool(processes=args.cores) as p:
     #     p.starmap(
@@ -129,8 +127,6 @@ if __name__ == '__main__':
     parser.add_argument("--extension", "-e",
                             help="extension for file name")
 
-    parser.add_argument( "--cores", "-c",
-                            help="Number of cores to use", type=int, default=4)
 
     args = parser.parse_args()
 
