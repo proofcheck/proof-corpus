@@ -126,7 +126,7 @@ if __name__ == '__main__':
     nicer.make_nice()
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--files", "-f", nargs='*',type=argparse.FileType("r"), default=[sys.stdin],
+    parser.add_argument("--files", "-f", nargs='*',type=argparse.FileType("r"),
                             help="list of txt files to read proof from")
     
     parser.add_argument("--output", "-o", type=argparse.FileType("w"),
