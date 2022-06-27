@@ -452,7 +452,7 @@ def cleanup(
 
         # MATH.1 to MATH
         # REF.1 to REF
-        proof = re.sub(r"(MATH|CASE|REF|CITE)\.([0-9]){0,3}", r"\1", proof)
+        proof = re.sub(r"(MATH|CASE|REF|CITE)\.([0-9]){1,3}", r"\1", proof)
 
         # (iii 'a-ds,.) -> REF
         proof = re.sub(
@@ -851,7 +851,7 @@ def cleanup(
 
     # MATH.1 to MATH
     # REF.1 to REF
-    proof = re.sub(r"(MATH|CASE|REF|CITE)\.([\.A-Za-z0-9]){0,5}", r"\1", proof)
+    proof = re.sub(r"(MATH|CASE|REF|CITE)\.([\.A-Za-z0-9]){1,5}", r"\1", proof)
 
     proof = re.sub(
         r"([Ss]ub)?[Cc]ase\s*([0-9]|[A-Za-z]|[',-–]|\s){0,5}([.,])\s*",
