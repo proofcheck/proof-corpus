@@ -50,7 +50,7 @@ def output(args):
 
 def length_sent(line):
     tokenized = tokenize(line)
-    return len(tokenized) + 2
+    return len(tokenized)
 
 def nltk_word_lp(lm, token):
     return lm.logscore(token)
