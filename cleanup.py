@@ -198,9 +198,9 @@ def ner(proof: str, debug: bool = False, aggressive: bool = True):
         print("0110", proof)
 
     # (van Trapp -> ) van NAME -> NAME
-    # Similarly von NAME, van de NAME, el NAME, st. NAME, ibn NAME, ...
+    # Similarly von NAME, van de NAME, el NAME, st. NAME, ibn NAME, le NAME, ...
     proof = re.sub(
-        "(\\b(?i:v[oa]n|d[eo]s|de[nr]?|la|el|st\\.|ibn)\\s+)+NAME",
+        "(\\b(?i:v[oa]n|d[eo]s|de[nr]?|la|le|el|st\\.|ibn)\\s+)+NAME",
         "NAME",
         proof,
     )
@@ -216,10 +216,11 @@ def ner(proof: str, debug: bool = False, aggressive: bool = True):
         f"(\\s){upperLetter}\\w+\\b and NAME\\b", "\\1NAME and NAME", proof
     )
 
-    proof = re.sub(f"(?<![.] )\\b{upperLetter}\\w+ CITE\\b", "NAME CITE", proof)
+    proof = re.sub(
+        f"(?<![.] )\\b{upperLetter}\\w+ CITE\\b", "NAME CITE", proof
+    )
 
     # proof = re.sub("NNAME", "NAME", proof)
-
 
     if debug:
         print("0125", proof)
@@ -447,12 +448,11 @@ def cleanup(
     if aggressive:
         # .. -> .
         # . . -> .
-        proof = re.sub(r"(\.\s*)+\.", ".",proof)
+        proof = re.sub(r"(\.\s*)+\.", ".", proof)
 
         # MATH.1 to MATH
         # REF.1 to REF
         proof = re.sub(r"(MATH|CASE|REF|CITE)\.([0-9]){0,3}", r"\1", proof)
-        
 
         # (iii 'a-ds,.) -> REF
         proof = re.sub(
@@ -464,11 +464,10 @@ def cleanup(
         # (sketch) -> ""
         proof = re.sub("\\(\\s*(?i:sketch)\\s*\\)", " ", proof)
 
-        #(Base case) -> REF (then likely to CASE: later)
+        # (Base case) -> REF (then likely to CASE: later)
         proof = re.sub(r"\(\s*(?i:base)\s*(?i:case).{0,5}\s*\)", "REF", proof)
 
         proof = re.sub(r"Base\s*(?i:case)", "REF", proof)
-
 
     # Case 1: -> CASE
     proof = re.sub(r"[cC]ase\s*([0-9]*|MATH|REF)\s*(:)", "REF", proof)
@@ -538,14 +537,18 @@ def cleanup(
         if debug:
             print(1100, proof)
 
-        proof = re.sub(r"\(\s*([-0-9]+|[a-zA-Z])(\s*,\s*([0-9.,'-]+|[a-zA-Z])\s*)+\)", "MATH", proof)
+        proof = re.sub(
+            r"\(\s*([-0-9]+|[a-zA-Z])(\s*,\s*([0-9.,'-]+|[a-zA-Z])\s*)+\)",
+            "MATH",
+            proof,
+        )
 
-        proof = re.sub(r"\b(?i:(figure|fig))\s*[.]?\s*[0-9]*(\s*REF)?", "REF", proof)
+        proof = re.sub(
+            r"\b(?i:(figure|fig))\s*[.]?\s*[0-9]*(\s*REF)?", "REF", proof
+        )
 
     # eliminate extra spaces
     proof = re.sub("[ ]+", " ", proof)
-
-
 
     if debug:
         print(1200, proof)
@@ -597,7 +600,7 @@ def cleanup(
     )
 
     if aggressive:
-    # dfajfdkls Case 1 dfhaslsfdlk -> dfajfdkls REF dfhaslsfdlk
+        # dfajfdkls Case 1 dfhaslsfdlk -> dfajfdkls REF dfhaslsfdlk
         proof = re.sub(
             f"({lowerLetter}+\\s*)(?i:case)\\s*{atomicID}*(\\s+{lowerLetter}+)",
             "\\1REF\\2",
@@ -631,8 +634,6 @@ def cleanup(
         proof,
     )
 
-
-
     proof = re.sub(f"(?i:stage)\\s*{atomicID}\\s*(.)", "", proof)
 
     proof = re.sub(
@@ -644,7 +645,6 @@ def cleanup(
     proof = re.sub(f"\\(\\s*{atomicID}\\s*\\)", "REF", proof)
 
     proof = re.sub("CASE\\s*:(\\s*CASE\\s*:)+", "CASE:", proof)
-
 
     # base and inductive step labeling to CASE only when followed by capital letter
     proof = re.sub(
@@ -823,7 +823,6 @@ def cleanup(
     # proof = re.sub(r"(MATH\s*,\s*|MATH\s*((?i:and)|&)\s*)+MATH", "MATH ", proof)
     proof = re.sub(r"(MATH\s*)+MATH", "MATH", proof)
 
-
     # figure REF ii -> REF
 
     proof = re.sub(
@@ -847,8 +846,6 @@ def cleanup(
         proof,
     )
 
-
-
     if debug:
         print(9890, proof)
 
@@ -856,8 +853,11 @@ def cleanup(
     # REF.1 to REF
     proof = re.sub(r"(MATH|CASE|REF|CITE)\.([\.A-Za-z0-9]){0,5}", r"\1", proof)
 
-
-    proof = re.sub(r"([Ss]ub)?[Cc]ase\s*([0-9]|[A-Za-z]|[',-–]|\s){0,5}([.,])\s*", "REF\\2 ", proof)
+    proof = re.sub(
+        r"([Ss]ub)?[Cc]ase\s*([0-9]|[A-Za-z]|[',-–]|\s){0,5}([.,])\s*",
+        "REF\\2 ",
+        proof,
+    )
 
     # (see REF) -> (REF)
     proof = re.sub(r"\(\s*((?i:see)|(?i:by))\s*REF\s*\)", "(REF)", proof)
@@ -871,7 +871,9 @@ def cleanup(
     if debug:
         print(9900, proof)
 
-    proof = re.sub(f"\\.({upperLetter}({upperLetter}|{lowerLetter})+)", ". \\1", proof)
+    proof = re.sub(
+        f"\\.({upperLetter}({upperLetter}|{lowerLetter})+)", ". \\1", proof
+    )
 
     proof = re.sub(r"([﹘–—⸺⸻])", r" \1 ", proof)
 
@@ -885,13 +887,18 @@ def cleanup(
 
     return proof
 
-URL = re.compile(r"""\b(?:https?|ftp|gopher)\s?:\s?/{1,3}\s?(?:[-a-z0-9_%@']+[.])+[-a-z0-9_%@]+(?:[:][0-9]+)?(?:\s*[/]\s*[.a-z0-9_%#~&@*()'~-]*)*\s*(?:[/]\s*[a-z0-9_%#~&@*()'~-]*[/]|[/][a-z0-9_%#~&@*()'~-]*)""",
-                 re.IGNORECASE)
+
+URL = re.compile(
+    r"""\b(?:https?|ftp|gopher)\s?:\s?/{1,3}\s?(?:[-a-z0-9_%@']+[.])+[-a-z0-9_%@]+(?:[:][0-9]+)?(?:\s*[/]\s*[.a-z0-9_%#~&@*()'~-]*)*\s*(?:[/]\s*[a-z0-9_%#~&@*()'~-]*[/]|[/][a-z0-9_%#~&@*()'~-]*)""",
+    re.IGNORECASE,
+)
+
 
 def urls(proof, debug=False):
     # Don't let it end with a period
     proof = re.sub(URL, " REF ", proof)
     return proof
+
 
 def clean_proof(
     orig: str,
@@ -906,7 +913,7 @@ def clean_proof(
         (prefix, line) = ("", orig)
 
     clean = unicodedata.normalize("NFKC", line)
-    clean = clean.replace("�", "") # 0810/0810.4782
+    clean = clean.replace("�", "")  # 0810/0810.4782
     if debug:
         print("0000", clean)
     clean = urls(clean, debug)
