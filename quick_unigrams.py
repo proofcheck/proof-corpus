@@ -43,7 +43,6 @@ def quick_read(fd, keep_punctuation, answer):
                 for s in fd.readlines()
             )
         )
-        print("done", fd)
 
 
 def get_unigrams(list_of_sentences):
