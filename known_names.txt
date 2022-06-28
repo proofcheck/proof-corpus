@@ -6620,6 +6620,7 @@ lazarsfeld
 lazarus
 lazowska
 lazzaro
+le
 leader
 leah
 leal
@@ -12393,6 +12394,7 @@ wright
 wrinch
 wroński
 wschebor
+wu
 wulf
 wursteisen
 wurstisen
