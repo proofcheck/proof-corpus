@@ -10,7 +10,7 @@ all:
 	foreach y (`seq 92 99` `seq -w 0 20`); ./collect_raw_proofs.py $$y >! proofs$$y.tsv; end
 	foreach y (`seq 92 99` `seq -w 0 20`); ./cleanup.py -p36 proofs$$y.tsv > cleanproofs$$y.tsv; end
 	foreach y (`seq 92 99` `seq -w 0 20`); ./sentize2.py -p36 cleanproofs$$y.tsv > sent$$y.tsv; end
-	find proofs -name "*.txt" -not -empty | cut -d'/' -f3 > successful-proof-ids
+	find proofs -name "*.txt" -not -empty | cut -d'/' -f3 | sort > successful-proof-ids
 	cut -f2 sent*.tsv | sort | uniq -c | sort -rn > sorted.txt
 
 matches/matches%: matches/eng-matches
