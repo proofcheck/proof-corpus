@@ -602,7 +602,7 @@ def cleanup(
     if aggressive:
         # dfajfdkls Case 1 dfhaslsfdlk -> dfajfdkls REF dfhaslsfdlk
         proof = re.sub(
-            f"({lowerLetter}+\\s*)(?i:case)\\s*{atomicID}*(\\s+{lowerLetter}+)",
+            f"({lowerLetter}+\\s+)(?i:case)\\s*{atomicID}*(\\s+{lowerLetter}+)",
             "\\1REF\\2",
             proof,
         )
@@ -832,7 +832,7 @@ def cleanup(
     )
 
     # Case REF -> REF
-    proof = re.sub(r"([Ss]ub)?(?i:case(s)?)\s*(MATH|REF)", "REF", proof)
+    proof = re.sub(r"\b([Ss]ub)?(?i:case(s)?)\s*(MATH|REF)", "REF", proof)
 
     proof = re.sub(r"\(\s*REF\s*\)\s*([A-Z])", "REF \\1", proof)
 
