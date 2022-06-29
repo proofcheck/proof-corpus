@@ -8,7 +8,7 @@ from itertools import repeat
 import pickle
 
 from load_ontonotes_pos import *
-from train_tagger import *
+from train_tagger import WSJ_TEST, mislabeled_vb, num_mislabelings, train_tagger
 
 from load_tagged_sent import load_tag_lines
 
@@ -29,6 +29,8 @@ def get_one_trial_results(testing, tagger, trial_id, dump_file=None):
     trained_results = [ trial_id,
                         tagger.accuracy(testing), 
                         trained_confusion['VB', 'NNP'],
+                        trained_confusion['VBG', 'NNP'],
+                        trained_confusion['VB', 'NN'],
                         mislabeled_vb(trained_confusion),
                         num_mislabelings(trained_confusion),
                     ]

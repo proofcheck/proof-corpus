@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import argparse
-from email.policy import default
 
 import nicer
 from multiprocessing import Pool
@@ -9,7 +8,7 @@ from itertools import repeat
 import pickle
 
 from load_ontonotes_pos import *
-from train_tagger import *
+from train_tagger import WSJ_TEST, DEFAULT_TAGGER, mislabeled_vb, num_mislabelings
 
 from load_tagged_sent import load_tag_lines
 from main_experiment import save_results, get_one_trial_results, get_tokens_from_tags
@@ -38,6 +37,8 @@ def do_dumped_experiments(args):
     default_confusion = default_tagger.confusion(testing)
     default_results = ["default", default_tagger.accuracy(testing), 
                         default_confusion['VB', 'NNP'],
+                        default_confusion['VBG', 'NNP'],
+                        default_confusion['VB', 'NN'],
                         mislabeled_vb(default_confusion),
                         num_mislabelings(default_confusion),
                       ]

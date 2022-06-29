@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 
 import argparse
-
-from more_itertools import flatten
 import nicer
 import os
+import nltk
 
 from load_ontonotes_pos import *
-from train_tagger import *
+from train_tagger import DEFAULT_TAGGER, mislabeled_vb, num_mislabelings, pick_sents, write_fixed_sents
 
 PATH = "/mnt/research/proofcheck/noda/proof-corpus/word_bins/unique/"
 
@@ -86,6 +85,8 @@ def make_train_test(args):
 
     default_results = [default_tagger.accuracy(testing), 
                         default_confusion['VB', 'NNP'],
+                        default_confusion['VBG', 'NNP'],
+                        default_confusion['VB', 'NN'],
                         mislabeled_vb(default_confusion),
                         num_mislabelings(default_confusion),
                       ]
