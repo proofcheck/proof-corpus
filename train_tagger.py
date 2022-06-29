@@ -99,10 +99,10 @@ def fix_sents(tags, word_list=[]):
             sent[0] = first_word, tag
         
         for ind, word in enumerate(sent):
-            if word[0] == "(" :
-                sent[ind] = "(", "("
-            elif word[0] == ")":
-                sent[ind] = ")", ")"
+            if word[0] in LEFT_BRACKET:
+                sent[ind] = word[0], "("
+            elif word[0] in RIGHT_BRACKET:
+                sent[ind] = word[0], ")"
             elif word[0] in ALIASES:
                 sent[ind] = word[0], "NNP"
             

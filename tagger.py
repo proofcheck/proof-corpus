@@ -83,13 +83,13 @@ def sent_tagger(line, raw=False):
     tagged = DEFAULT_TAGGER.tag(tokenized)
 
     if not raw:
-        for ind, word in enumerate(sent):
+        for ind, word in enumerate(tagged):
             if word[0] in LEFT_BRACKET:
-                sent[ind] = word[0], "("
+                tagged[ind] = word[0], "("
             elif word[0] in RIGHT_BRACKET:
-                sent[ind] = word[0], ")"
+                tagged[ind] = word[0], ")"
             elif word[0] in ALIASES:
-                sent[ind] = word[0], "NNP"
+                tagged[ind] = word[0], "NNP"
 
     return sent_id, tagged
 
