@@ -103,6 +103,9 @@ def fix_sents(tags, word_list=[]):
                 sent[ind] = "(", "("
             elif word[0] == ")":
                 sent[ind] = ")", ")"
+            elif word[0] in ALIASES:
+                sent[ind] = word[0], "NNP"
+            
     return tags
 
 def clean_sent(line):

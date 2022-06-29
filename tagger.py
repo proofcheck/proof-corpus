@@ -4,6 +4,7 @@ import argparse
 from nltk.tag.perceptron import PerceptronTagger
 import nicer
 from multiprocessing import Pool
+from itertools import repeat
 import sys
 import pickle
 
@@ -74,12 +75,22 @@ def make_default_tagger():
 
 DEFAULT_TAGGER = make_default_tagger()
 
-def sent_tagger(line):
+def sent_tagger(line, raw=False):
     # input: one line from sent**.tsv
     # returns: id, tagged sentence
     sent_id, sent = split_sentence_id(line)
     tokenized = tokenize(sent)
     tagged = DEFAULT_TAGGER.tag(tokenized)
+
+    if not raw:
+        for ind, word in enumerate(sent):
+            if word[0] in LEFT_BRACKET:
+                sent[ind] = word[0], "("
+            elif word[0] in RIGHT_BRACKET:
+                sent[ind] = word[0], ")"
+            elif word[0] in ALIASES:
+                sent[ind] = word[0], "NNP"
+
     return sent_id, tagged
 
 def write_tags(ids, sents, output=None): 
@@ -105,11 +116,14 @@ def main(args):
         if args.cores > 20:
             args.cores = 20
         with Pool(processes=args.cores) as p:
-            sent_tuples = p.imap(
-                sent_tagger,
-                fd.readlines(),
-                250,
-            )
+            sent_tuples = p.starmap(
+                    sent_tagger,
+                    zip(
+                        fd.readlines(),
+                        repeat(args.raw),
+                    ),
+                    250,
+                )
                 
             sent_ids, sents = zip(*sent_tuples)
             
@@ -137,6 +151,9 @@ if __name__ == '__main__':
 
     parser.add_argument( "--test", "-t",
                             help="test", action="store_true")
+    
+    parser.add_argument( "--raw", "-r",
+                            help="Do not correct alias tags", action="store_true")
 
     args = parser.parse_args()
     main(args)

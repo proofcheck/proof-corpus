@@ -6,7 +6,6 @@ from multiprocessing import Pool
 from itertools import repeat
 from nltk.probability import FreqDist
 
-from first_word import make_dist
 from sent_tools import *
 
 def dist_output(dist, output):
