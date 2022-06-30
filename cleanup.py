@@ -780,9 +780,15 @@ def cleanup(
 
     # Remove sub-references in citations
     # the theorem of Pick CITE -> REF CITE -> REF
-    proof = re.sub("REF,? CITE", "REF", proof)
+    proof = re.sub("\\bREF,? CITE\\b", "REF", proof)
+    # CITE, Theorem 2 -> CITE, REF -> REF
+    proof = re.sub("\\bCITE,? REF\\b", "REF", proof)
 
-    # ( CITE, Theorem 2) -> (CITE, REF) -> (CITE) -> CITE
+    # ( CITE, Theorem 2) -> (CITE, REF) -> REF
+    # ( CITE, 5.2) -> REF
+    proof = re.sub(f"\\(\\s*CITE[ ,]+(REF|{numAlpha})\\s*\\)", " REF ", proof)
+
+    # ( CITE ) -> CITE
     proof = re.sub("\\(\\s*CITE\\s*\\)", "CITE", proof)
 
     if debug:
