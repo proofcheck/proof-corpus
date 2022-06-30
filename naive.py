@@ -2383,7 +2383,8 @@ def get_proofs(
                 #  any attempt to redefine it. With luck, it won't matter
                 #  (particularly if the redefinition takes the same
                 #  number of arguments, which is common).
-                macros[rhs] = "frozen"
+                if rhs.startswith("\\"):
+                    macros[rhs] = "frozen"
                 macros[lhs] = ([[]], None, [rhs])
                 if debug:
                     print(f"  ... as macro for {rhs}")
