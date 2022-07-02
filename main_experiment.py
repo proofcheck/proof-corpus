@@ -6,10 +6,11 @@ import nicer
 from multiprocessing import Pool
 from itertools import repeat
 import pickle
+from nltk.metrics import ConfusionMatrix
 
 from load_ontonotes_pos import *
-from train_tagger import WSJ_TEST, mislabeled_vb, num_mislabelings, train_tagger
-
+from train_tagger import WSJ_TEST, DEFAULT_TAGGER, mislabeled_vb, num_mislabelings, train_tagger
+from tagger import untag_sent_to_tokens
 from load_tagged_sent import load_tag_lines
 
 PATH = "word_bins/unique/"
@@ -24,8 +25,34 @@ def save_results(results, output):
             result_string += "\t".join(str_trial) + "\n"            
         o.write(result_string)
 
-def get_one_trial_results(testing, tagger, trial_id, dump_file=None):
-    trained_confusion = tagger.confusion(testing)
+def get_first_three_confusion(testing, tagger):
+    """Compare tag of first three words only.
+    """
+
+    golden_tags = []
+    trained_tags = []
+
+    for golden in testing:
+        tokenized = untag_sent_to_tokens(golden)
+        trained = tagger.tag(tokenized)
+
+        first_three_golden = [golden[i][1] for i in range(3)]
+        first_three_trained = [trained[i][1] for i in range(3)]
+
+        golden_tags += first_three_golden
+        trained_tags += first_three_trained
+
+    confusion = ConfusionMatrix(golden_tags, trained_tags)
+
+    return confusion
+
+
+def get_one_trial_results(testing, tagger, trial_id, dump_file=None, tag_all=False):
+    if tag_all:
+        trained_confusion = tagger.confusion(testing)
+
+    else:
+        trained_confusion = get_first_three_confusion(testing, tagger)
     trained_results = [ trial_id,
                         tagger.accuracy(testing), 
                         trained_confusion['VB', 'NNP'],
@@ -53,18 +80,39 @@ def do_experiments(args):
     testing_lines = args.test.read().splitlines()
     testing = load_tag_lines(testing_lines)[1]
 
+    if args.default_results:
+        default_tagger = DEFAULT_TAGGER
+        if args.tag_all:
+            default_confusion = default_tagger.confusion(testing)
+        else:
+            default_confusion = get_first_three_confusion(testing, default_tagger)
+        
+        default_results = ["default", default_tagger.accuracy(testing), 
+                            default_confusion['VB', 'NNP'],
+                            default_confusion['VBG', 'NNP'],
+                            default_confusion['VB', 'NN'],
+                            mislabeled_vb(default_confusion),
+                            num_mislabelings(default_confusion),
+                        ]
+        output_default = "experiments/experiment_default_tagger_" + args.test_extension + ".txt"
+        with open(output_default, "w") as o:
+            str_results = list(map(str, default_results))
+            o.write("\t".join(str_results))
+
     train_num_list_zip = train_num_list*len(iter_num_list)
     iter_num_list_zip = [num for num in iter_num_list for i in range(len(train_num_list))]
     zipped_args = zip(train_num_list_zip, iter_num_list_zip)
 
     for arg in zipped_args:
         do_one_condition(testing, training_set, arg, args.extension, 
-                            args.num_trials, args.wsj_test, args.cores, args.print_mislabels, args.dump)
+                            args.num_trials, args.wsj_test, args.cores, 
+                            args.print_mislabels, args.dump, args.tag_all)
 
     args.train.close()
     args.test.close()
 
-def do_one_condition(testing, training_set, zipped_arg, extension="", num_trials=10, wsj_test=False, cores=5, print_mislabels=False, dump=False):
+def do_one_condition(testing, training_set, zipped_arg, extension="", num_trials=10, wsj_test=False, cores=5, print_mislabels=False, dump=False, tag_all=False):
+    
     num_train_sent, nr_iter = zipped_arg
     training = []
     for imperative_verb in training_set:
@@ -95,6 +143,7 @@ def do_one_condition(testing, training_set, zipped_arg, extension="", num_trials
                 [wsj_test]*num_trials,
                 repeat(print_mislabels),
                 repeat(output_dump),
+                repeat(tag_all)
             ),
             1,
         ):
@@ -118,10 +167,10 @@ def do_one_condition(testing, training_set, zipped_arg, extension="", num_trials
         with open(output_mislabels, "w") as o:
             o.write(output_string)
 
-def do_one_trial(training, nr_iter, testing, trial_id=None, wsj_test=False, print_mislabels=False, dump_file=None):
+def do_one_trial(training, nr_iter, testing, trial_id=None, wsj_test=False, print_mislabels=False, dump_file=None, tag_all=False):
     trained_tagger = train_tagger(training, nr_iter)
     trial_id = "trial" +  str(trial_id)
-    trained = get_one_trial_results(testing, trained_tagger, trial_id, dump_file)
+    trained = get_one_trial_results(testing, trained_tagger, trial_id, dump_file, tag_all)
 
     if print_mislabels:
         output_string = ""
@@ -184,6 +233,12 @@ if __name__ == '__main__':
 
     parser.add_argument("--dump", "-d", action='store_true',
                             help="dump tagger?")
+    
+    parser.add_argument("--tag_all", "-ta", action='store_true',
+                            help="use all tags (not just the first 3)?")
+
+    parser.add_argument("--default_results", "-dr", action='store_true',
+                            help="rewrite default results?")
 
     args = parser.parse_args()
 

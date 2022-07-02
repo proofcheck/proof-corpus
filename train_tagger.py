@@ -88,15 +88,14 @@ def fix_sents(tags, word_list=[]):
     # input: list of tagged sentences
     if word_list:
         tag_dict = make_tag_dict(word_list)
-    else:
-        tag_dict = {}
             
     for sent in tags:
-        first_tag = sent[0][1]
-        first_word = sent[0][0]
-        tag = tag_dict.get(first_word, 'VB')
-        if first_tag != tag:
-            sent[0] = first_word, tag
+        if tag_dict:
+            first_tag = sent[0][1]
+            first_word = sent[0][0]
+            tag = tag_dict.get(first_word, 'VB')
+            if first_tag != tag:
+                sent[0] = first_word, tag
         
         for ind, word in enumerate(sent):
             if word[0] in LEFT_BRACKET:

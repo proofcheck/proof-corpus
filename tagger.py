@@ -109,6 +109,10 @@ def write_tags(ids, sents, output=None):
             print(save_sent)
             print()
 
+def untag_sent_to_tokens(tags):
+    sent = [word[0] for word in tags]
+    return sent
+
 def main(args):
     # input must be sent**.tsv
     for fd in args.files:

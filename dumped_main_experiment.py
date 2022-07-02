@@ -11,7 +11,7 @@ from load_ontonotes_pos import *
 from train_tagger import WSJ_TEST, DEFAULT_TAGGER, mislabeled_vb, num_mislabelings
 
 from load_tagged_sent import load_tag_lines
-from main_experiment import save_results, get_one_trial_results, get_tokens_from_tags
+from main_experiment import save_results, get_one_trial_results, get_tokens_from_tags, get_first_three_confusion
 
 PATH = "word_bins/unique/"
 
@@ -32,9 +32,12 @@ def do_dumped_experiments(args):
     trained_results_wsj = []
     trained_results = []
 
-
     default_tagger = DEFAULT_TAGGER
-    default_confusion = default_tagger.confusion(testing)
+    if args.tag_all:
+        default_confusion = default_tagger.confusion(testing)
+    else:
+        default_confusion = get_first_three_confusion(testing, default_tagger)
+        
     default_results = ["default", default_tagger.accuracy(testing), 
                         default_confusion['VB', 'NNP'],
                         default_confusion['VBG', 'NNP'],
@@ -53,6 +56,7 @@ def do_dumped_experiments(args):
                 repeat(testing),
                 repeat(args.wsj_test),
                 repeat(args.print_mislabels),
+                repeat(args.tag_all),
             ),
             1,
         ):
@@ -75,12 +79,12 @@ def do_dumped_experiments(args):
         with open(output_mislabels, "w") as o:
             o.write(output_string)
 
-def do_dumped_trial(tagger_file, testing, wsj_test=False, print_mislabels=False):
+def do_dumped_trial(tagger_file, testing, wsj_test=False, print_mislabels=False, tag_all=False):
     with open(tagger_file, "rb") as resource:
         trained_tagger = pickle.load(resource)
 
     trial_id = "trial" + tagger_file.split("/")[-1].split(".")[0].split("_")[-1]
-    trained = get_one_trial_results(testing, trained_tagger, trial_id)
+    trained = get_one_trial_results(testing, trained_tagger, trial_id, tag_all=tag_all)
 
     if print_mislabels:
         output_string = ""
@@ -127,6 +131,9 @@ if __name__ == '__main__':
 
     parser.add_argument("--print_mislabels", "-p", action='store_true',
                             help="output non-VB tags?")
+
+    parser.add_argument("--tag_all", "-ta", action='store_true',
+                            help="use all tags (not just the first 3)?")
 
     args = parser.parse_args()
 
