@@ -36,8 +36,8 @@ def get_first_n_confusion(testing, tagger, n=3):
         tokenized = untag_sent_to_tokens(golden)
         trained = tagger.tag(tokenized)
 
-        first_three_golden = [golden[i][1] for i in range(n)]
-        first_three_trained = [trained[i][1] for i in range(n)]
+        first_three_golden = [golden[i][1] for i in range(min(n, len(golden)))]
+        first_three_trained = [trained[i][1] for i in range(min(n, len(trained)))]
 
         golden_tags += first_three_golden
         trained_tags += first_three_trained
@@ -97,7 +97,7 @@ def do_experiments(args):
                             mislabeled_vb(default_confusion),
                             num_mislabelings(default_confusion),
                         ]
-        output_default = "experiments/experiment_default_tagger_" + args.test_extension + ".txt"
+        output_default = "experiments/experiment_default_tagger_" + args.extension + ".txt"
         with open(output_default, "w") as o:
             str_results = list(map(str, default_results))
             o.write("\t".join(str_results))
@@ -189,7 +189,7 @@ def do_one_trial(training, nr_iter, testing, trial_id=None, wsj_test=False, prin
         output_string = None
             
     if wsj_test:
-        wsj = get_one_trial_results(WSJ_TEST, trained_tagger, trial_id)
+        wsj = get_one_trial_results(WSJ_TEST, trained_tagger, trial_id, tag_n=tag_n)
 
     else:
         wsj = None

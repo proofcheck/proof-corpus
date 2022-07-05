@@ -100,7 +100,7 @@ def do_dumped_trial(tagger_file, testing, wsj_test=False, print_mislabels=False,
         output_string = None
             
     if wsj_test:
-        wsj = get_one_trial_results(WSJ_TEST, trained_tagger, trial_id)
+        wsj = get_one_trial_results(WSJ_TEST, trained_tagger, trial_id, tag_n=tag_n)
 
     else:
         wsj = None
