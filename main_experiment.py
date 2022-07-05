@@ -25,8 +25,8 @@ def save_results(results, output):
             result_string += "\t".join(str_trial) + "\n"            
         o.write(result_string)
 
-def get_first_three_confusion(testing, tagger):
-    """Compare tag of first three words only.
+def get_first_n_confusion(testing, tagger, n=3):
+    """Compare tag of first n words only.
     """
 
     golden_tags = []
@@ -36,23 +36,26 @@ def get_first_three_confusion(testing, tagger):
         tokenized = untag_sent_to_tokens(golden)
         trained = tagger.tag(tokenized)
 
-        first_three_golden = [golden[i][1] for i in range(3)]
-        first_three_trained = [trained[i][1] for i in range(3)]
+        first_three_golden = [golden[i][1] for i in range(n)]
+        first_three_trained = [trained[i][1] for i in range(n)]
 
         golden_tags += first_three_golden
         trained_tags += first_three_trained
 
     confusion = ConfusionMatrix(golden_tags, trained_tags)
-
     return confusion
 
+def get_first_three_confusion(testing, tagger):
+    """Compare tag of first three words only.
+    """
+    return get_first_n_confusion(testing, tagger, 3)
 
-def get_one_trial_results(testing, tagger, trial_id, dump_file=None, tag_all=False):
-    if tag_all:
+def get_one_trial_results(testing, tagger, trial_id, dump_file=None, tag_n=3):
+    if not tag_n:
         trained_confusion = tagger.confusion(testing)
 
     else:
-        trained_confusion = get_first_three_confusion(testing, tagger)
+        trained_confusion = get_first_three_confusion(testing, tagger, tag_n)
     trained_results = [ trial_id,
                         tagger.accuracy(testing), 
                         trained_confusion['VB', 'NNP'],
@@ -82,10 +85,10 @@ def do_experiments(args):
 
     if args.default_results:
         default_tagger = DEFAULT_TAGGER
-        if args.tag_all:
+        if not args.tag_n:
             default_confusion = default_tagger.confusion(testing)
         else:
-            default_confusion = get_first_three_confusion(testing, default_tagger)
+            default_confusion = get_first_n_confusion(testing, default_tagger, args.tag_n)
         
         default_results = ["default", default_tagger.accuracy(testing), 
                             default_confusion['VB', 'NNP'],
@@ -106,12 +109,12 @@ def do_experiments(args):
     for arg in zipped_args:
         do_one_condition(testing, training_set, arg, args.extension, 
                             args.num_trials, args.wsj_test, args.cores, 
-                            args.print_mislabels, args.dump, args.tag_all)
+                            args.print_mislabels, args.dump, args.tag_n)
 
     args.train.close()
     args.test.close()
 
-def do_one_condition(testing, training_set, zipped_arg, extension="", num_trials=10, wsj_test=False, cores=5, print_mislabels=False, dump=False, tag_all=False):
+def do_one_condition(testing, training_set, zipped_arg, extension="", num_trials=10, wsj_test=False, cores=5, print_mislabels=False, dump=False, tag_n=3):
     
     num_train_sent, nr_iter = zipped_arg
     training = []
@@ -143,7 +146,7 @@ def do_one_condition(testing, training_set, zipped_arg, extension="", num_trials
                 [wsj_test]*num_trials,
                 repeat(print_mislabels),
                 repeat(output_dump),
-                repeat(tag_all)
+                repeat(tag_n)
             ),
             1,
         ):
@@ -167,10 +170,10 @@ def do_one_condition(testing, training_set, zipped_arg, extension="", num_trials
         with open(output_mislabels, "w") as o:
             o.write(output_string)
 
-def do_one_trial(training, nr_iter, testing, trial_id=None, wsj_test=False, print_mislabels=False, dump_file=None, tag_all=False):
+def do_one_trial(training, nr_iter, testing, trial_id=None, wsj_test=False, print_mislabels=False, dump_file=None, tag_n=3):
     trained_tagger = train_tagger(training, nr_iter)
     trial_id = "trial" +  str(trial_id)
-    trained = get_one_trial_results(testing, trained_tagger, trial_id, dump_file, tag_all)
+    trained = get_one_trial_results(testing, trained_tagger, trial_id, dump_file, tag_n)
 
     if print_mislabels:
         output_string = ""
@@ -234,8 +237,8 @@ if __name__ == '__main__':
     parser.add_argument("--dump", "-d", action='store_true',
                             help="dump tagger?")
     
-    parser.add_argument("--tag_all", "-ta", action='store_true',
-                            help="use all tags (not just the first 3)?")
+    parser.add_argument("--tag_n", "-tn", type=int, default=None,
+                            help="number of words to tag in each sentence (first n)")
 
     parser.add_argument("--default_results", "-dr", action='store_true',
                             help="rewrite default results?")
