@@ -39,14 +39,14 @@ def do_dumped_experiments(args):
         default_confusion = get_first_n_confusion(testing, default_tagger, args.tag_n)
         
     default_results = ["default", default_tagger.accuracy(testing), 
-                        get_confusion_results(default_confusion['VB', 'NNP']),
-                        get_confusion_results(default_confusion['VBG', 'NNP']),
-                        get_confusion_results(default_confusion['VB', 'NN']),
-                        get_confusion_results(default_confusion['NN', 'JJ']),
-                        get_confusion_results(default_confusion['NN', 'VB']),
-                        get_confusion_results(default_confusion['NNS', 'VBZ']),
-                        get_confusion_results(default_confusion['JJ', 'NN']),
-                        get_confusion_results(default_confusion['RB', 'NN']),
+                        get_confusion_results(default_confusion, ['VB', 'NNP']),
+                        get_confusion_results(default_confusion, ['VBG', 'NNP']),
+                        get_confusion_results(default_confusion, ['VB', 'NN']),
+                        get_confusion_results(default_confusion, ['NN', 'JJ']),
+                        get_confusion_results(default_confusion, ['NN', 'VB']),
+                        get_confusion_results(default_confusion, ['NNS', 'VBZ']),
+                        get_confusion_results(default_confusion, ['JJ', 'NN']),
+                        get_confusion_results(default_confusion, ['RB', 'NN']),
                         mislabeled_vb(default_confusion),
                         num_mislabelings(default_confusion),
                       ]
