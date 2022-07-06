@@ -74,8 +74,6 @@ def do_dumped_experiments(args):
             trained_results += [trained]
     
     save_results(trained_results, output_test)
-    print(trained_results)
-    print(output_test)
     
     if args.wsj_test:
         save_results(trained_results_wsj, output_wsj)
