@@ -9,9 +9,9 @@ import pickle
 
 from load_ontonotes_pos import *
 from train_tagger import WSJ_TEST, DEFAULT_TAGGER, mislabeled_vb, num_mislabelings
-
+from tagger import untag_sent_to_tokens
 from load_tagged_sent import load_tag_lines
-from main_experiment import save_results, get_one_trial_results, get_tokens_from_tags, get_first_n_confusion
+from main_experiment import save_results, get_one_trial_results, get_first_n_confusion, get_confusion_results
 
 PATH = "word_bins/unique/"
 
@@ -39,9 +39,14 @@ def do_dumped_experiments(args):
         default_confusion = get_first_n_confusion(testing, default_tagger, args.tag_n)
         
     default_results = ["default", default_tagger.accuracy(testing), 
-                        default_confusion['VB', 'NNP'],
-                        default_confusion['VBG', 'NNP'],
-                        default_confusion['VB', 'NN'],
+                        get_confusion_results(default_confusion['VB', 'NNP']),
+                        get_confusion_results(default_confusion['VBG', 'NNP']),
+                        get_confusion_results(default_confusion['VB', 'NN']),
+                        get_confusion_results(default_confusion['NN', 'JJ']),
+                        get_confusion_results(default_confusion['NN', 'VB']),
+                        get_confusion_results(default_confusion['NNS', 'VBZ']),
+                        get_confusion_results(default_confusion['JJ', 'NN']),
+                        get_confusion_results(default_confusion['RB', 'NN']),
                         mislabeled_vb(default_confusion),
                         num_mislabelings(default_confusion),
                       ]
@@ -69,6 +74,8 @@ def do_dumped_experiments(args):
             trained_results += [trained]
     
     save_results(trained_results, output_test)
+    print(trained_results)
+    print(output_test)
     
     if args.wsj_test:
         save_results(trained_results_wsj, output_wsj)
@@ -83,13 +90,13 @@ def do_dumped_trial(tagger_file, testing, wsj_test=False, print_mislabels=False,
     with open(tagger_file, "rb") as resource:
         trained_tagger = pickle.load(resource)
 
-    trial_id = "trial" + tagger_file.split("/")[-1].split(".")[0].split("_")[-1]
+    trial_id = tagger_file.split("/")[-1].split(".")[0].split("_")[-1]
     trained = get_one_trial_results(testing, trained_tagger, trial_id, tag_n=tag_n)
 
     if print_mislabels:
         output_string = ""
         for sent in testing:
-            tokens = get_tokens_from_tags(sent)
+            tokens = untag_sent_to_tokens(sent)
             tags = trained_tagger.tag(tokens)
             if tags[0][1] not in {'VB', 'VBG', 'VBN'}:
                 output_string += " ".join(tokens) + "\t" + tags[0][1] + "\n"
@@ -100,7 +107,7 @@ def do_dumped_trial(tagger_file, testing, wsj_test=False, print_mislabels=False,
         output_string = None
             
     if wsj_test:
-        wsj = get_one_trial_results(WSJ_TEST, trained_tagger, trial_id, tag_n=tag_n)
+        wsj = get_one_trial_results(WSJ_TEST, trained_tagger, trial_id, tag_n=None)
 
     else:
         wsj = None

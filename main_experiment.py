@@ -28,19 +28,17 @@ def save_results(results, output):
 def get_first_n_confusion(testing, tagger, n=3):
     """Compare tag of first n words only.
     """
-
     golden_tags = []
     trained_tags = []
 
     for golden in testing:
         tokenized = untag_sent_to_tokens(golden)
         trained = tagger.tag(tokenized)
+        first_n_golden = [golden[i][1] for i in range(min(n, len(golden)))]
+        first_n_trained = [trained[i][1] for i in range(min(n, len(trained)))]
 
-        first_three_golden = [golden[i][1] for i in range(min(n, len(golden)))]
-        first_three_trained = [trained[i][1] for i in range(min(n, len(trained)))]
-
-        golden_tags += first_three_golden
-        trained_tags += first_three_trained
+        golden_tags += first_n_golden
+        trained_tags += first_n_trained
 
     confusion = ConfusionMatrix(golden_tags, trained_tags)
     return confusion
@@ -55,12 +53,17 @@ def get_one_trial_results(testing, tagger, trial_id, dump_file=None, tag_n=3):
         trained_confusion = tagger.confusion(testing)
 
     else:
-        trained_confusion = get_first_three_confusion(testing, tagger, tag_n)
+        trained_confusion = get_first_n_confusion(testing, tagger, tag_n)
     trained_results = [ trial_id,
                         tagger.accuracy(testing), 
-                        trained_confusion['VB', 'NNP'],
-                        trained_confusion['VBG', 'NNP'],
-                        trained_confusion['VB', 'NN'],
+                        get_confusion_results(trained_confusion['VB', 'NNP']),
+                        get_confusion_results(trained_confusion['VBG', 'NNP']),
+                        get_confusion_results(trained_confusion['VB', 'NN']),
+                        get_confusion_results(trained_confusion['NN', 'JJ']),
+                        get_confusion_results(trained_confusion['NN', 'VB']),
+                        get_confusion_results(trained_confusion['NNS', 'VBZ']),
+                        get_confusion_results(trained_confusion['JJ', 'NN']),
+                        get_confusion_results(trained_confusion['RB', 'NN']),
                         mislabeled_vb(trained_confusion),
                         num_mislabelings(trained_confusion),
                     ]
@@ -91,9 +94,14 @@ def do_experiments(args):
             default_confusion = get_first_n_confusion(testing, default_tagger, args.tag_n)
         
         default_results = ["default", default_tagger.accuracy(testing), 
-                            default_confusion['VB', 'NNP'],
-                            default_confusion['VBG', 'NNP'],
-                            default_confusion['VB', 'NN'],
+                            get_confusion_results(default_confusion, ['VB', 'NNP']),
+                            get_confusion_results(default_confusion['VBG', 'NNP']),
+                            get_confusion_results(default_confusion['VB', 'NN']),
+                            get_confusion_results(default_confusion['NN', 'JJ']),
+                            get_confusion_results(default_confusion['NN', 'VB']),
+                            get_confusion_results(default_confusion['NNS', 'VBZ']),
+                            get_confusion_results(default_confusion['JJ', 'NN']),
+                            get_confusion_results(default_confusion['RB', 'NN']),
                             mislabeled_vb(default_confusion),
                             num_mislabelings(default_confusion),
                         ]
@@ -178,7 +186,7 @@ def do_one_trial(training, nr_iter, testing, trial_id=None, wsj_test=False, prin
     if print_mislabels:
         output_string = ""
         for sent in testing:
-            tokens = get_tokens_from_tags(sent)
+            tokens = untag_sent_to_tokens(sent)
             tags = trained_tagger.tag(tokens)
             if tags[0][1] not in {'VB', 'VBG', 'VBN'}:
                 output_string += " ".join(tokens) + "\t" + tags[0][1] + "\n"
@@ -189,16 +197,19 @@ def do_one_trial(training, nr_iter, testing, trial_id=None, wsj_test=False, prin
         output_string = None
             
     if wsj_test:
-        wsj = get_one_trial_results(WSJ_TEST, trained_tagger, trial_id, tag_n=tag_n)
+        wsj = get_one_trial_results(WSJ_TEST, trained_tagger, trial_id, tag_n=None)
 
     else:
         wsj = None
 
     return trained, wsj, output_string
 
-def get_tokens_from_tags(tags):
-    tokens = [word[0] for word in tags]
-    return tokens
+def get_confusion_results(confusion, mislabel_pair):
+    try:
+        return confusion[mislabel_pair]
+
+    except KeyError:
+        return None
 
 def main(args):
     do_experiments(args)
