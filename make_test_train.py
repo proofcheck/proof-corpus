@@ -96,6 +96,15 @@ def make_train_test(args):
         str_results = list(map(str, default_results))
         o.write("\t".join(str_results))
 
+def make_small_testing(training_fp, testing_fp, total, test_num):
+    with open(training_fp, "r") as f:
+        lines = f.readlines()
+    
+    new_test = [lines[i] for i in range(len(lines)) if i % total in range(total-test_num, total)]
+    with open(testing_fp, "w") as o:
+        for line in new_test:
+            o.write(line)
+
 def main(args):
     make_train_test(args)
 
