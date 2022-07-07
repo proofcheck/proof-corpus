@@ -15,9 +15,8 @@ from nltk.probability import FreqDist
 
 from sent_tools import *
 
-# Writes ngrams using nltk
+# Writes ngrams
 # Input : sent**.tsv, number of max ngrams
-
 
 def my_ngrams(sent, n):
     zip_list = []
@@ -74,7 +73,6 @@ def update_dist(sent, n, dist):
 def process_for_grams(s):
     tokenized = split_sentence_id_tokenized(s)[1]
     return [w.lower() if w not in ALIASES else w for w in tokenized]
-
 
 def write_ngrams(sentences, n, extension=""):
     dist = FreqDist()
