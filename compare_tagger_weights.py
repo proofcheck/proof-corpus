@@ -8,7 +8,7 @@ from nltk.tag.perceptron import *
 
 from sent_tools import *
 from load_ontonotes_pos import *
-from find_disagreeing_sents import get_taggers_from_trial
+from find_disagreeing_sents import get_taggers_from_ids, get_tagger_ids_from_list
 
 START = ["-START-", "-START2-"]
 END = ["-END-", "-END2-"]
@@ -72,11 +72,14 @@ def get_weights(key, weight_dict, best, worst):
 
 
 def main(args):
-    best_tagger_ids = [num for num in args.best_tagger.split(",")]
-    worst_tagger_ids = [num for num in args.worst_tagger.split(",")]
+    best_tagger_ids = get_tagger_ids_from_list(args.best_tagger)
+    worst_tagger_ids = get_tagger_ids_from_list(args.worst_tagger, args.use_default)
 
-    best_taggers = get_taggers_from_trial(best_tagger_ids)
-    worst_taggers = get_taggers_from_trial(worst_tagger_ids, args.use_default)
+    best_taggers = get_taggers_from_ids(best_tagger_ids)
+    worst_taggers = get_taggers_from_ids(worst_tagger_ids, args.use_default)
+
+    if args.use_default:
+        worst_tagger_ids += ["default"]
 
     with open(args.file, "r") as f:
         lines = f.read().splitlines()

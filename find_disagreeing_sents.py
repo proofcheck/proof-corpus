@@ -48,24 +48,33 @@ def mismatch_finder(sent, best_taggers, worst_taggers):
     else:
         return None, None, None
 
-def get_taggers_from_trial(tagger_num_list, use_default=False):
+def get_taggers_from_ids(tagger_num_list, use_default=False):
     taggers = []
+    if use_default:
+        tagger_num_list = tagger_num_list[:-1]
+        
     for num in tagger_num_list:
         tagger_file = TAGGER_PATH + num + ".pk"
         with open(tagger_file, "rb") as resource:
             taggers += [pickle.load(resource)]
-    
+
     if use_default:
         taggers += [DEFAULT_TAGGER]
     
     return taggers
 
-def main(args):
-    best_tagger_ids = [num for num in args.best_tagger.split(",")]
-    worst_tagger_ids = [num for num in args.worst_tagger.split(",")]
+def get_tagger_ids_from_list(id_list, use_default=False):
+    tagger_ids = [num for num in id_list.split(",")]
+    if use_default:
+        tagger_ids += ["default"]
+    return tagger_ids
 
-    best_taggers = get_taggers_from_trial(best_tagger_ids)
-    worst_taggers = get_taggers_from_trial(worst_tagger_ids, args.use_default)
+def main(args):
+    best_tagger_ids = get_tagger_ids_from_list(args.best_tagger)
+    worst_tagger_ids = get_tagger_ids_from_list(args.worst_tagger, args.use_default)
+
+    best_taggers = get_taggers_from_ids(best_tagger_ids)
+    worst_taggers = get_taggers_from_ids(worst_tagger_ids, args.use_default)
 
     with open(args.file, "r") as f:
         lines = f.read().splitlines()
@@ -95,7 +104,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     
     parser.add_argument("--file", "-f",
-                            help="txt file to read testing set")
+                            help="txt file to read (testing set)")
 
     parser.add_argument("--best_tagger", "-b", default="41,9",
                             help="trial number of best taggers")
