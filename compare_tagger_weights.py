@@ -2,15 +2,12 @@
 
 import argparse
 import nicer
-import pickle
+import sys
 
-from nltk.tag.perceptron import normalize
+from nltk.tag.perceptron import *
 
 from sent_tools import *
 from load_ontonotes_pos import *
-from train_tagger import DEFAULT_TAGGER
-from tagger import untag_sent_to_tokens, write_tags
-from load_tagged_sent import untag_line_to_tokens
 from find_disagreeing_sents import get_taggers_from_trial
 
 START = ["-START-", "-START2-"]
@@ -37,13 +34,14 @@ END = ["-END-", "-END2-"]
 def get_key(name, *args):
     return " ".join((name,) + tuple(args))
 
-def find_significant_weights(tagger, sent):
-    weight_dict = tagger.model.weights()
+def find_significant_weights(tagger, sent_with_best_worst):
+    best, worst, sent = sent_with_best_worst
+    weight_dict = tagger.model.weights
     tokens = tokenize(sent)
-    context = START + [normalize(w) for w in tokens] + END
+    context = START + [tagger.normalize(w) for w in tokens] + END
     prev, prev2 = START
     word = tokens[0]
-    i = 0
+    i = 2
 
     keys = [get_key("bias"),
             get_key("i suffix", word[-3:]),
@@ -60,44 +58,57 @@ def find_significant_weights(tagger, sent):
             get_key("i+1 suffix", context[i + 1][-3:]),
             get_key("i+2 word", context[i + 2])]
     
-    significant_weights = {key : weight_dict[key] for key in keys}
+    significant_weights = {key : get_weights(key, weight_dict, best, worst) for key in keys}
 
     return significant_weights
 
+def get_weights(key, weight_dict, best, worst):
+    try:
+        feature_dict = weight_dict[key]
+        return {best : feature_dict[best], worst : feature_dict[worst]}
+    
+    except KeyError:
+        pass
+
 
 def main(args):
-    best_tagger_ids = [int(num) for num in args.best_tagger.split(",")]
-    worst_tagger_ids = [int(num) for num in args.worst_tagger.split(",")]
+    best_tagger_ids = [num for num in args.best_tagger.split(",")]
+    worst_tagger_ids = [num for num in args.worst_tagger.split(",")]
 
     best_taggers = get_taggers_from_trial(best_tagger_ids)
     worst_taggers = get_taggers_from_trial(worst_tagger_ids, args.use_default)
 
     with open(args.file, "r") as f:
-        sentences = f.read().splitlines()
-    
-    for sent in sentences:
-        best_tagger_significant_weights = [(best_tagger_ids[ind], find_significant_weights(tagger, sent)) 
-                                            for ind, tagger in enumerate(best_taggers)]
-        worst_tagger_significant_weights = [(worst_tagger_ids[ind], find_significant_weights(tagger, sent)) 
-                                            for ind, tagger in enumerate(worst_taggers)]
+        lines = f.read().splitlines()
+    sents_with_best_worst = [tuple(line.split("\t")) for line in lines] 
 
-        print(sent)
+    result_string = ""
+    for sent_with_best_worst in sents_with_best_worst:
+        best_tagger_significant_weights = [(best_tagger_ids[tagger_ind], find_significant_weights(tagger, sent_with_best_worst)) 
+                                            for tagger_ind, tagger in enumerate(best_taggers)]
+        worst_tagger_significant_weights = [(worst_tagger_ids[tagger_ind], find_significant_weights(tagger, sent_with_best_worst)) 
+                                            for tagger_ind, tagger in enumerate(worst_taggers)]
+
         keys = best_tagger_significant_weights[0][1].keys()
-        best_feature_dict = {key : (tagger_id, weights[key]) for tagger_id, weights in best_tagger_significant_weights for key in keys}
-        worst_feature_dict = {key : (tagger_id, weights[key]) for tagger_id, weights in worst_tagger_significant_weights for key in keys}
+        best_feature_dict = {key : [(tagger_id, weights[key]) for tagger_id, weights in best_tagger_significant_weights] for key in keys}
+        worst_feature_dict = {key : [(tagger_id, weights[key]) for tagger_id, weights in worst_tagger_significant_weights] for key in keys}
         
+        result_string += sent_with_best_worst[-1] + "\n"
         for key in keys:
-            print(key)
-            print(best_feature_dict[key])
-            print(worst_feature_dict[key])
-        
+            result_string += key + "\n"
+            tagger_results = [tagger_id + " " + str(tagger_dict) for tagger_id, tagger_dict in best_feature_dict[key]]
+            result_string += "\t".join(tagger_results) + "\n"
 
-
+            tagger_results = [tagger_id + " " + str(tagger_dict) for tagger_id, tagger_dict in worst_feature_dict[key]]
+            result_string += "\t".join(tagger_results) + "\n"
         
-        
-
+        result_string += "\n"
     
 
+    if args.output:
+        args.output.write(result_string)
+        args.output.close()      
+    
 if __name__ == '__main__':
     nicer.make_nice()
     parser = argparse.ArgumentParser()
@@ -113,6 +124,10 @@ if __name__ == '__main__':
 
     parser.add_argument("--use_default", "-d", action='store_true',
                             help="use default tagger?")
+
+    parser.add_argument( "--output", "-o", type=argparse.FileType("w", encoding='UTF-8'),  
+                            default=sys.stdout,
+                            help="txt file to write results to")
 
     args = parser.parse_args()
 

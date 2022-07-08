@@ -3,6 +3,7 @@
 import argparse
 import nicer
 import pickle
+import sys
 
 from sent_tools import *
 from load_ontonotes_pos import *
@@ -37,12 +38,15 @@ TAGGER_PATH = "tagger/7_5/5sents_5iters_7_5_trial"
 
 def mismatch_finder(sent, best_taggers, worst_taggers):
     tokenized = untag_line_to_tokens(sent)
-    best_tagger_answers = set([tagger.tag(tokenized)[0][1] for tagger in best_taggers])
-    worst_tagger_answers = set([tagger.tag(tokenized)[0][1] for tagger in worst_taggers])
+    best_tagger_answers = list(set([tagger.tag(tokenized)[0][1] for tagger in best_taggers]))
+    worst_tagger_answers = list(set([tagger.tag(tokenized)[0][1] for tagger in worst_taggers]))
 
     if (len(best_tagger_answers) == 1 and len(worst_tagger_answers) == 1 
         and worst_tagger_answers != best_tagger_answers):
             return tokenized, best_tagger_answers, worst_tagger_answers
+    
+    else:
+        return None, None, None
 
 def get_taggers_from_trial(tagger_num_list, use_default=False):
     taggers = []
@@ -57,8 +61,8 @@ def get_taggers_from_trial(tagger_num_list, use_default=False):
     return taggers
 
 def main(args):
-    best_tagger_ids = [int(num) for num in args.best_tagger.split(",")]
-    worst_tagger_ids = [int(num) for num in args.worst_tagger.split(",")]
+    best_tagger_ids = [num for num in args.best_tagger.split(",")]
+    worst_tagger_ids = [num for num in args.worst_tagger.split(",")]
 
     best_taggers = get_taggers_from_trial(best_tagger_ids)
     worst_taggers = get_taggers_from_trial(worst_tagger_ids, args.use_default)
@@ -69,10 +73,10 @@ def main(args):
     for line in lines:
         tokenized, best_tagger_answers, worst_tagger_answers = mismatch_finder(line, best_taggers, worst_taggers)
         if tokenized:
-            print(tokenized, best_tagger_answers, worst_tagger_answers)
+            #print(tokenized, best_tagger_answers, worst_tagger_answers)
             if args.output:
-                sentence = tokenized.join(" ")
-                args.output.write(sentence + "\n")
+                sentence = " ".join(tokenized)
+                args.output.write(best_tagger_answers[0] + "\t" + worst_tagger_answers[0] + "\t" + sentence + "\n")
 
     if args.write_tags:
         all_taggers = best_taggers + worst_taggers
@@ -83,11 +87,8 @@ def main(args):
             with open("trial" + all_taggers_ids[ind] + ".txt", "w") as f:
                 write_tags([], tags, f)
 
-
     if args.output:
         args.output.close()
-
-        
 
 if __name__ == '__main__':
     nicer.make_nice()
@@ -108,7 +109,8 @@ if __name__ == '__main__':
     parser.add_argument("--write_tags", "-w", action='store_true',
                             help="write tags?")
 
-    parser.add_argument("--output", "-o", type=argparse.FileType('w'),
+    parser.add_argument("--output", "-o", type=argparse.FileType('w'), 
+                            default=sys.stdout,
                             help="file to write sentences to")
 
     args = parser.parse_args()
