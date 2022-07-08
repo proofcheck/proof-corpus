@@ -52,53 +52,51 @@ def save_ngrams(files, output, n):
 
     return ngrams, unigrams
 
-def pointwise_mutual_information(ngram, ngram_dist, unigram_dist):
-    p_ngram = get_ngram_probability(ngram_dist, ngram)
-    p_unigram_product = get_unigram_probability_product(unigram_dist, ngram)
-    # try:
+def pointwise_mutual_information(ngram, ngram_cnt, unigram_cnt):
+    p_ngram = get_ngram_probability(ngram_cnt, ngram)
+    p_unigram_product = get_unigram_probability_product(unigram_cnt, ngram)
     return math.log(p_ngram/p_unigram_product, 2)
-    # except ZeroDivisionError:
-    #     print(ngram)
-    #     print(get_ngram_probability(unigram_dist, ngram[0]))
-    #     print(get_ngram_probability(unigram_dist, ngram[1]))
 
 def get_ngram_probability(dist, ngrams):
     return dist[ngrams] / sum(dist.values())
 
-def get_unigram_probability_product(unigram_dist, ngram):
+def get_unigram_probability_product(unigram_cnt, ngram):
     probability = 1
     for unigram in ngram:
-        probability *= get_ngram_probability(unigram_dist, unigram)
+        probability *= get_ngram_probability(unigram_cnt, unigram)
     return probability
 
-def chi_squared_bigram(ngram, ngram_dist, unigram_dist):
+def bigram_with_mi(ngram, ngram_cnt, unigram_cnt):
+    return ngram, pointwise_mutual_information(ngram, ngram_cnt, unigram_cnt)
+
+def chi_squared_bigram(ngram, ngram_cnt, unigram_cnt=None):
     obs =   [
-                [   ngram_dist[ngram],                        get_ngrams_not_second(ngram, ngram_dist)          ],
-                [   get_ngrams_not_first(ngram, ngram_dist),  get_ngrams_not_first_or_second(ngram, ngram_dist) ]
+                [   ngram_cnt[ngram],                        get_ngrams_not_second(ngram, ngram_cnt)          ],
+                [   get_ngrams_not_first(ngram, ngram_cnt),  get_ngrams_not_first_or_second(ngram, ngram_cnt) ]
             ]
 
     chi2float, p, dof, expectedndarray = chi2_contingency(obs)
     return chi2float
 
-def get_ngrams_not_first(ngram, ngram_dist):
+def get_ngrams_not_first(ngram, ngram_cnt):
     count = 0
-    for key in ngram_dist.keys():
+    for key in ngram_cnt.keys():
         if key[0] is not ngram[0] and key[1] is ngram[1]:
-            count += ngram_dist[key]
+            count += ngram_cnt[key]
     return count
 
-def get_ngrams_not_second(ngram, ngram_dist):
+def get_ngrams_not_second(ngram, ngram_cnt):
     count = 0
-    for key in ngram_dist.keys():
+    for key in ngram_cnt.keys():
         if key[0] is ngram[0] and key[1] is not ngram[1]:
-            count += ngram_dist[key]
+            count += ngram_cnt[key]
     return count
 
-def get_ngrams_not_first_or_second(ngram, ngram_dist):
+def get_ngrams_not_first_or_second(ngram, ngram_cnt):
     count = 0
-    for key in ngram_dist.keys():
+    for key in ngram_cnt.keys():
         if key[0] is not ngram[0] and key[1] is not ngram[1]:
-            count += ngram_dist[key]
+            count += ngram_cnt[key]
     return count
 
 def compare_critical(chi, dof, confidence_level):
@@ -136,12 +134,39 @@ def main(args):
     frequency_filtered = [ngram for ngram in ngram_cnt.keys() if ngram_cnt[ngram] > 100]
     
     print("MI")
-    mi_dict = {ngram : pointwise_mutual_information(ngram, ngram_cnt, unigram_cnt) for ngram in frequency_filtered}
+    # mi_dict = {ngram : pointwise_mutual_information(ngram, ngram_cnt, unigram_cnt) for ngram in frequency_filtered}
+    
+    with Pool(processes=args.cores) as p:
+        mi_dict = {}
+        for ngram, mi_val in p.starmap(
+                    bigram_with_mi,
+                    zip(
+                        frequency_filtered,
+                        repeat(ngram_cnt),
+                        repeat(unigram_cnt),
+                    ),
+                    50
+                ):
+            mi_dict[ngram] = mi_val
+
     mi_filtered = [ngram for ngram in mi_dict.keys() if mi_dict[ngram] > 5]
 
     print("chi")
+    # chi_dict = {ngram : chi_squared_bigram(ngram, ngram_cnt, unigram_cnt) for ngram in mi_filtered}
 
-    chi_dict = {ngram : chi_squared_bigram(ngram, ngram_cnt, unigram_cnt) for ngram in mi_filtered}
+    with Pool(processes=args.cores) as p:
+        chi_dict = {}
+        for ngram, chi_val in p.starmap(
+                    bigram_with_chi_squared,
+                    zip(
+                        mi_filtered,
+                        repeat(ngram_cnt),
+                        repeat(unigram_cnt),
+                    ),
+                    50
+                ):
+            chi_dict[ngram] = chi_val
+
     print("done making dict")
     chi_filtered = [ngram for ngram in mi_filtered if compare_critical(chi_dict[ngram], 1, 0.95)]
 
@@ -170,21 +195,12 @@ if __name__ == "__main__":
     parser.add_argument("--output", "-o", default=sys.stdout, type=argparse.FileType("w"),
                         help="file to write results to")
 
+    parser.add_argument("--cores", "-c", type=int, default=4,
+                        help="Number of cores to use")
+
     args = parser.parse_args()
 
     main(args)
 
 
-    """
-
-    for chi_val in p.starmap(
-                bigram_with_chi_squared,
-                zip(
-                    mi_filtered,
-                    repeat(ngram_cnt),
-                    repeat(unigram_cnt),
-                ),
-            ):
-        chi_dict[]
     
-    """
