@@ -8,6 +8,8 @@ import argparse
 import sys
 import nicer
 import math
+import gc
+
 from multiprocessing import Pool
 from itertools import repeat
 from collections import Counter
@@ -129,8 +131,11 @@ def main(args):
             
     ngram_cnt = make_ngram_cnt(ngrams)
     del ngrams
+    gc.collect()
+    
     unigram_cnt = Counter(unigrams)
     del unigrams
+    gc.collect()
     
     print("frequency")
     frequency_filtered = [ngram for ngram in ngram_cnt.keys() if ngram_cnt[ngram] > 100]
@@ -152,6 +157,7 @@ def main(args):
             mi_dict[ngram] = mi_val
 
     del frequency_filtered
+    gc.collect()
     mi_filtered = [ngram for ngram in mi_dict.keys() if mi_dict[ngram] > 5]
 
     print("chi")
@@ -171,6 +177,8 @@ def main(args):
             chi_dict[ngram] = chi_val
 
     del mi_filtered
+    gc.collect()
+
 
     print("done making dict")
     chi_filtered = [ngram for ngram in chi_dict.keys() if compare_critical(chi_dict[ngram], 1, 0.95)]
