@@ -121,15 +121,17 @@ def main(args):
 
     else:
         with open(args.ngram_file, "rb") as resource:
-            print("loading bigrams")
+            print("loading ngrams")
             ngrams = pickle.load(resource)
-            print("done loading bigrams")
+            print("done loading ngrams")
         
         unigrams = [ngram[0] for ngram in ngrams]
             
     ngram_cnt = make_ngram_cnt(ngrams)
+    del ngrams
     unigram_cnt = Counter(unigrams)
-
+    del unigrams
+    
     print("frequency")
     frequency_filtered = [ngram for ngram in ngram_cnt.keys() if ngram_cnt[ngram] > 100]
     
@@ -149,6 +151,7 @@ def main(args):
                 ):
             mi_dict[ngram] = mi_val
 
+    del frequency_filtered
     mi_filtered = [ngram for ngram in mi_dict.keys() if mi_dict[ngram] > 5]
 
     print("chi")
@@ -167,8 +170,10 @@ def main(args):
                 ):
             chi_dict[ngram] = chi_val
 
+    del mi_filtered
+
     print("done making dict")
-    chi_filtered = [ngram for ngram in mi_filtered if compare_critical(chi_dict[ngram], 1, 0.95)]
+    chi_filtered = [ngram for ngram in chi_dict.keys() if compare_critical(chi_dict[ngram], 1, 0.95)]
 
     print("done calculating")
     for ngram in chi_filtered:

@@ -29,7 +29,6 @@ def my_ngrams(sent, n):
     ngram_list = zip(*zip_list)
     return ngram_list
 
-
 def results(f, dist):
     with open(f, "w") as output:
         sorted_keys = sorted(dist.keys(), key=lambda x: dist[x], reverse=True)
