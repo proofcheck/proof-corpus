@@ -6,7 +6,6 @@ import nicer
 import math
 from collections import Counter
 from scipy.stats.contingency import chi2_contingency
-from scipy.stats.chi2 import *
 
 from ngrams import return_ngrams
 from sent_tools import *
@@ -32,8 +31,8 @@ def save_ngrams(files, output, n):
     ngrams = []
     len_sent = len(sentences)
     for ind, sent in enumerate(sentences):
-        if ind % 100000 == 0:
-            print(round(ind/len_sent*100), "%", sep="")
+        if ind % 1000000 == 0:
+            print("Percent done: {}%".format(round(ind/len_sent*100, 2)))
         ngrams.extend([return_ngrams(sent, n)])
 
     print("dumping")
@@ -45,20 +44,17 @@ def save_ngrams(files, output, n):
     return ngrams, unigrams
 
 def pointwise_mutual_information(ngram, ngram_dist, unigram_dist):
-    p_ngram = get_probability(ngram_dist, ngram)
+    p_ngram = get_ngram_probability(ngram_dist, ngram)
     p_unigram_product = get_unigram_probability_product(unigram_dist, ngram)
     return math.log(p_ngram/p_unigram_product, 2)
 
-# def mutual_information(ngram, ngram_dist, unigram_dist):
-#     return
-
-def get_probability(dist, ngrams):
+def get_ngram_probability(dist, ngrams):
     return dist[ngrams] / dist.total()
 
 def get_unigram_probability_product(unigram_dist, ngram):
     probability = 1
     for unigram in ngram:
-        probability *= get_probability(unigram_dist, unigram)
+        probability *= get_ngram_probability(unigram_dist, unigram)
     return probability
 
 def chi_squared_bigram(ngram, ngram_dist, unigram_dist):
@@ -99,11 +95,11 @@ def compare_critical(chi, dof, confidence_level):
     else:
         return False
 
-def make_ngram_dist(ngrams):
-    dist = Counter()
+def make_ngram_cnt(ngrams):
+    cnt = Counter()
     for sent in ngrams:
-        dist.update(sent)
-    return dist
+        cnt.update(sent)
+    return cnt
 
 def main(args):
     if args.files:
@@ -115,27 +111,26 @@ def main(args):
         
         unigrams = [ngram[0] for ngram in ngrams]
             
-    ngram_cnt = make_ngram_dist(ngrams)
+    ngram_cnt = make_ngram_cnt(ngrams)
+    print(ngram_cnt)
     unigram_cnt = Counter(unigrams)
 
-    if args.frequency:
-        ngram_dict = ngram_cnt
-        ngrams_sorted = [ngram for ngram in ngram_cnt.keys() if ngram_cnt[ngram] < args.threshold]
-        ngrams_sorted.sort(key=lambda x: ngram_dict[x])
+    # Filter by frequency
+    frequency_filtered = [ngram for ngram in ngram_cnt.keys() if ngram_cnt[ngram] > 100]
     
-    if args.mutual_information:
-        ngram_dict = {ngram : pointwise_mutual_information(ngram, ngram_cnt, unigram_cnt) for ngram in ngram_cnt.keys()}
-        ngrams_sorted = [ngram for ngram in ngram_dict.keys() if ngram_dict[ngram] > args.threshold]
-        ngrams_sorted.sort(key=lambda x: ngram_dict[x])
+    mi_dict = {ngram : pointwise_mutual_information(ngram, ngram_cnt, unigram_cnt) for ngram in frequency_filtered}
+    mi_filtered = [ngram for ngram in mi_dict.keys() if mi_dict[ngram] > 5]
 
-    if args.chi_squared:
-        ngram_dict = {ngram : chi_squared_bigram(ngram, ngram_cnt, unigram_cnt)[0] for ngram in ngram_cnt.keys()}
-        ngrams_sorted = [ngram for ngram in ngram_dict.keys() if compare_critical(ngram_dict[ngram], 1, args.threshold)]
+    chi_dict = {ngram : chi_squared_bigram(ngram, ngram_cnt, unigram_cnt)[0] for ngram in mi_filtered}
+    chi_filtered = [ngram for ngram in mi_filtered if compare_critical(ngram_dict[ngram], 1, 0.95)]
 
     with open(args.output, "w") as o:
-        for ngram in ngrams_sorted:
+        for ngram in chi_filtered:
             ngram_string = " ".join(ngram)
-            o.write(str(ngram_dict[ngram]) + "\t" + ngram_string + "\n")
+            o.write(ngram_string + "\t" +
+                    str(ngram_cnt[ngram]) + "\t" +
+                    str(mi_dict[ngram]) + "\t" +
+                    str(chi_filtered[ngram]) + "\t" + "\n")
 
 if __name__ == "__main__":
     nicer.make_nice()
@@ -145,29 +140,13 @@ if __name__ == "__main__":
                         help="txt file to read proof from",)
 
     parser.add_argument("--ngram_file", "-nf",
-                        help="file to read/write ngrams",)
+                        help="pk file to read/write ngrams",)
     
     parser.add_argument("--n", "-n", type=int, default=2,
                         help="value of n for ngrams",)
 
-    parser.add_argument("--threshold", "-t", type=int, default=2,
-                        help="threshold/significance level for statistic\nfrequency, mutual_information: bottom n\nchi_squared: > significance level",
-                        )
-
-    parser.add_argument("--frequency", "-F", action="store_true",
-                        help="use frequency?",)
-
-    parser.add_argument("--mutual_information", "-MI", action="store_true",
-                        help="use mutual information?",)
-
-    parser.add_argument("--chi_squared", "-X", action="store_true",
-                        help="use chi squared?",)
-
     parser.add_argument("--output", "-o",
                         help="file to write results to",)
-
-    
-    
 
     args = parser.parse_args()
 
