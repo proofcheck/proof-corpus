@@ -77,7 +77,7 @@ def chi_squared_bigram(ngram, ngram_cnt, unigram_cnt=None):
                 [   get_ngrams_not_first(ngram, ngram_cnt),  get_ngrams_not_first_or_second(ngram, ngram_cnt) ]
             ]
 
-    chi2float, p, dof, expectedndarray = chi2_contingency(obs)
+    chi2float, _, _, _ = chi2_contingency(obs)
     return chi2float
 
 def get_ngrams_not_first(ngram, ngram_cnt):
@@ -138,50 +138,49 @@ def main(args):
     gc.collect()
     
     print("frequency")
-    frequency_filtered = [ngram for ngram in ngram_cnt.keys() if ngram_cnt[ngram] > 100]
+    frequency_filtered = [ngram for ngram in ngram_cnt.keys() if ngram_cnt[ngram] > args.frequency]
     
     print("MI")
-    # mi_dict = {ngram : pointwise_mutual_information(ngram, ngram_cnt, unigram_cnt) for ngram in frequency_filtered}
+    mi_dict = {ngram : pointwise_mutual_information(ngram, ngram_cnt, unigram_cnt) for ngram in frequency_filtered}
     
-    with Pool(processes=args.cores) as p:
-        mi_dict = {}
-        for ngram, mi_val in p.starmap(
-                    bigram_with_mi,
-                    zip(
-                        frequency_filtered,
-                        repeat(ngram_cnt),
-                        repeat(unigram_cnt),
-                    ),
-                    50
-                ):
-            mi_dict[ngram] = mi_val
+    # with Pool(processes=4) as p:
+    #     mi_dict = {}
+    #     for ngram, mi_val in p.starmap(
+    #                 bigram_with_mi,
+    #                 zip(
+    #                     frequency_filtered,
+    #                     repeat(ngram_cnt),
+    #                     repeat(unigram_cnt),
+    #                 ),
+    #                 25
+    #             ):
+    #         mi_dict[ngram] = mi_val
 
     del frequency_filtered
     gc.collect()
-    mi_filtered = [ngram for ngram in mi_dict.keys() if mi_dict[ngram] > 5]
+    mi_filtered = [ngram for ngram in mi_dict.keys() if mi_dict[ngram] > args.mi]
 
     print("chi")
-    # chi_dict = {ngram : chi_squared_bigram(ngram, ngram_cnt, unigram_cnt) for ngram in mi_filtered}
+    chi_dict = {ngram : chi_squared_bigram(ngram, ngram_cnt, unigram_cnt) for ngram in mi_filtered}
 
-    with Pool(processes=args.cores) as p:
-        chi_dict = {}
-        for ngram, chi_val in p.starmap(
-                    bigram_with_chi_squared,
-                    zip(
-                        mi_filtered,
-                        repeat(ngram_cnt),
-                        repeat(unigram_cnt),
-                    ),
-                    50
-                ):
-            chi_dict[ngram] = chi_val
+    # with Pool(processes=8) as p:
+    #     chi_dict = {}
+    #     for ngram, chi_val in p.starmap(
+    #                 bigram_with_chi_squared,
+    #                 zip(
+    #                     mi_filtered,
+    #                     repeat(ngram_cnt),
+    #                     repeat(unigram_cnt),
+    #                 ),
+    #                 25
+    #             ):
+    #         chi_dict[ngram] = chi_val
 
     del mi_filtered
     gc.collect()
 
-
     print("done making dict")
-    chi_filtered = [ngram for ngram in chi_dict.keys() if compare_critical(chi_dict[ngram], 1, 0.95)]
+    chi_filtered = [ngram for ngram in chi_dict.keys() if compare_critical(chi_dict[ngram], 1, args.chi_2)]
 
     print("done calculating")
     for ngram in chi_filtered:
@@ -208,8 +207,14 @@ if __name__ == "__main__":
     parser.add_argument("--output", "-o", default=sys.stdout, type=argparse.FileType("w"),
                         help="file to write results to")
 
-    parser.add_argument("--cores", "-c", type=int, default=4,
-                        help="Number of cores to use")
+    parser.add_argument("--frequency", "-F", type=int, default=100,
+                        help="threshold for frequency")
+
+    parser.add_argument("--mi", "-MI", type=int, default=5,
+                        help="threshold for MI")
+
+    parser.add_argument("--chi_2", "-C", type=float, default=0.95,
+                        help="confidence interval for chi-squared")
 
     args = parser.parse_args()
 
