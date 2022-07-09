@@ -180,6 +180,7 @@ DELETE_ENVS = {
     "minipage",
     "prooftree",
     "tikzpicture",
+    "lpic",
     # 1509/1509.06811
     "tz",
     # 2004/2004.04514
@@ -490,6 +491,10 @@ def fixup(filename: str, tex_source: str) -> str:
         tex_source = tex_source.replace(
             "\\providecommand{ }[1]{\\textcolor{blue}{#1}}", ""
         )
+    if "Leb2Poi" in filename:
+        tex_source = tex_source.replace(
+            "Moreover. the set", "Moreover, the set"
+        )
     return tex_source
 
 
@@ -746,6 +751,10 @@ def skip_num(words: "more_itertools.peekable[str]"):
             next(words)
             while words.peek("x").isdigit():
                 next(words)
+    elif words.peek("x") in {",", "."}:
+        next(words)
+        while words.peek("x").isdigit():
+            next(words)
     else:
         # e.g., \vskip-\topskip
         next(words)
@@ -1238,12 +1247,14 @@ def try_assign(words, allow_space: bool = False) -> bool:
         else:
             # print("TA: no 1")
             return False
-    # print("ta: ", " ".join(words[:15]))
+    # print("ta': ", " ".join(words[:15]))
     if words.peek("x").isdigit() or (
-        words.peek("x") in ["-", "."] and words[:2][-1].isdigit()
+        words.peek("x") in ["-", "."] and words[1].isdigit()
     ):
-
+        # print("ta skipglue1", words[:15])
         skip_glue(words)
+        # print("ta skipglue2", words[:15])
+
         # if words.peek("x") != ".":
         #     skip_int(words)
         # # decimal?
@@ -1335,6 +1346,11 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
 
     if cmd == "\\begindc":
         while next(words) != "\\enddc":
+            pass
+        return [" "]
+
+    if cmd == "\\beginpgfgraphicnamed":
+        while next(words) != "\\endpgfgraphicnamed":
             pass
         return [" "]
 
@@ -1533,10 +1549,14 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         return []
 
     if cmd in ["\\hbox", "\\vbox", "\\vtop", "\\hrule", "\\vrule"]:
+        # print("X1: ", cmd, words[:10])
         while try_skip_keywords(
             words, ["width", "height", "depth", "to", "spread"]
         ):
+            # print("X2: ", cmd, words[:10])
             try_assign(words, allow_space=True)
+            # print("X3: ", cmd, words[:10])
+        # print("X4: ", cmd, words[:10])
         return []
 
     if cmd == "\\rule":

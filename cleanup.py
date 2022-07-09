@@ -117,16 +117,19 @@ def splitMATH(proof: str, debug: bool = False, aggressive: bool = True):
     Break 'MATHsystem' (one word) into MATH system, etc.
 
     E.g.,
-        ( GF$(2)$ -> ) GFMATH -> MATH
+         GF$(2)$ -> GFMATH -> MATH
         sinceMATH -> since MATH
-        ( $\alpha-$decomposition -> ) MATHdecomposition -> MATH
-        ($n$-th element -> ) MATH th element -> MATH element
+        ( $\alpha-$decomposition -> ) MATHdecomposition -> MATH-decomposition
+        ($n$th element -> ) MATHth element -> MATH-th element
 
     Plus, do the same for CITE and REF.
     """
-    proof = re.sub("(\\w+)-?(MATH|CITE|REF)", "\\1 \\2", proof)
-    proof = re.sub("(MATH|CITE|REF)-?(\\w+)", "\\1 \\2", proof)
-    proof = re.sub("MATH\\s*(th|st|nd|rd)\\b", "MATH", proof)
+    proof = re.sub("(\\w+)-?(CITE|REF)", "\\1 \\2", proof)
+    proof = re.sub("(CITE|REF)-?(\\w+)", "\\1 \\2", proof)
+    proof = re.sub("\\b([A-Z0-9]+|[a-z0-9]{1,2})-?MATH", "MATH", proof)
+    proof = re.sub("(\\w+)MATH", "\\1-MATH", proof)
+    proof = re.sub("MATH(\\w+)", "MATH-\\1", proof)
+    # proof = re.sub("MATH\\s*-?(th|st|nd|rd)\\b", "MATH", proof)
 
     if debug:
         print("0010", proof)
@@ -149,10 +152,10 @@ def ner(proof: str, debug: bool = False, aggressive: bool = True):
     #    at front, and the word ends with an s sound.
     #
     # Guivarc'h is a name.
-    # I've also seen Poincar'e
+    # I've also seen Poincar'e and Maz'ya
     potential_name = (
-        "((?<!['`])(?:\\w'\\w|\\w)+[sz]')|"
-        "((?:\\w'\\w|\\w)+\\w(?:'s\\b|'h\\b|'e\\b)?)"
+        "((?:\\w'\\w|\\w)+\\w(?:'s\\b|'h\\b|'e|'ya\\b)?)|"
+        "((?<!['`])(?:\\w'\\w|\\w)+[sz]')"
     )
 
     def lookup(g: Match[str]) -> str:
