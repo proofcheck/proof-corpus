@@ -932,6 +932,19 @@ def clean_proof(
     return prefix + clean
 
 
+def skip_this_proof(proof: str) -> bool:
+    """Skip very specific proofs."""
+    forbidden_strings = [
+        "Angenommen",  #  1410/1410.313
+        "C1234, C23456, C2659",  # 2003/2003.06204
+        "Pl-B-Match",  # 2001/2001.01493
+    ]
+    for s in forbidden_strings:
+        if s in proof:
+            return True
+    return False
+
+
 def quietly_clean_proof(filename: str, aggressive: bool, orig: str):
     return clean_proof(orig, False, filename, aggressive)
 
@@ -970,9 +983,7 @@ if __name__ == "__main__":
                     print(clean)
                     print()
                 else:
-                    # 1410/1410.313
-                    # Hacky check for a german-language proof
-                    if "Angenommen" not in clean:
+                    if not skip_this_proof(clean):
                         print(clean)
         else:
             assert not args.debug
@@ -986,10 +997,7 @@ if __name__ == "__main__":
                     lines,
                     50,
                 ):
-                    # 1410/1410.313
-                    # Hacky check for a german-language proof
-                    if "Angenommen" not in line:
+                    if not skip_this_proof(line):
                         print(line)
-                    pass
 
         fd.close()

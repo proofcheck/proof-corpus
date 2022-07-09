@@ -182,6 +182,8 @@ DELETE_ENVS = {
     "tikzpicture",
     # 1509/1509.06811
     "tz",
+    # 2004/2004.04514
+    "config",
 }
 
 DELETE_UNINTERPRETED_ENVS = {
@@ -1719,7 +1721,7 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         words.prepend(*w1)
         return []
 
-    if cmd == "\\ifstrequal" or cmd == "\\ifnumequal":
+    if cmd == "\\ifstrequal" or cmd == "\\ifnumequal" or cmd == "\IfEq":
         a1 = "".join(get_arg(words))
         a2 = "".join(get_arg(words))
         if a1 == a2:
@@ -1729,6 +1731,68 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         else:
             get_arg(words)
             # leave the else alone (in braces)
+        return []
+
+    # xstring
+    if cmd == "\\IfBeginWith":
+        if words.peek("!") == "*":
+            next(words)
+        skip_optional_arg(words, macros)
+        a1 = "".join(get_arg(words))
+        a2 = "".join(get_arg(words))
+        if a1.startswith(a2):
+            then_arg = get_arg(words)
+            get_arg(words)  # skip else
+            words.prepend(*then_arg)
+        else:
+            get_arg(words)
+            # leave the else alone (in braces)
+            return []
+
+    if cmd == "\\IfEndWith":
+        if words.peek("!") == "*":
+            next(words)
+        skip_optional_arg(words, macros)
+        a1 = "".join(get_arg(words))
+        a2 = "".join(get_arg(words))
+        if a1.endswith(a2):
+            then_arg = get_arg(words)
+            get_arg(words)  # skip else
+            words.prepend(*then_arg)
+        else:
+            get_arg(words)
+            # leave the else alone (in braces)
+            return []
+
+    if cmd == "\\IfSubStr":
+        if words.peek("!") == "*":
+            next(words)
+        skip_optional_arg(words, macros)
+        a1 = "".join(get_arg(words))
+        a2 = "".join(get_arg(words))
+        if a2 in a1:
+            then_arg = get_arg(words)
+            get_arg(words)  # skip else
+            words.prepend(*then_arg)
+        else:
+            get_arg(words)
+            # leave the else alone (in braces)
+            return []
+
+    if cmd == "\\IfStrEqual":
+        if words.peek("!") == "*":
+            next(words)
+        skip_optional_arg(words, macros)
+        a1 = "".join(get_arg(words))
+        a2 = "".join(get_arg(words))
+        if a1 == a2:
+            then_arg = get_arg(words)
+            get_arg(words)  # skip else
+            words.prepend(*then_arg)
+        else:
+            get_arg(words)
+            # leave the else alone (in braces)
+            return []
 
     if cmd == "\\write":
         if words.peek("q").isdigit():
@@ -1937,6 +2001,15 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
             for i in range(5):
                 next(words)
         return []
+
+    if cmd == "\\ednote":
+        # 2004/2004.08576
+        get_arg(words)
+        return []
+
+    if cmd == "\\the":
+        get_arg(words)
+        return ["42"]
 
     if cmd in macros:
         if cmd == "\\BoxedEPSF":
