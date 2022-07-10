@@ -717,6 +717,7 @@ MATH_ABBREVS = set(
         "c.o.f.e",
         "c.o.g",
         "c.o.i",
+        "comp",
         "c.o.n.s",
         "c.o.p",
         "c.p",
@@ -831,6 +832,7 @@ MATH_ABBREVS = set(
         "e.s.d",
         "e.s.p",
         "e.t.c",
+        "etc",
         "e.u.b",
         "e.u.c",
         "e.v",
@@ -1280,6 +1282,7 @@ MATH_ABBREVS = set(
         "papers.html",
         "pg.f",
         "positivew.h.p",
+        "pp",
         "pre.explorers",
         "proj.dim",
         "proofs.jl",
@@ -1634,7 +1637,7 @@ MATH_ABBREVS = set(
         "x.r",
         "z.c.q.v",
         "z.p.c",
-        "z.u.e"
+        "z.u.e",
     ]
 )
 
@@ -1715,11 +1718,7 @@ if __name__ == "__main__":
         if args.cores > 1:
             with Pool(processes=args.cores) as p:
                 # p.map(pf, tex_files, 1)
-                for lines in p.imap(
-                    sentize_proof,
-                    fd.readlines(),
-                    50,
-                ):
+                for lines in p.imap(sentize_proof, fd.readlines(), 50,):
                     for line in lines:
                         print(line)
         else:

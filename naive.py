@@ -491,9 +491,19 @@ def fixup(filename: str, tex_source: str) -> str:
         tex_source = tex_source.replace(
             "\\providecommand{ }[1]{\\textcolor{blue}{#1}}", ""
         )
-    if "Leb2Poi" in filename:
+    elif "Leb2Poi" in filename:
         tex_source = tex_source.replace(
             "Moreover. the set", "Moreover, the set"
+        )
+    elif "Journal_Hyp_2020January" in filename:
+        tex_source = tex_source.replace(
+            "same endpoints. and if", "same endpoints, and if"
+        )
+    elif "pseudo." in filename:
+        tex_source = re.sub(r"\{e\}\$.\s+for \$j", r"{e}$ for $j", tex_source)
+    elif "canonicaldomainDMT" in filename:
+        tex_source = tex_source.replace(
+            r"\alpha^\sigma$.", r"\alpha^\sigma$,"
         )
     return tex_source
 
