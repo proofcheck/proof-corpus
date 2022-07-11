@@ -1231,6 +1231,7 @@ def try_assign(words, allow_space: bool = False) -> bool:
     """
     # print("try_assign: ", " ".join(words[:15]))
     if words.peek("") in (["=", " "] if allow_space else ["="]):
+        assignment_operator = words.peek("")
         # print("TA: 000")
         w23 = words[1:3]
         if len(w23) < 2:
@@ -1250,6 +1251,12 @@ def try_assign(words, allow_space: bool = False) -> bool:
             for _ in range(skip):
                 next(words)  # Drop the '=' (or ' ')
         elif tok == "{":
+            for _ in range(skip):
+                next(words)  # Drop the '=' (or ' ')
+            get_arg(words)
+            return True
+        elif assignment_operator == "=" and tok.startswith("\\"):
+            # e.g., \baselineskip=\normalbaselineskip
             for _ in range(skip):
                 next(words)  # Drop the '=' (or ' ')
             get_arg(words)
@@ -2335,8 +2342,18 @@ def get_proofs(
                 #
                 # I don't know if any environment needs more
                 # than one such argument, but just in case...
+                guessed_args = 0
                 while words.peek() == "{":
                     get_arg(words)
+                    guessed_args += 1
+                if guessed_args:
+                    # Handle things like
+                    #   \begin{proof}
+                    #     {\em Soundness}. We let...
+                    skip_ws(words)
+                    if words.peek("x") in {".", ":"}:
+                        next(words)
+
             elif env_name.rstrip("*") in MATH_ENVS:
                 fp = skip_rest_env(words, macros)
                 if proof_nesting > 0:
