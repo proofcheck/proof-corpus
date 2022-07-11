@@ -71,7 +71,7 @@ theoremNumber = (
 
 # Prop, Th., Theorem, Formula, ...
 theorem_word = (
-    r"(?:(?i:(?:\b(?:Props?|Prps?|prps?|Thms?|Cor|Th|Lem|Rem|Eqs?|Defs?|Ex|Alg)(?:\b|\.))"
+    r"(?:(?i:(?:\b(?:Props?|Prps?|prps?|Thms?|Cor|Th|Lem|Rem|Eqn?s?|Defs?|Ex|Alg)(?:\b|\.))"
     r"|"
     r"(?:\b(?:Propositions?|Theorems?|Corollar(?:y|ies)|Lemm(?:a|as|e|ata)|"
     r"Remarks?|Equations?|Diagrams?|Claims?|Statements?|Axioms?|Conditions?|"
@@ -117,16 +117,19 @@ def splitMATH(proof: str, debug: bool = False, aggressive: bool = True):
     Break 'MATHsystem' (one word) into MATH system, etc.
 
     E.g.,
-        ( GF$(2)$ -> ) GFMATH -> MATH
+         GF$(2)$ -> GFMATH -> MATH
         sinceMATH -> since MATH
-        ( $\alpha-$decomposition -> ) MATHdecomposition -> MATH
-        ($n$-th element -> ) MATH th element -> MATH element
+        ( $\alpha-$decomposition -> ) MATHdecomposition -> MATH-decomposition
+        ($n$th element -> ) MATHth element -> MATH-th element
 
     Plus, do the same for CITE and REF.
     """
-    proof = re.sub("(\\w+)-?(MATH|CITE|REF)", "\\1 \\2", proof)
-    proof = re.sub("(MATH|CITE|REF)-?(\\w+)", "\\1 \\2", proof)
-    proof = re.sub("MATH\\s*(th|st|nd|rd)\\b", "MATH", proof)
+    proof = re.sub("(\\w+)-?(CITE|REF)", "\\1 \\2", proof)
+    proof = re.sub("(CITE|REF)-?(\\w+)", "\\1 \\2", proof)
+    proof = re.sub("\\b([A-Z0-9]+|[a-z0-9]{1,2})-?MATH", "MATH", proof)
+    proof = re.sub("(\\w+)MATH", "\\1-MATH", proof)
+    proof = re.sub("MATH(\\w+)", "MATH-\\1", proof)
+    # proof = re.sub("MATH\\s*-?(th|st|nd|rd)\\b", "MATH", proof)
 
     if debug:
         print("0010", proof)
@@ -149,10 +152,10 @@ def ner(proof: str, debug: bool = False, aggressive: bool = True):
     #    at front, and the word ends with an s sound.
     #
     # Guivarc'h is a name.
-    # I've also seen Poincar'e
+    # I've also seen Poincar'e and Maz'ya
     potential_name = (
-        "((?<!['`])(?:\\w'\\w|\\w)+[sz]')|"
-        "((?:\\w'\\w|\\w)+\\w(?:'s\\b|'h\\b|'e\\b)?)"
+        "((?:\\w'\\w|\\w)+\\w(?:'s\\b|'h\\b|'e|'ya\\b)?)|"
+        "((?<!['`])(?:\\w'\\w|\\w)+[sz]')"
     )
 
     def lookup(g: Match[str]) -> str:
@@ -198,9 +201,9 @@ def ner(proof: str, debug: bool = False, aggressive: bool = True):
         print("0110", proof)
 
     # (van Trapp -> ) van NAME -> NAME
-    # Similarly von NAME, van de NAME, el NAME, st. NAME, ibn NAME, ...
+    # Similarly von NAME, van de NAME, el NAME, st. NAME, ibn NAME, le NAME, ...
     proof = re.sub(
-        "(\\b(?i:v[oa]n|d[eo]s|de[nr]?|la|el|st\\.|ibn)\\s+)+NAME",
+        "(\\b(?i:v[oa]n|d[eo]s|de[nr]?|la|le|el|st\\.|ibn)\\s+)+NAME",
         "NAME",
         proof,
     )
@@ -216,10 +219,11 @@ def ner(proof: str, debug: bool = False, aggressive: bool = True):
         f"(\\s){upperLetter}\\w+\\b and NAME\\b", "\\1NAME and NAME", proof
     )
 
-    proof = re.sub(f"(?<![.] )\\b{upperLetter}\\w+ CITE\\b", "NAME CITE", proof)
+    proof = re.sub(
+        f"(?<![.] )\\b{upperLetter}\\w+ CITE\\b", "NAME CITE", proof
+    )
 
     # proof = re.sub("NNAME", "NAME", proof)
-
 
     if debug:
         print("0125", proof)
@@ -451,12 +455,11 @@ def cleanup(
 
         # .. -> .
         # . . -> .
-        proof = re.sub(r"(\.\s*)+\.", ".",proof)
+        proof = re.sub(r"(\.\s*)+\.", ".", proof)
 
         # MATH.1 to MATH
         # REF.1 to REF
-        proof = re.sub(r"(MATH|CASE|REF|CITE)\.([0-9]){0,3}", r"\1", proof)
-        
+        proof = re.sub(r"(MATH|CASE|REF|CITE)\.([0-9]){1,3}", r"\1", proof)
 
         # (iii 'a-ds,.) -> REF
         proof = re.sub(
@@ -468,11 +471,10 @@ def cleanup(
         # (sketch) -> ""
         proof = re.sub("\\(\\s*(?i:sketch)\\s*\\)", " ", proof)
 
-        #(Base case) -> REF (then likely to CASE: later)
+        # (Base case) -> REF (then likely to CASE: later)
         proof = re.sub(r"\(\s*(?i:base)\s*(?i:case).{0,5}\s*\)", "REF", proof)
 
         proof = re.sub(r"Base\s*(?i:case)", "REF", proof)
-
 
     # Case 1: -> CASE
     proof = re.sub(r"[cC]ase\s*([0-9]*|MATH|REF)\s*(:)", "REF", proof)
@@ -542,14 +544,18 @@ def cleanup(
         if debug:
             print(1100, proof)
 
-        proof = re.sub(r"\(\s*([-0-9]+|[a-zA-Z])(\s*,\s*([0-9.,'-]+|[a-zA-Z])\s*)+\)", "MATH", proof)
+        proof = re.sub(
+            r"\(\s*([-0-9]+|[a-zA-Z])(\s*,\s*([0-9.,'-]+|[a-zA-Z])\s*)+\)",
+            "MATH",
+            proof,
+        )
 
-        proof = re.sub(r"\b(?i:(figure|fig))\s*[.]?\s*[0-9]*(\s*REF)?", "REF ", proof)
+        proof = re.sub(
+            r"\b(?i:(figure|fig))\s*[.]?\s*[0-9]*(\s*REF)?", "REF", proof
+        )
 
     # eliminate extra spaces
     proof = re.sub("[ ]+", " ", proof)
-
-
 
     if debug:
         print(1200, proof)
@@ -594,16 +600,12 @@ def cleanup(
     proof = re.sub(r"\(\s*MATH\s*\)\s*:", "CASE :", proof)
 
     # (Case 1) -> REF
-    proof = re.sub(
-        f"\\((?i:case)\\s*{atomicID}+\\)",
-        "REF ",
-        proof,
-    )
+    proof = re.sub(f"\\((?i:case)\\s*{atomicID}+\\)", "REF ", proof,)
 
     if aggressive:
-    # dfajfdkls Case 1 dfhaslsfdlk -> dfajfdkls REF dfhaslsfdlk
+        # dfajfdkls Case 1 dfhaslsfdlk -> dfajfdkls REF dfhaslsfdlk
         proof = re.sub(
-            f"({lowerLetter}+\\s*)(?i:case)\\s*{atomicID}*(\\s+{lowerLetter}+)",
+            f"({lowerLetter}+\\s+)(?i:case)\\s*{atomicID}*(\\s+{lowerLetter}+)",
             "\\1REF\\2",
             proof,
         )
@@ -630,12 +632,8 @@ def cleanup(
     )
     # We proceed in steps. 1. Let x be -> ...steps. CASE: Let x be
     proof = re.sub(
-        f"(^|[.;:\\])] ){atomicID}\\. ({upperLetter})",
-        "\\1CASE: \\2",
-        proof,
+        f"(^|[.;:\\])] ){atomicID}\\. ({upperLetter})", "\\1CASE: \\2", proof,
     )
-
-
 
     proof = re.sub(f"(?i:stage)\\s*{atomicID}\\s*(.)", "", proof)
 
@@ -649,8 +647,7 @@ def cleanup(
 
     proof = re.sub("CASE\\s*:(\\s*CASE\\s*:)+", "CASE:", proof)
 
-
-    # base and inductive step labeling to CASE only when followed by capital letter that is not MATH or other tokens
+    # base and inductive step labeling to CASE only when followed by capital letter
     proof = re.sub(
         fr"((\()?\s*(?i:basis)\s*(\))?|(\()?\s*(?i:induction)\s*(\))?)\s*(?!(?:MATH|REF|CASE|CITE|NAME))([A-Z])",
         " CASE: \\6",
@@ -784,9 +781,15 @@ def cleanup(
 
     # Remove sub-references in citations
     # the theorem of Pick CITE -> REF CITE -> REF
-    proof = re.sub("REF,? CITE", "REF", proof)
+    proof = re.sub("\\bREF,? CITE\\b", "REF", proof)
+    # CITE, Theorem 2 -> CITE, REF -> REF
+    proof = re.sub("\\bCITE,? REF\\b", "REF", proof)
 
-    # ( CITE, Theorem 2) -> (CITE, REF) -> (CITE) -> CITE
+    # ( CITE, Theorem 2) -> (CITE, REF) -> REF
+    # ( CITE, 5.2) -> REF
+    proof = re.sub(f"\\(\\s*CITE[ ,]+(REF|{numAlpha})\\s*\\)", " REF ", proof)
+
+    # ( CITE ) -> CITE
     proof = re.sub("\\(\\s*CITE\\s*\\)", "CITE", proof)
 
     if debug:
@@ -827,7 +830,6 @@ def cleanup(
     # proof = re.sub(r"(MATH\s*,\s*|MATH\s*((?i:and)|&)\s*)+MATH", "MATH ", proof)
     proof = re.sub(r"(MATH\s*)+MATH", "MATH", proof)
 
-
     # figure REF ii -> REF
 
     proof = re.sub(
@@ -837,7 +839,7 @@ def cleanup(
     )
 
     # Case REF -> REF
-    proof = re.sub(r"([Ss]ub)?(?i:case(s)?)\s*(MATH|REF)", "REF", proof)
+    proof = re.sub(r"\b([Ss]ub)?(?i:case(s)?)\s*(MATH|REF)", "REF", proof)
 
     proof = re.sub(r"\(\s*REF\s*\)\s*([A-Z])", "REF \\1", proof)
 
@@ -851,17 +853,18 @@ def cleanup(
         proof,
     )
 
-
-
     if debug:
         print(9890, proof)
 
     # MATH.1 to MATH
     # REF.1 to REF
-    proof = re.sub(r"(MATH|CASE|REF|CITE)\.([\.A-Za-z0-9]){0,5}", r"\1", proof)
+    proof = re.sub(r"(MATH|CASE|REF|CITE)\.([\.A-Za-z0-9]){1,5}", r"\1", proof)
 
-
-    proof = re.sub(r"([Ss]ub)?[Cc]ase\s*([0-9]|[A-Za-z]|[',-–]|\s){0,5}([.,])\s*", "REF\\2 ", proof)
+    proof = re.sub(
+        r"([Ss]ub)?[Cc]ase\s*([0-9]|[A-Za-z]|[',-–]|\s){0,5}([.,])\s*",
+        "REF\\2 ",
+        proof,
+    )
 
     # (see REF) -> (REF)
     proof = re.sub(r"\(\s*((?i:see)|(?i:by))\s*REF\s*\)", "(REF)", proof)
@@ -875,7 +878,9 @@ def cleanup(
     if debug:
         print(9900, proof)
 
-    proof = re.sub(f"\\.({upperLetter}({upperLetter}|{lowerLetter})+)", ". \\1", proof)
+    proof = re.sub(
+        f"\\.({upperLetter}({upperLetter}|{lowerLetter})+)", ". \\1", proof
+    )
 
     proof = re.sub(r"([﹘–—⸺⸻])", r" \1 ", proof)
 
@@ -889,13 +894,18 @@ def cleanup(
 
     return proof
 
-URL = re.compile(r"""\b(?:https?|ftp|gopher)\s?:\s?/{1,3}\s?(?:[-a-z0-9_%@']+[.])+[-a-z0-9_%@]+(?:[:][0-9]+)?(?:\s*[/]\s*[.a-z0-9_%#~&@*()'~-]*)*\s*(?:[/]\s*[a-z0-9_%#~&@*()'~-]*[/]|[/][a-z0-9_%#~&@*()'~-]*)""",
-                 re.IGNORECASE)
+
+URL = re.compile(
+    r"""\b(?:https?|ftp|gopher)\s?:\s?/{1,3}\s?(?:[-a-z0-9_%@']+[.])+[-a-z0-9_%@]+(?:[:][0-9]+)?(?:\s*[/]\s*[.a-z0-9_%#~&@*()'~-]*)*\s*(?:[/]\s*[a-z0-9_%#~&@*()'~-]*[/]|[/][a-z0-9_%#~&@*()'~-]*)""",
+    re.IGNORECASE,
+)
+
 
 def urls(proof, debug=False):
     # Don't let it end with a period
     proof = re.sub(URL, " REF ", proof)
     return proof
+
 
 def clean_proof(
     orig: str,
@@ -910,7 +920,7 @@ def clean_proof(
         (prefix, line) = ("", orig)
 
     clean = unicodedata.normalize("NFKC", line)
-    clean = clean.replace("�", "") # 0810/0810.4782
+    clean = clean.replace("�", "")  # 0810/0810.4782
     if debug:
         print("0000", clean)
     clean = urls(clean, debug)
@@ -921,6 +931,20 @@ def clean_proof(
     clean = cleanup(filename, clean, debug, aggressive)
     # clean = remove_extra_rparens(clean)
     return prefix + clean
+
+
+def skip_this_proof(proof: str) -> bool:
+    """Skip very specific proofs."""
+    forbidden_strings = [
+        "Angenommen",  #  1410/1410.313
+        "C1234, C23456, C2659",  # 2003/2003.06204
+        "Pl-B-Match",  # 2001/2001.01493
+        "if@tlamode",  # 1908/1908.05535, 2002/2002.03613, 1508/1508.02705
+    ]
+    for s in forbidden_strings:
+        if s in proof:
+            return True
+    return False
 
 
 def quietly_clean_proof(filename: str, aggressive: bool, orig: str):
@@ -961,9 +985,7 @@ if __name__ == "__main__":
                     print(clean)
                     print()
                 else:
-                    # 1410/1410.313
-                    # Hacky check for a german-language proof
-                    if "Angenommen" not in clean:
+                    if not skip_this_proof(clean):
                         print(clean)
         else:
             assert not args.debug
@@ -977,10 +999,7 @@ if __name__ == "__main__":
                     lines,
                     50,
                 ):
-                    # 1410/1410.313
-                    # Hacky check for a german-language proof
-                    if "Angenommen" not in line:
+                    if not skip_this_proof(line):
                         print(line)
-                    pass
 
         fd.close()

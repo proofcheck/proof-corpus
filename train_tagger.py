@@ -26,6 +26,18 @@ WSJ_TEST = make_wsj_test()
 
 #random.seed(42)
 
+def train_tagger(training, wsj_train=True, nr_iter=5):
+    # train tagger on training data
+    nltk.data.clear_cache()
+    tagger = PerceptronTagger(load=False)
+    print("training")
+    if wsj_train:
+        tagger.train(training + WSJ_TRAIN, nr_iter=nr_iter)
+    else:
+        tagger.train(training, nr_iter=nr_iter)
+    print("done training")
+    return tagger
+
 def pick_sents(lines, n=None, compare=[]):
     # Creates a random list of n sentences with words as tuples
     # Input: lines (unique lines from tagged file)
@@ -76,17 +88,23 @@ def fix_sents(tags, word_list=[]):
     # input: list of tagged sentences
     if word_list:
         tag_dict = make_tag_dict(word_list)
-    else:
-        tag_dict = {}
             
     for sent in tags:
-        first_tag = sent[0][1]
-        first_word = sent[0][0]
-        tag = tag_dict.get(first_word, 'VB')
-        if first_tag != tag:
-            #print(sent)
-            sent[0] = first_word, tag
-
+        if tag_dict:
+            first_tag = sent[0][1]
+            first_word = sent[0][0]
+            tag = tag_dict.get(first_word, 'VB')
+            if first_tag != tag:
+                sent[0] = first_word, tag
+        
+        for ind, word in enumerate(sent):
+            if word[0] in LEFT_BRACKET:
+                sent[ind] = word[0], "("
+            elif word[0] in RIGHT_BRACKET:
+                sent[ind] = word[0], ")"
+            elif word[0] in ALIASES:
+                sent[ind] = word[0], "NNP"
+            
     return tags
 
 def clean_sent(line):
@@ -130,9 +148,14 @@ def num_mislabelings(confusion):
 
 def mislabeled_vb(confusion):
     # counts the number of mislabeled verbs
-    i = confusion._indices['VB']
-    sum_vb = sum(confusion._confusion[i]) - confusion['VB', 'VB']
+    sum_vb = mislabeled_tag(confusion, 'VB')
     return sum_vb
+
+def mislabeled_tag(confusion, tag):
+    # counts the number of mislabeled tags
+    i = confusion._indices[tag]
+    sum_tag = sum(confusion._confusion[i]) - confusion[tag, tag]
+    return sum_tag
 
 def make_training_set(train_lines, train_num=None, sample_all=False, testing=[], output=None):
     # makes training set
@@ -147,6 +170,7 @@ def make_training_set(train_lines, train_num=None, sample_all=False, testing=[],
             sents = pick_sents(lines_one_file, train_num, testing, output)
             training_set += fix_sents(sents)
     return training_set
+
 
 def do_experiments(args):
     # Prints accuracy, number of VBs mistakenly tagged as NPP, number of mislabelled tokens overall
@@ -252,17 +276,7 @@ def print_results(default_results, trained_results, num, output=None):
             o.write("VB words tagged as NNP :\t{} \t{}\n".format(default_results[1], trained_results[1]))
             o.write("Mislabeled words overall :\t{} \t{}\n".format(default_results[2], trained_results[2]))
 
-def train_tagger(training, wsj_train=True, nr_iter=5):
-    # train tagger on training data
-    nltk.data.clear_cache()
-    tagger = PerceptronTagger(load=False)
-    print("training")
-    if wsj_train:
-        tagger.train(training + WSJ_TRAIN, nr_iter=nr_iter)
-    else:
-        tagger.train(training, nr_iter=nr_iter)
-    print("done training")
-    return tagger
+
 
 def do_one_basic_experiment(test_file, trained_tagger, default_tagger, numtest=None, compare=[], output=None):
     # creates testing set
@@ -287,7 +301,7 @@ def do_one_basic_experiment(test_file, trained_tagger, default_tagger, numtest=N
     default_results = [default_tagger.accuracy(testing), 
                     default_confusion['VB', 'NNP'],
                     num_mislabelings(default_confusion),
-                ]
+                    ]
     trained_confusion = trained_tagger.confusion(testing)
     results = [trained_tagger.accuracy(testing), 
                     trained_confusion['VB', 'NNP'],

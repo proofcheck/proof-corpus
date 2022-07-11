@@ -11,7 +11,6 @@ from sent_tools import *
 # Extracts sentences and tags that begin with words in word_file
 # from tagged sentences
 
-
 def check_first_word(sent, word):
     # Input: sentence with tags (connected by _ ), word
     # Returns sentence if the first word of the sentence is word
@@ -31,8 +30,12 @@ def make_bins(args):
     
     if not args.extension:
         args.extension = ""
+    
+    with open(args.file, "r") as fd:
+        lines = fd.readlines()
 
     for word in word_list:
+        print(word)
         file_name = "word_bins/" + word + args.extension + ".txt"
         if args.unique:
             file_name_unique = "word_bins/unique/" + word + args.extension + ".txt"
@@ -40,26 +43,28 @@ def make_bins(args):
             unique_output = open(file_name_unique, "w")
           
         with open(file_name, "w") as output:  
-            with open(args.file, "r") as fd:
-                with Pool(processes=args.cores) as p:          
-                    for line in p.starmap(
-                        check_first_word,
-                        zip(
-                            fd.readlines(),
-                            repeat(word),
-                            ),
-                                50,
-                        ):
-                            if line:
-                                sent = line.split("\t")[1]
-                                output.write(sent)
-                                if args.unique:
-                                    if sent not in unique_sents:
-                                        unique_sents.add(sent)
-                                        unique_output.write(sent) 
-                                
-                    if args.unique:
-                        unique_output.close()
+            with Pool(processes=args.cores) as p:          
+                for ind, line in enumerate(p.starmap(
+                    check_first_word,
+                    zip(
+                        lines,
+                        repeat(word),
+                        ),
+                            50,
+                    )):
+                        if ind % 100000 == 0:
+                            print(round(ind / len(lines) * 100, 2), "% done", sep="")
+
+                        if line:
+                            sent = line.split("\t")[1]
+                            output.write(sent)
+                            if args.unique:
+                                if sent not in unique_sents:
+                                    unique_sents.add(sent)
+                                    unique_output.write(sent) 
+                            
+                if args.unique:
+                    unique_output.close()
         
 def main(args):
     make_bins(args)
@@ -69,10 +74,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--file", "-f", 
-                            help="txt file to read proof from")
-
-    parser.add_argument("--list", "-l", nargs='*',
-                            help="list of txt files to read proof from")
+                            help="txt file to read tags from")
     
     parser.add_argument("--output", "-o", type=argparse.FileType('w'),
                             help="txt file to write results to")

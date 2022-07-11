@@ -7,3 +7,4 @@ nltk
 psutil
 spacy
 dill
+scipy

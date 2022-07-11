@@ -138,6 +138,9 @@ TEX_REFS = {
     "\\wref": 1,
     # 0209/math-ph0209020
     "\\itemref": 1,
+    # 1902/1902.07230
+    # 1905/1905.13429
+    "\\irref": 1,
 }
 
 # Set of LaTeX \cite-like commands
@@ -180,8 +183,16 @@ DELETE_ENVS = {
     "minipage",
     "prooftree",
     "tikzpicture",
+    "lpic",
     # 1509/1509.06811
     "tz",
+    # 2004/2004.04514
+    "config",
+    # 1602/1602.00521
+    "mma",
+    # 1902/1902.07230
+    # 1905/1905.13429
+    "sequentdeduction",
 }
 
 DELETE_UNINTERPRETED_ENVS = {
@@ -488,6 +499,30 @@ def fixup(filename: str, tex_source: str) -> str:
         tex_source = tex_source.replace(
             "\\providecommand{ }[1]{\\textcolor{blue}{#1}}", ""
         )
+    elif "Leb2Poi" in filename:
+        tex_source = tex_source.replace(
+            "Moreover. the set", "Moreover, the set"
+        )
+    elif "Journal_Hyp_2020January" in filename:
+        tex_source = tex_source.replaceq(
+            "same endpoints. and if", "same endpoints, and if"
+        )
+    elif "pseudo." in filename:
+        tex_source = re.sub(r"\{e\}\$.\s+for \$j", r"{e}$ for $j", tex_source)
+    elif "canonicaldomainDMT." in filename:
+        tex_source = tex_source.replace(r"\alpha^\sigma$.", r"\alpha^\sigma$,")
+    elif "paper_beta_arxiv." in filename:
+        tex_source = tex_source.replace("(???)", " REF ")
+    elif "abci." in filename:
+        tex_source = tex_source.replace("Picture?????", "")
+    elif "monotone." in filename:
+        tex_source = tex_source.replace("see??.", ".")
+    elif "lipschitzfree." in filename:
+        tex_source = tex_source.replace("Proposition ???", "Proposition 42")
+    elif "shi-yang-eppo." in filename:
+        tex_source = tex_source.replace("(??)", "")
+    elif "46-100." in filename:
+        tex_source = tex_source.replace("？？？？？？？", "")
     return tex_source
 
 
@@ -744,6 +779,10 @@ def skip_num(words: "more_itertools.peekable[str]"):
             next(words)
             while words.peek("x").isdigit():
                 next(words)
+    elif words.peek("x") in {",", "."}:
+        next(words)
+        while words.peek("x").isdigit():
+            next(words)
     else:
         # e.g., \vskip-\topskip
         next(words)
@@ -1210,6 +1249,7 @@ def try_assign(words, allow_space: bool = False) -> bool:
     """
     # print("try_assign: ", " ".join(words[:15]))
     if words.peek("") in (["=", " "] if allow_space else ["="]):
+        assignment_operator = words.peek("")
         # print("TA: 000")
         w23 = words[1:3]
         if len(w23) < 2:
@@ -1233,15 +1273,23 @@ def try_assign(words, allow_space: bool = False) -> bool:
                 next(words)  # Drop the '=' (or ' ')
             get_arg(words)
             return True
+        elif assignment_operator == "=" and tok.startswith("\\"):
+            # e.g., \baselineskip=\normalbaselineskip
+            for _ in range(skip):
+                next(words)  # Drop the '=' (or ' ')
+            get_arg(words)
+            return True
         else:
             # print("TA: no 1")
             return False
-    # print("ta: ", " ".join(words[:15]))
+    # print("ta': ", " ".join(words[:15]))
     if words.peek("x").isdigit() or (
-        words.peek("x") in ["-", "."] and words[:2][-1].isdigit()
+        words.peek("x") in ["-", "."] and words[1].isdigit()
     ):
-
+        # print("ta skipglue1", words[:15])
         skip_glue(words)
+        # print("ta skipglue2", words[:15])
+
         # if words.peek("x") != ".":
         #     skip_int(words)
         # # decimal?
@@ -1333,6 +1381,11 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
 
     if cmd == "\\begindc":
         while next(words) != "\\enddc":
+            pass
+        return [" "]
+
+    if cmd == "\\beginpgfgraphicnamed":
+        while next(words) != "\\endpgfgraphicnamed":
             pass
         return [" "]
 
@@ -1531,10 +1584,14 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         return []
 
     if cmd in ["\\hbox", "\\vbox", "\\vtop", "\\hrule", "\\vrule"]:
+        # print("X1: ", cmd, words[:10])
         while try_skip_keywords(
             words, ["width", "height", "depth", "to", "spread"]
         ):
+            # print("X2: ", cmd, words[:10])
             try_assign(words, allow_space=True)
+            # print("X3: ", cmd, words[:10])
+        # print("X4: ", cmd, words[:10])
         return []
 
     if cmd == "\\rule":
@@ -1719,7 +1776,7 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         words.prepend(*w1)
         return []
 
-    if cmd == "\\ifstrequal" or cmd == "\\ifnumequal":
+    if cmd == "\\ifstrequal" or cmd == "\\ifnumequal" or cmd == "\IfEq":
         a1 = "".join(get_arg(words))
         a2 = "".join(get_arg(words))
         if a1 == a2:
@@ -1729,6 +1786,68 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         else:
             get_arg(words)
             # leave the else alone (in braces)
+        return []
+
+    # xstring
+    if cmd == "\\IfBeginWith":
+        if words.peek("!") == "*":
+            next(words)
+        skip_optional_arg(words, macros)
+        a1 = "".join(get_arg(words))
+        a2 = "".join(get_arg(words))
+        if a1.startswith(a2):
+            then_arg = get_arg(words)
+            get_arg(words)  # skip else
+            words.prepend(*then_arg)
+        else:
+            get_arg(words)
+            # leave the else alone (in braces)
+            return []
+
+    if cmd == "\\IfEndWith":
+        if words.peek("!") == "*":
+            next(words)
+        skip_optional_arg(words, macros)
+        a1 = "".join(get_arg(words))
+        a2 = "".join(get_arg(words))
+        if a1.endswith(a2):
+            then_arg = get_arg(words)
+            get_arg(words)  # skip else
+            words.prepend(*then_arg)
+        else:
+            get_arg(words)
+            # leave the else alone (in braces)
+            return []
+
+    if cmd == "\\IfSubStr":
+        if words.peek("!") == "*":
+            next(words)
+        skip_optional_arg(words, macros)
+        a1 = "".join(get_arg(words))
+        a2 = "".join(get_arg(words))
+        if a2 in a1:
+            then_arg = get_arg(words)
+            get_arg(words)  # skip else
+            words.prepend(*then_arg)
+        else:
+            get_arg(words)
+            # leave the else alone (in braces)
+            return []
+
+    if cmd == "\\IfStrEqual":
+        if words.peek("!") == "*":
+            next(words)
+        skip_optional_arg(words, macros)
+        a1 = "".join(get_arg(words))
+        a2 = "".join(get_arg(words))
+        if a1 == a2:
+            then_arg = get_arg(words)
+            get_arg(words)  # skip else
+            words.prepend(*then_arg)
+        else:
+            get_arg(words)
+            # leave the else alone (in braces)
+            return []
 
     if cmd == "\\write":
         if words.peek("q").isdigit():
@@ -1937,6 +2056,15 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
             for i in range(5):
                 next(words)
         return []
+
+    if cmd == "\\ednote":
+        # 2004/2004.08576
+        get_arg(words)
+        return []
+
+    if cmd == "\\the":
+        get_arg(words)
+        return ["42"]
 
     if cmd in macros:
         if cmd == "\\BoxedEPSF":
@@ -2232,8 +2360,18 @@ def get_proofs(
                 #
                 # I don't know if any environment needs more
                 # than one such argument, but just in case...
+                guessed_args = 0
                 while words.peek() == "{":
                     get_arg(words)
+                    guessed_args += 1
+                if guessed_args:
+                    # Handle things like
+                    #   \begin{proof}
+                    #     {\em Soundness}. We let...
+                    skip_ws(words)
+                    if words.peek("x") in {".", ":"}:
+                        next(words)
+
             elif env_name.rstrip("*") in MATH_ENVS:
                 fp = skip_rest_env(words, macros)
                 if proof_nesting > 0:
@@ -2383,7 +2521,8 @@ def get_proofs(
                 #  any attempt to redefine it. With luck, it won't matter
                 #  (particularly if the redefinition takes the same
                 #  number of arguments, which is common).
-                macros[rhs] = "frozen"
+                if rhs.startswith("\\"):
+                    macros[rhs] = "frozen"
                 macros[lhs] = ([[]], None, [rhs])
                 if debug:
                     print(f"  ... as macro for {rhs}")

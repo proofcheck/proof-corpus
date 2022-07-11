@@ -50,7 +50,7 @@ def output(args):
 
 def length_sent(line):
     tokenized = tokenize(line)
-    return len(tokenized) + 2
+    return len(tokenized)
 
 def nltk_word_lp(lm, token):
     return lm.logscore(token)
@@ -97,6 +97,7 @@ def rank_sentences_from_file(lm, sentence_file, prob_function, lp_word=nltk_word
         sentences = sent_file.read().splitlines()
     
     log_prob_dict, log_prob_sorted = sentence_ranker(lm, sentences, prob_function, lp_word, lp_sent, n)
+    
     for sent in log_prob_sorted:
         print(log_prob_dict[sent], "\t", sent)
 
@@ -110,7 +111,7 @@ def experiment(args):
     with open(args.sentences, "r") as s:
         sents = s.read().splitlines()
 
-    for prob_func in [lp_sent, unigram_lp, mean_lp, norm_lp_div, norm_lp_sub, slor]:
+    for prob_func in [nltk_sent_lp, unigram_lp, mean_lp, norm_lp_div, norm_lp_sub, slor]:
         prob_dict, sorted_list = sentence_ranker(lm, sents, prob_func, 2)
         if args.output:
             results += "\n" + prob_func.__name__ + "\n"
@@ -151,7 +152,7 @@ if __name__ == '__main__':
                             help="txt file to read sentences from (for testing on lm)")
 
     parser.add_argument( "--output", "-o", 
-                            help="txt file to write resuls to")
+                            help="txt file to write results to")
 
 
 

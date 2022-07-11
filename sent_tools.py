@@ -30,6 +30,9 @@ PUNCTUATION = {
     "="
 }
 
+LEFT_BRACKET = {"(", "[", "{",}
+RIGHT_BRACKET = {")", "]", "}",}
+
 def split_sentence_id(line):
     line = line.strip()
     if "\t" in line:

@@ -6,7 +6,6 @@ from multiprocessing import Pool
 from itertools import repeat
 from nltk.probability import FreqDist
 
-from first_word import make_dist
 from sent_tools import *
 
 def dist_output(dist, output):
@@ -48,6 +47,12 @@ def check_one_sent_tag(this_id, this_sent, tag):
     # Checks if first word of the sentence is tagged tag
     if this_sent[0][1] == tag:
         return this_id, this_sent, this_sent[0][1]
+
+def untag_line_to_tokens(line):
+    sent_id, sent = split_sentence_id(line)
+    tokenized = tokenize(sent)
+    tokens = [word.split('_')[0] for word in tokenized]
+    return tokens
 
 def load_one_sent_tags(line):
     # Loads one sentence of tags

@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 
 import argparse
-
-from more_itertools import flatten
 import nicer
 import os
+import nltk
 
 from load_ontonotes_pos import *
-from train_tagger import *
+from train_tagger import DEFAULT_TAGGER, mislabeled_vb, num_mislabelings, pick_sents, write_fixed_sents
 
 PATH = "/mnt/research/proofcheck/noda/proof-corpus/word_bins/unique/"
 
@@ -59,14 +58,14 @@ def make_train_test(args):
     num_train_bins = len(word_list) - args.num_test_bins
     train_files, test_files = get_train_test_files(word_list, num_train_bins)
 
-    save_test = "testing_set/" + args.extension + ".txt"
+    save_test = "testing_set/" + args.test_extension + ".txt"
 
     if os.path.exists(save_test):
         print("Testing exists")
         return 0
 
     if not args.train: 
-        save_train = "training_set/" + args.extension + ".txt"
+        save_train = "training_set/" + args.train_extension + ".txt"
     
         if os.path.exists(save_train):
             print("Training exists")
@@ -86,18 +85,28 @@ def make_train_test(args):
 
     default_results = [default_tagger.accuracy(testing), 
                         default_confusion['VB', 'NNP'],
+                        default_confusion['VBG', 'NNP'],
+                        default_confusion['VB', 'NN'],
                         mislabeled_vb(default_confusion),
                         num_mislabelings(default_confusion),
                       ]
     
-    output_default = "experiments/experiment_default_tagger_" + args.extension + ".txt"
+    output_default = "experiments/experiment_default_tagger_" + args.test_extension + ".txt"
     with open(output_default, "w") as o:
         str_results = list(map(str, default_results))
         o.write("\t".join(str_results))
 
+def make_small_testing(training_fp, testing_fp, total, test_num):
+    with open(training_fp, "r") as f:
+        lines = f.readlines()
+    
+    new_test = [lines[i] for i in range(len(lines)) if i % total in range(total-test_num, total)]
+    with open(testing_fp, "w") as o:
+        for line in new_test:
+            o.write(line)
+
 def main(args):
     make_train_test(args)
-
 
 if __name__ == '__main__':
     nicer.make_nice()
@@ -111,11 +120,11 @@ if __name__ == '__main__':
     
     parser.add_argument("--num_test_bins", "-nte",type=int, default=1,
                             help="number of testing word bins")
-    
-    parser.add_argument("--save_sentences", "-s", action='store_true',
-                            help="save sentences")
 
-    parser.add_argument("--extension", "-e",
+    parser.add_argument("--train_extension", "-tr_e",
+                            help="file extension")
+
+    parser.add_argument("--test_extension", "-te_e",
                             help="file extension")
     
     parser.add_argument("--word_list", "-wl",type=argparse.FileType('r'),
