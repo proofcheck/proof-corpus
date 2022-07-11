@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-import os
-os.environ["OPENBLAS_NUM_THREADS"] = "1"
-
 import pickle
 import argparse
 import sys
@@ -34,7 +31,7 @@ def save_ngrams(files, output, n):
     for fd in files:
         for line in fd.readlines():
             sentences.extend([  tokenize(clean_sent(line))  ])
-        print("done", fd)
+        print("done", fd, flush=True)
         fd.close()
 
     ngrams = []
@@ -46,12 +43,11 @@ def save_ngrams(files, output, n):
         if ngram is not []:
             ngrams.extend(ngram)
 
-    print("dumping")
+    print("dumping", flush=True)
     with open(output, "wb") as resource:
         pickle.dump(ngrams, resource)
 
     unigrams = [word for sent in sentences for word in sent]
-
     return ngrams, unigrams
 
 def pointwise_mutual_information(ngram, ngram_cnt, unigram_cnt):
@@ -111,61 +107,72 @@ def compare_critical(chi, dof, confidence_level):
 def bigram_with_chi_squared(ngram, ngram_cnt, unigram_cnt):
     return ngram, chi_squared_bigram(ngram, ngram_cnt, unigram_cnt)
 
-def make_ngram_cnt(ngrams):
+def make_ngram_cnt(ngrams, freq_threshold=None):
     cnt = Counter()
     for ngram in ngrams:
         cnt[ngram] += 1
+
+    if freq_threshold:
+        keys = list(cnt.keys())
+        for key in keys:
+            if cnt[key] < freq_threshold:
+                del cnt[key]
     return cnt
+
+def make_unigram_cnt(unigrams, ngram_cnt):
+    freq_unigrams = set([uni for ngram in ngram_cnt.keys() for uni in ngram])
+    unigram_cnt = Counter([unigram for unigram in unigrams if unigram in freq_unigrams])
+    return unigram_cnt
 
 def main(args):
     if args.files:
         ngrams, unigrams = save_ngrams(args.files, args.ngram_file, args.n)
 
     else:
+        print("loading ngrams", flush=True)
         with open(args.ngram_file, "rb") as resource:
-            print("loading ngrams")
             ngrams = pickle.load(resource)
-            print("done loading ngrams")
-        
+            print("done loading ngrams", flush=True)
         unigrams = [ngram[0] for ngram in ngrams]
-            
-    ngram_cnt = make_ngram_cnt(ngrams)
+
+    print("frequency", flush=True)
+    ngram_cnt = make_ngram_cnt(ngrams, args.frequency)
     del ngrams
     gc.collect()
-    
-    unigram_cnt = Counter(unigrams)
+
+    print("making unigram counter", flush=True)
+    unigram_cnt = make_unigram_cnt(unigrams, ngram_cnt)
     del unigrams
     gc.collect()
-    
-    print("frequency")
-    frequency_filtered = [ngram for ngram in ngram_cnt.keys() if ngram_cnt[ngram] > args.frequency]
-    
-    print("MI")
-    mi_dict = {ngram : pointwise_mutual_information(ngram, ngram_cnt, unigram_cnt) for ngram in frequency_filtered}
-    
-    # with Pool(processes=4) as p:
-    #     mi_dict = {}
-    #     for ngram, mi_val in p.starmap(
-    #                 bigram_with_mi,
-    #                 zip(
-    #                     frequency_filtered,
-    #                     repeat(ngram_cnt),
-    #                     repeat(unigram_cnt),
-    #                 ),
-    #                 25
-    #             ):
-    #         mi_dict[ngram] = mi_val
 
-    del frequency_filtered
-    gc.collect()
+    print("MI", flush=True)
+    mi_dict = {ngram : pointwise_mutual_information(ngram, ngram_cnt, unigram_cnt) for ngram in ngram_cnt.keys()}
+    
+    args.cores = min(args.cores, 15)
+
+    # with Pool(processes=args.cores) as p:
+    #     mi_dict = {}
+    #     mi_dict.update(
+    #               p.starmap(
+    #                     bigram_with_mi,
+    #                     zip(
+    #                         ngram_cnt.keys(),
+    #                         repeat(ngram_cnt),
+    #                         repeat(unigram_cnt),
+    #                     ),
+    #                    25
+    #                 )
+    #               )
+
     mi_filtered = [ngram for ngram in mi_dict.keys() if mi_dict[ngram] > args.mi]
 
-    print("chi")
+    print("chi", flush=True)
     chi_dict = {ngram : chi_squared_bigram(ngram, ngram_cnt, unigram_cnt) for ngram in mi_filtered}
 
-    # with Pool(processes=8) as p:
+    # with Pool(processes=args.cores) as p:
     #     chi_dict = {}
-    #     for ngram, chi_val in p.starmap(
+    #     chi_dict.update(
+    #               p.starmap(
     #                 bigram_with_chi_squared,
     #                 zip(
     #                     mi_filtered,
@@ -173,16 +180,16 @@ def main(args):
     #                     repeat(unigram_cnt),
     #                 ),
     #                 25
-    #             ):
-    #         chi_dict[ngram] = chi_val
+    #               )
+    #       )
 
     del mi_filtered
     gc.collect()
 
-    print("done making dict")
+    print("done making dict", flush=True)
     chi_filtered = [ngram for ngram in chi_dict.keys() if compare_critical(chi_dict[ngram], 1, args.chi_2)]
 
-    print("done calculating")
+    print("done calculating", flush=True)
     for ngram in chi_filtered:
         ngram_string = " ".join(ngram)
         args.output.write(ngram_string + "\t" 
@@ -204,6 +211,9 @@ if __name__ == "__main__":
     parser.add_argument("--n", "-n", type=int, default=2,
                         help="value of n for ngrams")
 
+    parser.add_argument("--cores", "-c", type=int, default=4,
+                        help="number of cores")
+
     parser.add_argument("--output", "-o", default=sys.stdout, type=argparse.FileType("w"),
                         help="file to write results to")
 
@@ -219,6 +229,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main(args)
-
-
-    

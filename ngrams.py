@@ -115,7 +115,6 @@ def main(args):
     #         1
     #     )
 
-
 if __name__ == "__main__":
     nicer.make_nice()
     parser = argparse.ArgumentParser()
