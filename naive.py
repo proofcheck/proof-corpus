@@ -185,6 +185,8 @@ DELETE_ENVS = {
     "tz",
     # 2004/2004.04514
     "config",
+    # 1602/1602.00521
+    "mma",
 }
 
 DELETE_UNINTERPRETED_ENVS = {
@@ -502,9 +504,7 @@ def fixup(filename: str, tex_source: str) -> str:
     elif "pseudo." in filename:
         tex_source = re.sub(r"\{e\}\$.\s+for \$j", r"{e}$ for $j", tex_source)
     elif "canonicaldomainDMT" in filename:
-        tex_source = tex_source.replace(
-            r"\alpha^\sigma$.", r"\alpha^\sigma$,"
-        )
+        tex_source = tex_source.replace(r"\alpha^\sigma$.", r"\alpha^\sigma$,")
     return tex_source
 
 
