@@ -445,6 +445,10 @@ def cleanup(
         )
 
     if aggressive:
+        # by 6.3 -> by REF
+        # to 2-4a -> to REF
+        proof = re.sub(f"(?i:(to|by|of|from))\\s*{numAlpha}", "\\1 REF", proof)
+
         # .. -> .
         # . . -> .
         proof = re.sub(r"(\.\s*)+\.", ".",proof)
@@ -456,7 +460,7 @@ def cleanup(
 
         # (iii 'a-ds,.) -> REF
         proof = re.sub(
-            r"\((\s*(SII|[iI]+)([0-9]|[A-Za-z]|['.,-–]|\s){0,10}\s*)+\)",
+            r"\((\s*(SII|[iI]+)([0-9]|[A-Za-z]|['.,\-–]|\s){0,10}\s*)+\)",
             "REF ",
             proof,
         )
@@ -540,7 +544,7 @@ def cleanup(
 
         proof = re.sub(r"\(\s*([-0-9]+|[a-zA-Z])(\s*,\s*([0-9.,'-]+|[a-zA-Z])\s*)+\)", "MATH", proof)
 
-        proof = re.sub(r"\b(?i:(figure|fig))\s*[.]?\s*[0-9]*(\s*REF)?", "REF", proof)
+        proof = re.sub(r"\b(?i:(figure|fig))\s*[.]?\s*[0-9]*(\s*REF)?", "REF ", proof)
 
     # eliminate extra spaces
     proof = re.sub("[ ]+", " ", proof)
@@ -641,14 +645,14 @@ def cleanup(
         proof,
     )
 
-    proof = re.sub(f"\\(\\s*{atomicID}\\s*\\)", "REF", proof)
+    # proof = re.sub(f"\\(\\s*{atomicID}\\s*\\)", "REF", proof)
 
     proof = re.sub("CASE\\s*:(\\s*CASE\\s*:)+", "CASE:", proof)
 
 
-    # base and inductive step labeling to CASE only when followed by capital letter
+    # base and inductive step labeling to CASE only when followed by capital letter that is not MATH or other tokens
     proof = re.sub(
-        f"((\\()?\\s*(?i:basis)\\s*(\\))?|(\\()?\\s*(?i:induction)\\s*(\\))?)\\s*({upperLetter})",
+        fr"((\()?\s*(?i:basis)\s*(\))?|(\()?\s*(?i:induction)\s*(\))?)\s*(?!(?:MATH|REF|CASE|CITE|NAME))([A-Z])",
         " CASE: \\6",
         proof,
     )
@@ -867,7 +871,7 @@ def cleanup(
 
     # REF in REF -> REF
     # REF, REF -> REF
-    proof = re.sub(r"(?i:REF)(?i:\s*(in|and|,)\s*REF)+", "REF", proof)
+    proof = re.sub(r"REF(\s*(in|and|,)\s*REF)+", "REF", proof)
     if debug:
         print(9900, proof)
 
