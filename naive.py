@@ -138,6 +138,9 @@ TEX_REFS = {
     "\\wref": 1,
     # 0209/math-ph0209020
     "\\itemref": 1,
+    # 1902/1902.07230
+    # 1905/1905.13429
+    "\\irref": 1,
 }
 
 # Set of LaTeX \cite-like commands
@@ -187,6 +190,9 @@ DELETE_ENVS = {
     "config",
     # 1602/1602.00521
     "mma",
+    # 1902/1902.07230
+    # 1905/1905.13429
+    "sequentdeduction",
 }
 
 DELETE_UNINTERPRETED_ENVS = {
@@ -498,13 +504,25 @@ def fixup(filename: str, tex_source: str) -> str:
             "Moreover. the set", "Moreover, the set"
         )
     elif "Journal_Hyp_2020January" in filename:
-        tex_source = tex_source.replace(
+        tex_source = tex_source.replaceq(
             "same endpoints. and if", "same endpoints, and if"
         )
     elif "pseudo." in filename:
         tex_source = re.sub(r"\{e\}\$.\s+for \$j", r"{e}$ for $j", tex_source)
-    elif "canonicaldomainDMT" in filename:
+    elif "canonicaldomainDMT." in filename:
         tex_source = tex_source.replace(r"\alpha^\sigma$.", r"\alpha^\sigma$,")
+    elif "paper_beta_arxiv." in filename:
+        tex_source = tex_source.replace("(???)", " REF ")
+    elif "abci." in filename:
+        tex_source = tex_source.replace("Picture?????", "")
+    elif "monotone." in filename:
+        tex_source = tex_source.replace("see??.", ".")
+    elif "lipschitzfree." in filename:
+        tex_source = tex_source.replace("Proposition ???", "Proposition 42")
+    elif "shi-yang-eppo." in filename:
+        tex_source = tex_source.replace("(??)", "")
+    elif "46-100." in filename:
+        tex_source = tex_source.replace("？？？？？？？", "")
     return tex_source
 
 
