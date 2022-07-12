@@ -448,6 +448,38 @@ def cleanup(
             proof,
         )
 
+    if debug:
+        print(1000, proof)
+
+    # Delete any leftover dimensions or keys
+    # We hope there aren't any, but just in case...
+
+    real_re = "(?:[+-]?(?:\\d+(?:[.,]\\d*)?|\\d*(?:[.,]\\d+)))"
+    dimen_re2 = f"(?:{real_re}(?:[ ]?true[ ]?)?(?:in)\\b)"
+    dimen_re = f"(?:{real_re}[ ]?(?:true[ ]?)?(?:pt|cm|mm|bp|em|ex|sp)\\b|{dimen_re2})"
+    inf_re = f"(?:{real_re}[ ]?fill?l?)"
+    dori_re = f"(?:{dimen_re}|{inf_re})"
+    glue_re = (
+        f"(?:{dimen_re}(?:[ ]?plus[ ]?{dori_re})?(?:[ ]?minus[ ]?{dori_re})?)"
+    )
+
+    # [5.2pt]
+    proof = re.sub(f"\\[\\s*{glue_re}\\s*\\]", "", proof)
+
+    # [width=5.2pt, boundary=solid]
+    proof = re.sub("\\[\\s?[a-z_]+=.*?\\]", "", proof)
+
+    # 5pt
+    # =5pt
+    # 5pt plus 1fil minus 5pt
+    proof = re.sub(f"(=[ ]?)?{glue_re}", "", proof)
+
+    # toric.eps
+    proof = re.sub("[-_A-Za-z0-9]+[.](jpg|jpeg|eps|pdf|png|svg|ps)", "", proof)
+
+    if debug:
+        print("1020", proof)
+
     if aggressive:
         # by 6.3 -> by REF
         # to 2-4a -> to REF
@@ -481,35 +513,6 @@ def cleanup(
 
     # ad 1 -> CASE
     proof = re.sub(f"(?i:ad)\\s*{numAlpha}(.)?", " CASE:", proof)
-
-    if debug:
-        print(1000, proof)
-
-    # Delete any leftover dimensions or keys
-    # We hope there aren't any, but just in case...
-
-    real_re = "(?:[+-]?(?:\\d+(?:[.,]\\d*)?|\\d*(?:[.,]\\d+)))"
-    dimen_re2 = f"(?:{real_re}(?:[ ]?true[ ]?)?(?:in)\\b)"
-    dimen_re = f"(?:{real_re}[ ]?(?:true[ ]?)?(?:pt|cm|mm|bp|em|ex|sp)\\b|{dimen_re2})"
-    inf_re = f"(?:{real_re}[ ]?fill?l?)"
-    dori_re = f"(?:{dimen_re}|{inf_re})"
-    glue_re = (
-        f"(?:{dimen_re}(?:[ ]?plus[ ]?{dori_re})?(?:[ ]?minus[ ]?{dori_re})?)"
-    )
-
-    # [5.2pt]
-    proof = re.sub(f"\\[\\s*{glue_re}\\s*\\]", "", proof)
-
-    # [width=5.2pt, boundary=solid]
-    proof = re.sub("\\[\\s?[a-z_]+=.*?\\]", "", proof)
-
-    # 5pt
-    # =5pt
-    # 5pt plus 1fil minus 5pt
-    proof = re.sub(f"(=[ ]?)?{glue_re}", "", proof)
-
-    # toric.eps
-    proof = re.sub("[-_A-Za-z0-9]+[.](jpg|jpeg|eps|pdf|png|svg|ps)", "", proof)
 
     if debug:
         print(1050, proof)

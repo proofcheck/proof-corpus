@@ -1052,6 +1052,7 @@ def skip_rest_math(
             if arg:
                 final_period = arg[-1] == "."
         else:
+            # print("srm", words[:20])
             w = next(words)
             nwords_seen += 1
             if nwords_seen >= 100_000:
@@ -1483,6 +1484,9 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         "\\noeqref",
     }:
         # ignore these (and their argument)
+        # Skip optional asterisk
+        if words.peek("!") == "*":
+            next(words)
         skip_optional_arg(words, macros)
         get_arg(words)
         return []
@@ -2066,6 +2070,10 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         get_arg(words)
         return ["42"]
 
+    if cmd == "\\tabto":
+        get_arg(words)
+        return [" "]
+
     if cmd in macros:
         if cmd == "\\BoxedEPSF":
             # Hack for 0002/math0002136/zinno.tex
@@ -2430,6 +2438,15 @@ def get_proofs(
                 next(words)
                 single_dollar = False
             else:
+                # Special case $($ and $)$
+                ts = words[:2]
+                if len(ts) == 2 and ts[1] == "$":
+                    if ts[0] in {"(", ")"}:
+                        next(words)
+                        next(words)
+                        words.prepend(ts[0])
+                        continue
+                # Normal $ start of math
                 single_dollar = True
             fp = skip_rest_math(
                 words, macros, single_dollar, debug=debug, verbose=verbose
