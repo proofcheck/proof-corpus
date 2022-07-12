@@ -5486,6 +5486,7 @@ itai
 italo
 iti
 itiro
+ito
 its
 ittner
 itô
@@ -6018,6 +6019,7 @@ kempf
 kempner
 kempthorne
 ken
+keng
 kendal
 kendall
 kengo
@@ -6435,6 +6437,7 @@ kuzmin
 kuznets
 kuznetsov
 kwan
+ky
 kyoji
 kálmán
 kármán
@@ -6778,6 +6781,7 @@ leyland
 leyton
 lezama
 leśniewski
+li
 lia
 lian
 liang
@@ -6983,6 +6987,7 @@ lozano
 lozhkin
 loève
 loïc
+lu
 luan
 lubbock
 lubich
@@ -12486,6 +12491,7 @@ yelpidifor
 yen
 yeneng
 yershov
+yetter
 yevgenii
 yevgeny
 yewande

@@ -154,8 +154,9 @@ def ner(proof: str, debug: bool = False, aggressive: bool = True):
     # Guivarc'h is a name.
     # I've also seen Poincar'e and Maz'ya
     potential_name = (
+        "((?<!['`])(?:\\w'\\w|\\w)+[sz]')|"
         "((?:\\w'\\w|\\w)+\\w(?:'s\\b|'h\\b|'e|'ya\\b)?)|"
-        "((?<!['`])(?:\\w'\\w|\\w)+[sz]')"
+        "\\bKy Fan\\b"  # 1911/1911.08637
     )
 
     def lookup(g: Match[str]) -> str:
@@ -179,6 +180,7 @@ def ner(proof: str, debug: bool = False, aggressive: bool = True):
             and w != w.upper()
             and not (re.match(theorem_word, w))
         ):
+            print("lookup: ", w)
             if w.endswith("'s"):
                 w = w[:-2]
                 possessive = " 's"
@@ -201,10 +203,20 @@ def ner(proof: str, debug: bool = False, aggressive: bool = True):
         print("0110", proof)
 
     # (van Trapp -> ) van NAME -> NAME
-    # Similarly von NAME, van de NAME, el NAME, st. NAME, ibn NAME, le NAME, ...
+    # Similarly von NAME, van de NAME, el NAME, st. NAME, ibn NAME, le NAME, Du Name ...
+    #   mc NAME, mac Name
     proof = re.sub(
-        "(\\b(?i:v[oa]n|d[eo]s|de[nr]?|la|le|el|st\\.|ibn)\\s+)+NAME",
+        "(\\b(?i:v[oa]n|d[eo]s|de[nr]?|la|le|el|st\\.|ibn|du|ma?c|del|al)\\s+)+NAME",
         "NAME",
+        proof,
+    )
+
+    # Qi-keng -> NAME-keng ->NAME
+    proof = re.sub(
+        "NAME-(\\w+)\\b",
+        lambda match: "NAME"
+        if match.group(1) in known_names
+        else "NAME-" + match.group(1),
         proof,
     )
 
@@ -448,36 +460,6 @@ def cleanup(
             proof,
         )
 
-    if aggressive:
-        # .. -> .
-        # . . -> .
-        proof = re.sub(r"(\.\s*)+\.", ".", proof)
-
-        # MATH.1 to MATH
-        # REF.1 to REF
-        proof = re.sub(r"(MATH|CASE|REF|CITE)\.([0-9]){1,3}", r"\1", proof)
-
-        # (iii 'a-ds,.) -> REF
-        proof = re.sub(
-            r"\((\s*(SII|[iI]+)([0-9]|[A-Za-z]|['.,-–]|\s){0,10}\s*)+\)",
-            "REF ",
-            proof,
-        )
-
-        # (sketch) -> ""
-        proof = re.sub("\\(\\s*(?i:sketch)\\s*\\)", " ", proof)
-
-        # (Base case) -> REF (then likely to CASE: later)
-        proof = re.sub(r"\(\s*(?i:base)\s*(?i:case).{0,5}\s*\)", "REF", proof)
-
-        proof = re.sub(r"Base\s*(?i:case)", "REF", proof)
-
-    # Case 1: -> CASE
-    proof = re.sub(r"[cC]ase\s*([0-9]*|MATH|REF)\s*(:)", "REF", proof)
-
-    # ad 1 -> CASE
-    proof = re.sub(f"(?i:ad)\\s*{numAlpha}(.)?", " CASE:", proof)
-
     if debug:
         print(1000, proof)
 
@@ -506,6 +488,65 @@ def cleanup(
 
     # toric.eps
     proof = re.sub("[-_A-Za-z0-9]+[.](jpg|jpeg|eps|pdf|png|svg|ps)", "", proof)
+
+    if debug:
+        print("1020", proof)
+
+    if aggressive:
+        # by 1. of REF -> by REF of REF
+        proof = re.sub(
+            f"\\b(?i:(to|by|of|from))\\s*{numAlpha}[.](\\s+[a-z])",
+            "\\1 REF \\2",
+            proof,
+        )
+
+        # by 6.3 -> by REF
+        # to 2-4a -> to REF
+        # NOT  dividing by 2 -> dividing by REF
+        # NOT  equal to 4 -> equal to REF
+        # NOT  from 1 to 2. -> from REF to REF.
+        # i.e., don't replace raw integers
+        proof = re.sub(
+            f"\\b(?i:(to|by|of|from))\\s*({numAlpha})",
+            lambda match: match.group(1) + " " + match.group(2)
+            if re.fullmatch(r"\d+", match.group(2))
+            else match.group(1) + " REF",
+            proof,
+        )
+
+        proof = re.sub(
+            f"in CITE, {numAlpha}[.](\\s+[a-z])", "in CITE \\1", proof
+        )
+        proof = re.sub(f"in CITE, {numAlpha}", "in CITE", proof)
+
+        # .. -> .
+        # . . -> .
+        proof = re.sub(r"(\.\s*)+\.", ".", proof)
+
+        # MATH.1 to MATH
+        # REF.1 to REF
+        proof = re.sub(r"(MATH|CASE|REF|CITE)\.([0-9]){1,3}", r"\1", proof)
+
+        # (iii 'a-ds,.) -> REF
+        proof = re.sub(
+            r"\((\s*(SII|[iI]+)([0-9]|[A-Za-z]|['.,\-–]|\s){0,10}\s*)+\)",
+            "REF ",
+            proof,
+        )
+
+        # (sketch) -> ""
+        proof = re.sub("\\(\\s*(?i:sketch)\\s*\\)", " ", proof)
+
+        # (Base case) -> REF (then likely to CASE: later)
+        proof = re.sub(r"\(\s*(?i:base)\s*(?i:case).{0,5}\s*\)", "REF", proof)
+
+        proof = re.sub(r"Base\s*(?i:case)", "REF", proof)
+
+    # Case 1: -> CASE
+    proof = re.sub(r"[cC]ase\s*([0-9]*|MATH|REF)\s*(:)", "REF", proof)
+
+    # ad 1 -> CASE
+    proof = re.sub(f"(?i:ad)\\s*{numAlpha}(.)?", " CASE:", proof)
 
     if debug:
         print(1050, proof)
@@ -639,13 +680,13 @@ def cleanup(
         proof,
     )
 
-    proof = re.sub(f"\\(\\s*{atomicID}\\s*\\)", "REF", proof)
+    # proof = re.sub(f"\\(\\s*{atomicID}\\s*\\)", "REF", proof)
 
     proof = re.sub("CASE\\s*:(\\s*CASE\\s*:)+", "CASE:", proof)
 
     # base and inductive step labeling to CASE only when followed by capital letter
     proof = re.sub(
-        f"((\\()?\\s*(?i:basis)\\s*(\\))?|(\\()?\\s*(?i:induction)\\s*(\\))?)\\s*({upperLetter})",
+        fr"((\()?\s*(?i:basis)\s*(\))?|(\()?\s*(?i:induction)\s*(\))?)\s*(?!(?:MATH|REF|CASE|CITE|NAME))([A-Z])",
         " CASE: \\6",
         proof,
     )
@@ -870,7 +911,11 @@ def cleanup(
 
     # REF in REF -> REF
     # REF, REF -> REF
-    proof = re.sub(r"(?i:REF)(?i:\s*(in|and|,)\s*REF)+", "REF", proof)
+    proof = re.sub(r"REF(\s*(in|and|,)\s*REF)+", "REF", proof)
+
+    # ( REF ) -> REF   (possibly a repeat, but maybe there are more single REFs now)
+    proof = re.sub(r"\(\s*REF\s*\)", " REF ", proof)
+
     if debug:
         print(9900, proof)
 
