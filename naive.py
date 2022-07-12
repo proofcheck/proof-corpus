@@ -2472,7 +2472,7 @@ def get_proofs(
                 if fp:
                     current_proof_words.append(" . ")
 
-        elif w in TEX_REFS and w not in macros:
+        elif w in TEX_REFS and (w not in macros or macros[w] == "frozen"):
             # Skip optional asterisk
             if words.peek("!") == "*":
                 next(words)
