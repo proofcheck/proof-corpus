@@ -481,9 +481,31 @@ def cleanup(
         print("1020", proof)
 
     if aggressive:
+        # by 1. of REF -> by REF of REF
+        proof = re.sub(
+            f"\\b(?i:(to|by|of|from))\\s*{numAlpha}[.](\\s+[a-z])",
+            "\\1 REF \\2",
+            proof,
+        )
+
         # by 6.3 -> by REF
         # to 2-4a -> to REF
-        proof = re.sub(f"(?i:(to|by|of|from))\\s*{numAlpha}", "\\1 REF", proof)
+        # NOT  dividing by 2 -> dividing by REF
+        # NOT  equal to 4 -> equal to REF
+        # NOT  from 1 to 2. -> from REF to REF.
+        # i.e., don't replace raw integers
+        proof = re.sub(
+            f"\\b(?i:(to|by|of|from))\\s*({numAlpha})",
+            lambda match: match.group(1) + " " + match.group(2)
+            if re.fullmatch(r"\d+", match.group(2))
+            else match.group(1) + " REF",
+            proof,
+        )
+
+        proof = re.sub(
+            f"in CITE, {numAlpha}[.](\\s+[a-z])", "in CITE \\1", proof
+        )
+        proof = re.sub(f"in CITE, {numAlpha}", "in CITE", proof)
 
         # .. -> .
         # . . -> .
@@ -878,6 +900,10 @@ def cleanup(
     # REF in REF -> REF
     # REF, REF -> REF
     proof = re.sub(r"REF(\s*(in|and|,)\s*REF)+", "REF", proof)
+
+    # ( REF ) -> REF   (possibly a repeat, but maybe there are more single REFs now)
+    proof = re.sub(r"\(\s*REF\s*\)", " REF ", proof)
+
     if debug:
         print(9900, proof)
 
