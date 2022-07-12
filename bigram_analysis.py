@@ -7,8 +7,6 @@ import nicer
 import math
 import gc
 
-from multiprocessing import Pool
-from itertools import repeat
 from collections import Counter
 from scipy.stats.contingency import chi2_contingency
 from scipy.stats import chi2
@@ -20,11 +18,19 @@ from sent_tools import *
 def clean_sent(line, keep_punct=False):
     _, sent = split_sentence_id(line)
     if keep_punct:
-        tokens = [w.lower() if w not in ALIASES else w for w in tokenize(sent)]
+        tokens = [w.lower() if not check_alias(w) else w for w in tokenize(sent)]
     else:
-        tokens = [w.lower() if w not in ALIASES else w for w in tokenize(sent) if w not in PUNCTUATION]
+        tokens = [w.lower() if not check_alias(w) else w for w in tokenize(sent) if w not in PUNCTUATION]
     
     return " ".join(tokens)
+
+def check_alias(word):
+    alias_list = list(ALIASES)
+    for alias in alias_list:
+        if word.find(alias) != -1:
+            return True
+    
+    return False
 
 def save_ngrams(files, output, n):
     sentences = []
@@ -39,9 +45,10 @@ def save_ngrams(files, output, n):
     for ind, sent in enumerate(sentences):
         if ind % 1000000 == 0:
             print("Percent done: {}%".format(round(ind/len_sent*100, 2)))
-        ngram = list(return_ngrams(sent, n))
-        if ngram is not []:
-            ngrams.extend(ngram)
+        
+        sent_ngrams = list(return_ngrams(sent, n))
+        if sent_ngrams is not []:
+            ngrams.extend(sent_ngrams)
 
     print("dumping", flush=True)
     with open(output, "wb") as resource:
@@ -55,8 +62,8 @@ def pointwise_mutual_information(ngram, ngram_cnt, unigram_cnt):
     p_unigram_product = get_unigram_probability_product(unigram_cnt, ngram)
     return math.log(p_ngram/p_unigram_product, 2)
 
-def get_ngram_probability(dist, ngrams):
-    return dist[ngrams] / sum(dist.values())
+def get_ngram_probability(cnt, ngram):
+    return cnt[ngram] / sum(cnt.values())
 
 def get_unigram_probability_product(unigram_cnt, ngram):
     probability = 1
@@ -64,7 +71,7 @@ def get_unigram_probability_product(unigram_cnt, ngram):
         probability *= get_ngram_probability(unigram_cnt, unigram)
     return probability
 
-def bigram_with_mi(ngram, ngram_cnt, unigram_cnt):
+def ngram_with_mi(ngram, ngram_cnt, unigram_cnt):
     return ngram, pointwise_mutual_information(ngram, ngram_cnt, unigram_cnt)
 
 def chi_squared_bigram(ngram, ngram_cnt, unigram_cnt=None):
@@ -154,7 +161,7 @@ def main(args):
     #     mi_dict = {}
     #     mi_dict.update(
     #               p.starmap(
-    #                     bigram_with_mi,
+    #                     ngram_with_mi,
     #                     zip(
     #                         ngram_cnt.keys(),
     #                         repeat(ngram_cnt),
