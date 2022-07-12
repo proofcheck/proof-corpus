@@ -154,8 +154,9 @@ def ner(proof: str, debug: bool = False, aggressive: bool = True):
     # Guivarc'h is a name.
     # I've also seen Poincar'e and Maz'ya
     potential_name = (
+        "((?<!['`])(?:\\w'\\w|\\w)+[sz]')|"
         "((?:\\w'\\w|\\w)+\\w(?:'s\\b|'h\\b|'e|'ya\\b)?)|"
-        "((?<!['`])(?:\\w'\\w|\\w)+[sz]')"
+        "\\bKy Fan\\b"  # 1911/1911.08637
     )
 
     def lookup(g: Match[str]) -> str:
@@ -179,6 +180,7 @@ def ner(proof: str, debug: bool = False, aggressive: bool = True):
             and w != w.upper()
             and not (re.match(theorem_word, w))
         ):
+            print("lookup: ", w)
             if w.endswith("'s"):
                 w = w[:-2]
                 possessive = " 's"
@@ -201,10 +203,20 @@ def ner(proof: str, debug: bool = False, aggressive: bool = True):
         print("0110", proof)
 
     # (van Trapp -> ) van NAME -> NAME
-    # Similarly von NAME, van de NAME, el NAME, st. NAME, ibn NAME, le NAME, ...
+    # Similarly von NAME, van de NAME, el NAME, st. NAME, ibn NAME, le NAME, Du Name ...
+    #   mc NAME, mac Name
     proof = re.sub(
-        "(\\b(?i:v[oa]n|d[eo]s|de[nr]?|la|le|el|st\\.|ibn)\\s+)+NAME",
+        "(\\b(?i:v[oa]n|d[eo]s|de[nr]?|la|le|el|st\\.|ibn|du|ma?c|del|al)\\s+)+NAME",
         "NAME",
+        proof,
+    )
+
+    # Qi-keng -> NAME-keng ->NAME
+    proof = re.sub(
+        "NAME-(\\w+)\\b",
+        lambda match: "NAME"
+        if match.group(1) in known_names
+        else "NAME-" + match.group(1),
         proof,
     )
 

@@ -6019,6 +6019,7 @@ kempf
 kempner
 kempthorne
 ken
+keng
 kendal
 kendall
 kengo
@@ -6436,6 +6437,7 @@ kuzmin
 kuznets
 kuznetsov
 kwan
+ky
 kyoji
 kálmán
 kármán
@@ -6985,6 +6987,7 @@ lozano
 lozhkin
 loève
 loïc
+lu
 luan
 lubbock
 lubich

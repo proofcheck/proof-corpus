@@ -193,6 +193,8 @@ DELETE_ENVS = {
     # 1902/1902.07230
     # 1905/1905.13429
     "sequentdeduction",
+    # 0610/math0610416
+    "miniboard",
 }
 
 DELETE_UNINTERPRETED_ENVS = {
