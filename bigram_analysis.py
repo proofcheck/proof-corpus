@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+import os
+os.environ['OPENBLAS_NUM_THREADS'] = '1'
+
 import pickle
 import argparse
 import sys
@@ -15,8 +18,7 @@ from ngrams import return_ngrams
 from sent_tools import *
 
 # remove all punctuation, lower alias
-def clean_sent(line, keep_punct=False):
-    _, sent = split_sentence_id(line)
+def clean_sent(sent, keep_punct=False):
     if keep_punct:
         tokens = [w.lower() if not check_alias(w) else w for w in tokenize(sent)]
     else:
@@ -36,7 +38,8 @@ def save_ngrams(files, output, n):
     sentences = []
     for fd in files:
         for line in fd.readlines():
-            sentences.extend([  tokenize(clean_sent(line))  ])
+            _, sent = split_sentence_id(line)
+            sentences.extend([  tokenize(clean_sent(sent))  ])
         print("done", fd, flush=True)
         fd.close()
 
@@ -48,7 +51,7 @@ def save_ngrams(files, output, n):
         
         sent_ngrams = list(return_ngrams(sent, n))
         if sent_ngrams is not []:
-            ngrams.extend(sent_ngrams)
+            ngrams.extend([sent_ngrams])
 
     print("dumping", flush=True)
     with open(output, "wb") as resource:
@@ -57,28 +60,45 @@ def save_ngrams(files, output, n):
     unigrams = [word for sent in sentences for word in sent]
     return ngrams, unigrams
 
-def pointwise_mutual_information(ngram, ngram_cnt, unigram_cnt):
-    p_ngram = get_ngram_probability(ngram_cnt, ngram)
-    p_unigram_product = get_unigram_probability_product(unigram_cnt, ngram)
+def pointwise_mutual_information(ngram, ngram_cnt, unigram_cnt, ngram_sum=None, unigram_sum=None):
+    if not ngram_sum:
+        ngram_sum = sum(ngram_cnt.values())
+
+    if not unigram_sum:
+        unigram_sum = sum(unigram_cnt.values())
+
+    p_ngram = get_ngram_probability(ngram_cnt, ngram, ngram_sum)
+    p_unigram_product = get_unigram_probability_product(unigram_cnt, ngram, unigram_sum)
     return math.log(p_ngram/p_unigram_product, 2)
 
-def get_ngram_probability(cnt, ngram):
-    return cnt[ngram] / sum(cnt.values())
+def get_ngram_probability(cnt, ngram, cnt_sum):
+    return cnt[ngram] / cnt_sum
 
-def get_unigram_probability_product(unigram_cnt, ngram):
+def get_unigram_probability_product(unigram_cnt, ngram, unigram_sum):
     probability = 1
     for unigram in ngram:
-        probability *= get_ngram_probability(unigram_cnt, unigram)
+        probability *= get_ngram_probability(unigram_cnt, unigram, unigram_sum)
     return probability
 
 def ngram_with_mi(ngram, ngram_cnt, unigram_cnt):
     return ngram, pointwise_mutual_information(ngram, ngram_cnt, unigram_cnt)
 
-def chi_squared_bigram(ngram, ngram_cnt, unigram_cnt=None):
-    obs =   [
-                [   ngram_cnt[ngram],                        get_ngrams_not_second(ngram, ngram_cnt)          ],
-                [   get_ngrams_not_first(ngram, ngram_cnt),  get_ngrams_not_first_or_second(ngram, ngram_cnt) ]
-            ]
+def chi_squared_bigram(ngram, ngram_cnt, unigram_cnt=None, bigram_sum=None):
+    if not bigram_sum or not unigram_cnt:
+        obs =   [
+                    [   ngram_cnt[ngram],                        get_ngrams_not_second(ngram, ngram_cnt)          ],
+                    [   get_ngrams_not_first(ngram, ngram_cnt),  get_ngrams_not_first_or_second(ngram, ngram_cnt) ]
+                ]
+    
+    else:
+        w1_w2 = ngram_cnt[ngram]
+        w1_notw2 = unigram_cnt[ngram[0]] - w1_w2
+        notw1_w2 = unigram_cnt[ngram[1]] - w1_w2
+
+        obs =   [
+                    [   w1_w2   ,  w1_notw2                                      ],
+                    [   notw1_w2,  bigram_sum - w1_w2 - w1_notw2 - notw1_w2      ]
+                ]
 
     chi2float, _, _, _ = chi2_contingency(obs)
     return chi2float
@@ -140,9 +160,11 @@ def main(args):
         with open(args.ngram_file, "rb") as resource:
             ngrams = pickle.load(resource)
             print("done loading ngrams", flush=True)
-        unigrams = [ngram[0] for ngram in ngrams]
+        unigrams = [ngram[0] for sent in ngrams for ngram in sent]
 
     print("frequency", flush=True)
+    sent_count = len(ngrams)
+    ngrams = [ngram for sent in ngrams for ngram in sent]
     ngram_cnt = make_ngram_cnt(ngrams, args.frequency)
     del ngrams
     gc.collect()
@@ -152,10 +174,14 @@ def main(args):
     del unigrams
     gc.collect()
 
+    ngram_sum = sum(ngram_cnt.values())
+    unigram_sum = sum(unigram_cnt.values())
+
     print("MI", flush=True)
-    mi_dict = {ngram : pointwise_mutual_information(ngram, ngram_cnt, unigram_cnt) for ngram in ngram_cnt.keys()}
+
+    mi_dict = {ngram : pointwise_mutual_information(ngram, ngram_cnt, unigram_cnt, ngram_sum, unigram_sum) for ngram in ngram_cnt.keys()}
     
-    args.cores = min(args.cores, 15)
+    # args.cores = min(args.cores, 15)
 
     # with Pool(processes=args.cores) as p:
     #     mi_dict = {}
@@ -174,7 +200,9 @@ def main(args):
     mi_filtered = [ngram for ngram in mi_dict.keys() if mi_dict[ngram] > args.mi]
 
     print("chi", flush=True)
-    chi_dict = {ngram : chi_squared_bigram(ngram, ngram_cnt, unigram_cnt) for ngram in mi_filtered}
+
+    bigram_sum = ngram_sum + 2 * sent_count
+    chi_dict = {ngram : chi_squared_bigram(ngram, ngram_cnt, unigram_cnt, bigram_sum) for ngram in mi_filtered}
 
     # with Pool(processes=args.cores) as p:
     #     chi_dict = {}
@@ -218,8 +246,8 @@ if __name__ == "__main__":
     parser.add_argument("--n", "-n", type=int, default=2,
                         help="value of n for ngrams")
 
-    parser.add_argument("--cores", "-c", type=int, default=4,
-                        help="number of cores")
+    # parser.add_argument("--cores", "-c", type=int, default=4,
+    #                     help="number of cores")
 
     parser.add_argument("--output", "-o", default=sys.stdout, type=argparse.FileType("w"),
                         help="file to write results to")
