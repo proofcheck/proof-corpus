@@ -7,18 +7,16 @@ from multiprocessing import Pool
 from itertools import repeat
 
 from sent_tools import *
-from bigram_analysis import clean_sent
 
 PATH = "merged_sents/"
 
 def replace_collocations(line, collocations_dict, merge_collocations=False, print_status=False):
-    sent = clean_sent(line, True)
-    # total = len(collocations_dict.keys())
+    total = len(collocations_dict.keys())
     # i = 0
 
-    # for i, (colloc, joined) in enumerate(collocations_dict.items()):
+    for i, (colloc, joined) in enumerate(collocations_dict.items()):
     
-    for colloc, joined in collocations_dict.items():
+    # for colloc, joined in collocations_dict.items():
         if print_status and i % 100 == 0:
             print("{}% done".format(round(i/total*100, 2)))
             i += 1
@@ -26,18 +24,18 @@ def replace_collocations(line, collocations_dict, merge_collocations=False, prin
         spaced = " ".join(colloc)
        
         if merge_collocations:
-            sent = sent.replace(" " + spaced + " ", " " + joined + " ")
-            sent = sent.replace("_" + spaced + " ", "_" + joined + " ")
-            sent = sent.replace(" " + spaced + "_", " " + joined + "_")
-            sent = sent.replace("_" + spaced + "_", "_" + joined + "_")
-            sent = sent.replace("\t" + spaced + " ", "\t" + joined + " ")
-            sent = sent.replace("\t" + spaced + "_", "\t" + joined + "_")
+            line = line.replace(" " + spaced + " ", " " + joined + " ")
+            line = line.replace("_" + spaced + " ", "_" + joined + " ")
+            line = line.replace(" " + spaced + "_", " " + joined + "_")
+            line = line.replace("_" + spaced + "_", "_" + joined + "_")
+            # line = line.replace("\t" + spaced + " ", "\t" + joined + " ")
+            # line = line.replace("\t" + spaced + "_", "\t" + joined + "_")
 
         else:
-            sent = sent.replace(" " + spaced + " ", " " + joined + " ")
-            sent = sent.replace("\t" + spaced + " ", "\t" + joined + " ")
+            line = line.replace(" " + spaced + " ", " " + joined + " ")
+            # line = line.replace("\t" + spaced + " ", "\t" + joined + " ")
     
-    return sent
+    return line
 
 def get_collocations_dict(collocations_file):
     lines = collocations_file.read().splitlines()
@@ -86,9 +84,15 @@ def main(args):
                     )
 
                 if args.merge_collocations:
-                    fname = PATH + "merged_collocations/" + fd.name.split("/")[-1].split(".")[0] + "_" + args.extension + ".txt"
+                    if args.extension:
+                        fname = PATH + "merged_collocations/" + fd.name.split("/")[-1].split(".")[0] + "_" + args.extension + ".txt"
+                    else:
+                        fname = PATH + "merged_collocations/" + fd.name.split("/")[-1].split(".")[0] + ".txt"
                 else:
-                    fname = PATH + fd.name.split("/")[-1].split(".")[0] + "_" + args.extension + ".txt"
+                    if args.extension:
+                        fname = PATH + fd.name.split("/")[-1].split(".")[0] + "_" + args.extension + ".txt"
+                    else:
+                        fname = PATH + fd.name.split("/")[-1].split(".")[0] + ".txt"
 
                 with open(fname, "w") as o:
                     lines = "\n".join(joined_lines)
