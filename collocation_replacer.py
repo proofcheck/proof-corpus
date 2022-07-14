@@ -76,7 +76,7 @@ def main(args):
                 joined_lines = p.starmap(
                     replace_collocations,
                         zip(
-                            fd.readlines(),
+                            fd.read().splitlines(),
                             repeat(collocations_dict),
                             repeat(args.merge_collocations)
                             ),
