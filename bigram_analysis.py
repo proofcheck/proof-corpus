@@ -44,7 +44,7 @@ def save_bigrams(files, output, n=2):
     with open(output, "wb") as resource:
         pickle.dump(bigrams, resource)
 
-    return bigrams, unigrams
+    return bigrams
 
 def pointwise_mutual_information(bigram, bigram_cnt, unigram_cnt, bigram_sum=None, unigram_sum=None):
     if not bigram_sum:
