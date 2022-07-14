@@ -13,7 +13,7 @@ PATH = "preprocessed_sents/"
 def clean_sent(line, keep_punct=False, add_spacing=False):
     _, sent = split_sentence_id(line)
     alias_list = list(ALIASES)
-    
+
     if keep_punct:
         # tokens = [w.lower() if not check_alias(w, alias_list) else w for w in tokenize(sent)]
         tokens = [w.lower() if not check_alias(w, alias_list) else clean_word(w, alias_list) for w in tokenize(sent)]
@@ -65,8 +65,8 @@ def main(args):
                 clean_sent,
                     zip(
                         fd.readlines(),
-                        repeat(keep_punct=False),
-                        repeat(add_spacing=True),
+                        repeat(False),
+                        repeat(True),
                         ),
                     50
                 )
@@ -92,7 +92,7 @@ if __name__ == "__main__":
                         help="number of cores")
 
     parser.add_argument("--extension", "-e",
-                            help="file extension")
+                        help="file extension")
 
     args = parser.parse_args()
 
