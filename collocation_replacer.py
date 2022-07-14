@@ -18,7 +18,7 @@ def replace_collocations(line, collocations_dict, merge_collocations=False, prin
     
     # for colloc, joined in collocations_dict.items():
         if print_status and i % 100 == 0:
-            print("{}% done".format(round(i/total*100, 2)))
+            print("{}% done".format(round(i/total*100, 2)), flush=True)
             i += 1
 
         spaced = " ".join(colloc)
@@ -98,7 +98,7 @@ def main(args):
                     lines = "\n".join(joined_lines)
                     o.write(lines)
 
-            print("done", fd)
+            print("done", fd, flush=True)
             fd.close()
     
     else:
@@ -123,7 +123,7 @@ def main(args):
             with open(fname, "w") as o:
                 o.write(joined_lines)
 
-            print("done", fd)
+            print("done", fd, flush=True)
             fd.close()
 
 if __name__ == "__main__":

@@ -74,11 +74,13 @@ def main(args):
             if args.extension:
                 fname = PATH + fd.name.split("/")[-1].split(".")[0] + "_" + args.extension + ".txt"
             else:
-                fname = PATH + fd.name.split("/")[-1].split(".")[0] + "_" + args.extension + ".txt"
+                fname = PATH + fd.name.split("/")[-1].split(".")[0] + ".txt"
 
             with open(fname, "w") as o:
                 lines = "\n".join(cleaned)
                 o.write(lines)
+                
+        print(fd, "done", flush=True)
 
 
 if __name__ == "__main__":

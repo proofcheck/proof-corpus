@@ -9,7 +9,6 @@ import sys
 import nicer
 import math
 import gc
-import re
 
 from collections import Counter
 from scipy.stats.contingency import chi2_contingency
@@ -18,19 +17,24 @@ from scipy.stats import chi2
 from ngrams import return_ngrams
 from sent_tools import *
 
+BIGRAM_PATH = "bigrams/"
+ANALYSIS_PATH = "bigram_analysis/"
+
 def save_bigrams(files, output, n=2):
     sentences = []
     for fd in files:
         for line in fd.readlines():
-            sentences.extend([  tokenize(line.strip())  ])
+            tokens = tokenize(line.strip())
+            sentences.extend([tokens])
         print("done", fd, flush=True)
         fd.close()
 
     bigrams = []
     len_sent = len(sentences)
+
     for ind, sent in enumerate(sentences):
         if ind % 1000000 == 0:
-            print("Percent done: {}%".format(round(ind/len_sent*100, 2)))
+            print("Percent done: {}%".format(round(ind/len_sent*100, 2)), flush=True)
         
         sent_bigrams = list(return_ngrams(sent, n))
         if sent_bigrams is not []:
@@ -40,7 +44,6 @@ def save_bigrams(files, output, n=2):
     with open(output, "wb") as resource:
         pickle.dump(bigrams, resource)
 
-    unigrams = [word for sent in sentences for word in sent]
     return bigrams, unigrams
 
 def pointwise_mutual_information(bigram, bigram_cnt, unigram_cnt, bigram_sum=None, unigram_sum=None):
@@ -146,15 +149,15 @@ def make_unigrams_from_bigrams_sents(sents):
 
 def main(args):
     if args.files:
-        bigrams, unigrams = save_bigrams(args.files, args.bigram_file, args.n)
+        bigrams = save_bigrams(args.files, args.bigram_file, args.n)
 
     else:
         print("loading bigrams", flush=True)
         with open(args.bigram_file, "rb") as resource:
             bigrams = pickle.load(resource)
             print("done loading bigrams", flush=True)
-        unigrams = make_unigrams_from_bigrams_sents(bigrams)
-
+    
+    unigrams = make_unigrams_from_bigrams_sents(bigrams)
     print("frequency", flush=True)
     sent_count = len(bigrams)
     bigrams = [bigram for sent in bigrams for bigram in sent]
@@ -172,9 +175,7 @@ def main(args):
     del unigrams
     gc.collect()
 
-
     print("MI", flush=True)
-
     mi_dict = {bigram : pointwise_mutual_information(bigram, bigram_cnt, unigram_cnt, bigram_sum, unigram_sum) for bigram in bigram_cnt.keys()}
     
     # args.cores = min(args.cores, 15)
@@ -196,7 +197,6 @@ def main(args):
     mi_filtered = [bigram for bigram in mi_dict.keys() if mi_dict[bigram] > args.mi]
 
     print("chi", flush=True)
-
     bigram_sum = bigram_sum + 2 * sent_count
     chi_dict = {bigram : chi_squared_bigram(bigram, bigram_cnt, unigram_cnt, bigram_sum) for bigram in mi_filtered}
 
