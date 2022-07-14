@@ -284,6 +284,9 @@ def ner(proof: str, debug: bool = False, aggressive: bool = True):
         proof,
     )
 
+    # NAME et al. -> NAME
+    proof = re.sub(r"NAME\s*(?i:et(\.)?\s*a(l)+(\.?))", "NAME", proof)
+
     proof = re.sub(r"\s*(?i:case)\s*[0-9]\s*(:)", " REF", proof)
     proof = re.sub(f">\\s*({upperLetter})", "\\1", proof)
 
@@ -551,7 +554,7 @@ def cleanup(
         )
 
         proof = re.sub(
-            r"\b(?i:(figure|fig))\s*[.]?\s*[0-9]*(\s*REF)?", "REF", proof
+            r"\b(?i:(figure|fig))\s*([.]\s*[0-9]+)?(\s*REF)?", "REF", proof
         )
 
     # eliminate extra spaces
