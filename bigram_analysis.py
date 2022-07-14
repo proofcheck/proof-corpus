@@ -20,7 +20,7 @@ from sent_tools import *
 BIGRAM_PATH = "bigrams/"
 ANALYSIS_PATH = "bigram_analysis/"
 
-def save_bigrams(files, output, n=2):
+def save_bigrams_sents(files, output, n=2):
     sentences = []
     for fd in files:
         for line in fd.readlines():
@@ -39,6 +39,9 @@ def save_bigrams(files, output, n=2):
         sent_bigrams = list(return_ngrams(sent, n))
         if sent_bigrams is not []:
             bigrams.extend([sent_bigrams])
+
+    del sentences
+    gc.collect()
 
     print("dumping", flush=True)
     with open(output, "wb") as resource:
@@ -149,7 +152,7 @@ def make_unigrams_from_bigrams_sents(sents):
 
 def main(args):
     if args.files:
-        bigrams = save_bigrams(args.files, args.bigram_file, args.n)
+        bigrams_sents = save_bigrams_sents(args.files, args.bigram_file, args.n)
 
     else:
         print("loading bigrams", flush=True)
@@ -157,10 +160,15 @@ def main(args):
             bigrams = pickle.load(resource)
             print("done loading bigrams", flush=True)
     
-    unigrams = make_unigrams_from_bigrams_sents(bigrams)
+    print("making unigrams", flush=True)
+    unigrams = make_unigrams_from_bigrams_sents(bigrams_sents)
+
     print("frequency", flush=True)
-    sent_count = len(bigrams)
-    bigrams = [bigram for sent in bigrams for bigram in sent]
+    sent_count = len(bigrams_sents)
+
+    bigrams = [bigram for sent in bigrams_sents for bigram in sent]
+    del bigrams_sents
+    gc.collect()
 
     bigram_sum = len(bigrams)
     unigram_sum = len(unigrams)
