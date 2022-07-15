@@ -154,8 +154,9 @@ def ner(proof: str, debug: bool = False, aggressive: bool = True):
     # Guivarc'h is a name.
     # I've also seen Poincar'e and Maz'ya
     potential_name = (
+        "((?<!['`])(?:\\w'\\w|\\w)+[sz]')|"
         "((?:\\w'\\w|\\w)+\\w(?:'s\\b|'h\\b|'e|'ya\\b)?)|"
-        "((?<!['`])(?:\\w'\\w|\\w)+[sz]')"
+        "\\bKy Fan\\b"  # 1911/1911.08637
     )
 
     def lookup(g: Match[str]) -> str:
@@ -179,6 +180,7 @@ def ner(proof: str, debug: bool = False, aggressive: bool = True):
             and w != w.upper()
             and not (re.match(theorem_word, w))
         ):
+            print("lookup: ", w)
             if w.endswith("'s"):
                 w = w[:-2]
                 possessive = " 's"
@@ -201,10 +203,20 @@ def ner(proof: str, debug: bool = False, aggressive: bool = True):
         print("0110", proof)
 
     # (van Trapp -> ) van NAME -> NAME
-    # Similarly von NAME, van de NAME, el NAME, st. NAME, ibn NAME, le NAME, ...
+    # Similarly von NAME, van de NAME, el NAME, st. NAME, ibn NAME, le NAME, Du Name ...
+    #   mc NAME, mac Name
     proof = re.sub(
-        "(\\b(?i:v[oa]n|d[eo]s|de[nr]?|la|le|el|st\\.|ibn)\\s+)+NAME",
+        "(\\b(?i:v[oa]n|d[eo]s|de[nr]?|la|le|el|st\\.|ibn|du|ma?c|del|al)\\s+)+NAME",
         "NAME",
+        proof,
+    )
+
+    # Qi-keng -> NAME-keng ->NAME
+    proof = re.sub(
+        "NAME-(\\w+)\\b",
+        lambda match: "NAME"
+        if match.group(1) in known_names
+        else "NAME-" + match.group(1),
         proof,
     )
 
@@ -451,10 +463,64 @@ def cleanup(
             proof,
         )
 
+    if debug:
+        print(1000, proof)
+
+    # Delete any leftover dimensions or keys
+    # We hope there aren't any, but just in case...
+
+    real_re = "(?:[+-]?(?:\\d+(?:[.,]\\d*)?|\\d*(?:[.,]\\d+)))"
+    dimen_re2 = f"(?:{real_re}(?:[ ]?true[ ]?)?(?:in)\\b)"
+    dimen_re = f"(?:{real_re}[ ]?(?:true[ ]?)?(?:pt|cm|mm|bp|em|ex|sp)\\b|{dimen_re2})"
+    inf_re = f"(?:{real_re}[ ]?fill?l?)"
+    dori_re = f"(?:{dimen_re}|{inf_re})"
+    glue_re = (
+        f"(?:{dimen_re}(?:[ ]?plus[ ]?{dori_re})?(?:[ ]?minus[ ]?{dori_re})?)"
+    )
+
+    # [5.2pt]
+    proof = re.sub(f"\\[\\s*{glue_re}\\s*\\]", "", proof)
+
+    # [width=5.2pt, boundary=solid]
+    proof = re.sub("\\[\\s?[a-z_]+=.*?\\]", "", proof)
+
+    # 5pt
+    # =5pt
+    # 5pt plus 1fil minus 5pt
+    proof = re.sub(f"(=[ ]?)?{glue_re}", "", proof)
+
+    # toric.eps
+    proof = re.sub("[-_A-Za-z0-9]+[.](jpg|jpeg|eps|pdf|png|svg|ps)", "", proof)
+
+    if debug:
+        print("1020", proof)
+
     if aggressive:
+        # by 1. of REF -> by REF of REF
+        proof = re.sub(
+            f"\\b(?i:(to|by|of|from))\\s*{numAlpha}[.](\\s+[a-z])",
+            "\\1 REF \\2",
+            proof,
+        )
+
         # by 6.3 -> by REF
         # to 2-4a -> to REF
-        proof = re.sub(f"(?i:(to|by|of|from))\\s*{numAlpha}", "\\1 REF", proof)
+        # NOT  dividing by 2 -> dividing by REF
+        # NOT  equal to 4 -> equal to REF
+        # NOT  from 1 to 2. -> from REF to REF.
+        # i.e., don't replace raw integers
+        proof = re.sub(
+            f"\\b(?i:(to|by|of|from))\\s*({numAlpha})",
+            lambda match: match.group(1) + " " + match.group(2)
+            if re.fullmatch(r"\d+", match.group(2))
+            else match.group(1) + " REF",
+            proof,
+        )
+
+        proof = re.sub(
+            f"in CITE, {numAlpha}[.](\\s+[a-z])", "in CITE \\1", proof
+        )
+        proof = re.sub(f"in CITE, {numAlpha}", "in CITE", proof)
 
         # .. -> .
         # . . -> .
@@ -484,35 +550,6 @@ def cleanup(
 
     # ad 1 -> CASE
     proof = re.sub(f"(?i:ad)\\s*{numAlpha}(.)?", " CASE:", proof)
-
-    if debug:
-        print(1000, proof)
-
-    # Delete any leftover dimensions or keys
-    # We hope there aren't any, but just in case...
-
-    real_re = "(?:[+-]?(?:\\d+(?:[.,]\\d*)?|\\d*(?:[.,]\\d+)))"
-    dimen_re2 = f"(?:{real_re}(?:[ ]?true[ ]?)?(?:in)\\b)"
-    dimen_re = f"(?:{real_re}[ ]?(?:true[ ]?)?(?:pt|cm|mm|bp|em|ex|sp)\\b|{dimen_re2})"
-    inf_re = f"(?:{real_re}[ ]?fill?l?)"
-    dori_re = f"(?:{dimen_re}|{inf_re})"
-    glue_re = (
-        f"(?:{dimen_re}(?:[ ]?plus[ ]?{dori_re})?(?:[ ]?minus[ ]?{dori_re})?)"
-    )
-
-    # [5.2pt]
-    proof = re.sub(f"\\[\\s*{glue_re}\\s*\\]", "", proof)
-
-    # [width=5.2pt, boundary=solid]
-    proof = re.sub("\\[\\s?[a-z_]+=.*?\\]", "", proof)
-
-    # 5pt
-    # =5pt
-    # 5pt plus 1fil minus 5pt
-    proof = re.sub(f"(=[ ]?)?{glue_re}", "", proof)
-
-    # toric.eps
-    proof = re.sub("[-_A-Za-z0-9]+[.](jpg|jpeg|eps|pdf|png|svg|ps)", "", proof)
 
     if debug:
         print(1050, proof)
@@ -878,6 +915,10 @@ def cleanup(
     # REF in REF -> REF
     # REF, REF -> REF
     proof = re.sub(r"REF(\s*(in|and|,)\s*REF)+", "REF", proof)
+
+    # ( REF ) -> REF   (possibly a repeat, but maybe there are more single REFs now)
+    proof = re.sub(r"\(\s*REF\s*\)", " REF ", proof)
+
     if debug:
         print(9900, proof)
 

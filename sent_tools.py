@@ -70,13 +70,11 @@ def split_sentence_id_tokenized(line):
     tokenized = tokenize(sent)
     return sent_id, tokenized
 
-def read_one(fn):
+def read_one(f):
     # Input: file of sentences/proofs
     # Returns list of ids and sentences
-    f = open(fn, "r")
     lines = f.readlines()
     ids, sents = split_sentences_ids(lines)
-    f.close()
     return ids, sents
 
 def read_one_tokenized(fn):

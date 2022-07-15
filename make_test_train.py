@@ -8,7 +8,7 @@ import nltk
 from load_ontonotes_pos import *
 from train_tagger import DEFAULT_TAGGER, mislabeled_vb, num_mislabelings, pick_sents, write_fixed_sents
 
-PATH = "/mnt/research/proofcheck/noda/proof-corpus/word_bins/unique/"
+PATH = "word_bins/unique/"
 
 def get_train_test_files(word_list_tags, num):
     word_list = [word.split('_')[0] for word in word_list_tags]
