@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Acceptability experiment using NLTK LM."""
+"""Acceptability experiment using NLTK LM. Use kenlm script."""
 
 import os
 os.environ['OPENBLAS_NUM_THREADS'] = '1'
