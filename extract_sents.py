@@ -8,8 +8,8 @@ from itertools import repeat
 from load_tagged_sent import load_one_sent_tags
 from sent_tools import *
 
-# Extracts sentences and tags that begin with words in word_file
-# from tagged sentences
+""" Extracts sentences and tags that begin with words in word_file
+ from tagged sentences """
 
 def check_first_word(sent, word):
     # Input: sentence with tags (connected by _ ), word

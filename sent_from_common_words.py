@@ -5,6 +5,11 @@ from collections import Counter, defaultdict
 from email.policy import default
 import sys
 
+"""Given a number of how many words from common_words.txt to use, and a tsv file of sentences, 
+this will output how many (n) sentences can be formed using the given words and the number more needed (x), 
+in the form 'x n', and the dictionary containing all values
+
+example call: python sent_from_common_words.py 100 sent01.tsv"""
 
 aliases = {"CASE", "CITE", "MATH", "NAME", "REF"}
 punctuation = {
