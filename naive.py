@@ -65,6 +65,11 @@ MATH_ENVS = {
     "refeq",
     # 1901/1901.07820
     "myequation",
+    # 0408/math-ph0408016
+    "equa",
+    # 0412/math0412117
+    "xalignat",  # obsolete amsmath?
+    "xxalignat",  # obsolete amsmath?
 }
 
 # Maps each LaTeX \ref-like command to its number of arguments
@@ -2465,8 +2470,15 @@ def get_proofs(
 
                 begin_code = "".join(begin_tokens)
                 if (
-                    "\\begin{array}" in begin_code
-                    and "\\end{array}" not in begin_code
+                    (
+                        "\\begin{array}" in begin_code
+                        and "\\end{array}" not in begin_code
+                    )
+                    or ("\[" in begin_code and "\]" not in begin_code)
+                    or (
+                        "\\begin{equation}" in begin_code
+                        and "\\end{equation}" not in begin_code
+                    )
                 ):
                     MATH_ENVS.add(env_name)
 
