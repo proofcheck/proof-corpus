@@ -1514,16 +1514,28 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
     if cmd not in macros:
         # Allow user to override these, but otherwise
         # translate accent commands to unicode
-        if cmd == "\\`":
-            skip_ws(words)
-            if words.peek("!").isalpha():
-                # \` means something different in a tabbing environment
-                return ["".join(get_arg(words)) + "\u0300"]
-        if cmd == "\\'":
-            skip_ws(words)
-            if words.peek("!").isalpha():
-                # \' means something different in a tabbing environment
-                return ["".join(get_arg(words)) + "\u0301"]
+        if cmd == "\\`" and words.peek("!") != " ":
+            arg_tokens = get_arg(words)
+            # \` means something different in a tabbing environment
+            if (
+                len(arg_tokens) == 1
+                and len(arg_tokens[0]) == 1
+                and arg_tokens[0].isalpha()
+            ):
+                return ["".join(arg_tokens) + "\u0300"]
+            else:
+                words.prepend(*arg_tokens)
+        if cmd == "\\'" and words.peek("!") != " ":
+            arg_tokens = get_arg(words)
+            # \' means something different in a tabbing environment
+            if (
+                len(arg_tokens) == 1
+                and len(arg_tokens[0]) == 1
+                and arg_tokens[0].isalpha()
+            ):
+                return ["".join(arg_tokens) + "\u0301"]
+            else:
+                words.prepend(*arg_tokens)
         if cmd == "\\^":
             return ["".join(get_arg(words)) + "\u0302"]
         if cmd == "\\~":
@@ -1532,11 +1544,17 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
                 return [arg + "\u0303"]
             else:
                 return "~"
-        if cmd == "\\=":
-            skip_ws(words)
-            if words.peek("!").isalpha():
-                # \= means something different in a tabbing environment
-                return ["".join(get_arg(words)) + "\u0304"]
+        if cmd == "\\=" and words.peek("!") != " ":
+            arg_tokens = get_arg(words)
+            # \= means something different in a tabbing environment
+            if (
+                len(arg_tokens) == 1
+                and len(arg_tokens[0]) == 1
+                and arg_tokens[0].isalpha()
+            ):
+                return ["".join(arg_tokens) + "\u0304"]
+            else:
+                words.prepend(*arg_tokens)
         if cmd == "\\u" and cmd not in macros:
             return ["".join(get_arg(words)) + "\u0306"]
         if cmd == "\\.":
