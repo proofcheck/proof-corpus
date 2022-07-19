@@ -2450,14 +2450,25 @@ def get_proofs(
                 next(words)
             env_name = "".join(get_arg(words))  # env name
             skip_ws(words)
-            if words.peek("!") == "{" and False:
+            if words.peek("!") == "{":
+                begin_tokens = get_arg(words)
+                skip_ws(words)
+                end_tokens = get_arg(words)
+
                 # Disabled for now; usually the user-defined \begin{foo}
                 # invokes an internal \begin{bar}, and
                 # skip-rest-env looks for \end{bar}, not \end{foo},
                 # and skip-rest-env doesn't expand \begin{} or \end{}
-                macros["\\" + env_name] = ([[]], [], get_arg(words))
-                skip_ws(words)
-                macros["\\end" + env_name] = ([[]], [], get_arg(words))
+                # macros["\\" + env_name] = ([[]], [], begin_tokens)
+                # macros["\\end" + env_name] = ([[]], [], end_tokens)
+
+                begin_code = "".join(begin_tokens)
+                if (
+                    "\\begin{array}" in begin_code
+                    and "\\end{array}" not in begin_code
+                ):
+                    MATH_ENVS.add(env_name)
+
             else:
                 skip_to_lbrace(words)
                 get_arg(words)  # begin part
