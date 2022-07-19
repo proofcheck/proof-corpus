@@ -617,6 +617,12 @@ def fixup(filename: str, tex_source: str) -> str:
         # \fullref are considered immutable)
         tex_source = tex_source.replace("\\fullref", "\\myfullref")
         tex_source = tex_source.replace("\\pref", "\\mypref")
+    elif "modularDD." in filename:
+        tex_source = tex_source.replace("\\NewCons{}{} ", "MATH ")
+    elif "Harriss_OSTWI." in filename:
+        tex_source = tex_source.replace(
+            "\\WARMprocessEPS{2to1_three_steps_window}{eps}{bb}", ""
+        )
     return tex_source
 
 
@@ -2556,6 +2562,10 @@ def get_proofs(
                     # 0109/math0109152/walks
                     # (step+ environment takes an extra label argument that
                     #  shouldn't appear in the output)
+                    get_arg(words)
+                elif env_name == "list":
+                    # The list environment takes two arguments.
+                    get_arg(words)
                     get_arg(words)
                 elif "\\" + env_name in macros:
                     print("GGG entering user-defined environment", env_name)
