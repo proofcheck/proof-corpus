@@ -706,6 +706,20 @@ def tokenize_string(filename: str, tex_source: str):
 
 def get_words(filename: str):
     """Get a stream of words from the given file."""
+
+    path = Path(filename)
+    if not path.exists():
+        # in case the source code is assuming a case-insensitive
+        # file system, and we're running on a linux server with a
+        # case-sensitive file system.
+        directory, name = os.path.split(path)
+        directory, name = (directory or "."), name.lower()
+        for f in os.listdir(directory):
+            newpath = os.path.join(directory, f)
+            if f.lower() == name:
+                filename = newpath
+                break
+
     with open(filename, "r") as fh:
         try:
             tex_source: str = fh.read()
