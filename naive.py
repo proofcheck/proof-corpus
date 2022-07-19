@@ -608,6 +608,7 @@ def fixup(filename: str, tex_source: str) -> str:
         # we can't handle (because reference commands like
         # \fullref are considered immutable)
         tex_source = tex_source.replace("\\fullref", "\\myfullref")
+        tex_source = tex_source.replace("\\pref", "\\mypref")
     return tex_source
 
 
