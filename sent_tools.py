@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-from multiprocessing import Pool
-import nicer
+"""Tools for corpus. (Mostly used by importing)"""
 
 ALIASES = {"CASE", "CITE", "MATH", "NAME", "REF", "VERBATIM"}
 PUNCTUATION = {
@@ -83,37 +82,3 @@ def read_one_tokenized(fn):
     ids, sents = read_one(fn)
     tokenized = tokenize_sentences(sents)
     return ids, tokenized
-
-def read_files(files, cores):
-    nicer.make_nice()
-    ids = []
-    sents = []
-    for fd in files:
-        print(fd)
-        with Pool(processes=cores) as p:
-            for id_sent in p.imap(
-                    split_sentence_id,
-                    fd.readlines(),
-                    250
-                ):
-                ids += id_sent[0]
-                sents += id_sent[1]
-        fd.close()
-    return ids, sents
-
-def read_files_tokenized(files, cores):
-    nicer.make_nice()
-    ids = []
-    sents = []
-    for fd in files:
-        print(fd)
-        with Pool(processes=cores) as p:
-            for id_sent in p.imap(
-                    split_sentence_id_tokenized,
-                    fd.readlines(),
-                    250
-                ):
-                ids += id_sent[0]
-                sents += [id_sent[1]]
-        fd.close()
-    return ids, sents

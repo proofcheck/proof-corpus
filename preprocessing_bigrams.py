@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+"""Preprocess sentences for bigram analysis."""
+
 import argparse
 import nicer
 
@@ -8,18 +10,23 @@ from itertools import repeat
 
 from sent_tools import *
 
+"""
+Typical usage:
+    nohup python3 preprocessing_bigrams.py -f ../../stone/proof-corpus/sent*.tsv -c 25 -e
+
+"""
+
 PATH = "preprocessed_sents/"
 
 def clean_sent(line, keep_punct=False, add_spacing=False):
+    # Lower everything but aliases
     _, sent = split_sentence_id(line)
     alias_list = list(ALIASES)
 
     if keep_punct:
-        # tokens = [w.lower() if not check_alias(w, alias_list) else w for w in tokenize(sent)]
         tokens = [w.lower() if not check_alias(w, alias_list) else clean_word(w, alias_list) for w in tokenize(sent)]
     
     else:
-        # tokens = [w.lower() if not check_alias(w, alias_list) else w for w in tokenize(sent) if w not in PUNCTUATION]
         tokens = [w.lower() if not check_alias(w, alias_list) else clean_word(w, alias_list) for w in tokenize(sent) if w not in PUNCTUATION]
 
     if add_spacing:
@@ -28,6 +35,7 @@ def clean_sent(line, keep_punct=False, add_spacing=False):
     return " ".join(tokens)
 
 def clean_word_naive(word, alias_list):
+    # Clean word naively
     lcword = word.lower()
     for alias in alias_list:
         if alias in word:
@@ -35,6 +43,7 @@ def clean_word_naive(word, alias_list):
     return lcword
 
 def clean_word(word, alias_list):
+    # Clean word (find indices of aliases, then lower)
     lower_list = list(word.lower())
     indices = []
     for alias in alias_list:
@@ -52,6 +61,7 @@ def clean_word(word, alias_list):
     return "".join(lower_list)
 
 def check_alias(word, alias_list):
+    # Check if word contains an alias
     for alias in alias_list:
         if alias in word:
             return True

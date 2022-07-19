@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+"""Make training and testing sets for optimal tagger experiment."""
+
 import argparse
 import nicer
 import os
@@ -8,6 +10,16 @@ import nltk
 from load_ontonotes_pos import *
 from train_tagger import DEFAULT_TAGGER, mislabeled_vb, num_mislabelings, pick_sents, write_fixed_sents
 
+"""
+Typical usage:
+    Making training sets:
+    nohup python3 make_test_train.py -ntr 100 -nte 45 -wl nnp_verb_list_all.txt -e main3 -s
+
+    Making testing sets:
+    nohup python3 make_test_train.py -tr training_set/optimal_handtagged.txt -nte 1 -te_e partition_handtagged -wl nnp_verb_list_partition.txt
+"""
+
+# Use unique sentences by default
 PATH = "word_bins/unique/"
 
 def get_train_test_files(word_list_tags, num):
@@ -28,6 +40,7 @@ def get_train_test_files(word_list_tags, num):
     return train_list, test_list
 
 def make_training_from_bin(train_files, train_num, output, word_list=[], test_lines=[]): 
+    # Make training set using bins, number of training sentences per bin
     training_set = []
     for train_file in train_files:
         path_to_file = PATH + train_file
@@ -38,6 +51,7 @@ def make_training_from_bin(train_files, train_num, output, word_list=[], test_li
     return write_fixed_sents(training_set, output, word_list)
 
 def make_testing_from_bin(test_files, output, word_list, train_lines=[]):
+    # Make testing set using bins, word list and training lines (to ensure no overlap)
     testing_set = []
     num_lines_one_file = 5000 // len(test_files)
 
@@ -54,8 +68,12 @@ def make_testing_from_bin(test_files, output, word_list, train_lines=[]):
     return write_fixed_sents(testing_set, output, word_list) 
 
 def make_train_test(args):
+    # Make word list from word_list file 
+    # (with the first n being training words and the rest being testing words)
     word_list = args.word_list.read().splitlines()
+    
     num_train_bins = len(word_list) - args.num_test_bins
+    # Get list of training and testing bins
     train_files, test_files = get_train_test_files(word_list, num_train_bins)
 
     save_test = "testing_set/" + args.test_extension + ".txt"
@@ -64,6 +82,7 @@ def make_train_test(args):
         print("Testing exists")
         return 0
 
+    # Make training set and save as a single file
     if not args.train: 
         save_train = "training_set/" + args.train_extension + ".txt"
     
@@ -77,8 +96,10 @@ def make_train_test(args):
     else:
         fixed_training_lines = args.train.read().splitlines()
     
+    # Make testing set and save (make sure there are no common sentences with training set)
     testing = make_testing_from_bin(test_files, save_test, word_list, fixed_training_lines)
 
+    # Use default tagger to tag
     nltk.data.clear_cache()
     default_tagger = DEFAULT_TAGGER
     default_confusion = default_tagger.confusion(testing)
@@ -116,20 +137,19 @@ if __name__ == '__main__':
                             help="txt file to read training set")
 
     parser.add_argument("--num_train_sents", "-ntr",type=int, default=5,
-                            help="number of training sentences")
+                            help="number of training sentences per bin")
     
     parser.add_argument("--num_test_bins", "-nte",type=int, default=1,
                             help="number of testing word bins")
 
     parser.add_argument("--train_extension", "-tr_e",
-                            help="file extension")
+                            help="training file extension")
 
     parser.add_argument("--test_extension", "-te_e",
-                            help="file extension")
+                            help="testing file extension")
     
     parser.add_argument("--word_list", "-wl",type=argparse.FileType('r'),
                             help="txt file to read imperative verbs")
-
 
     args = parser.parse_args()
 

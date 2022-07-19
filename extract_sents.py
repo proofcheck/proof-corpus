@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+"""Creates word bins for optimal tagger experiment. (Extracts sentences and tags that begin with words in word_file from tagged sentences.)""" 
+
 import argparse
 import nicer
 from multiprocessing import Pool
@@ -8,8 +10,10 @@ from itertools import repeat
 from load_tagged_sent import load_one_sent_tags
 from sent_tools import *
 
-""" Extracts sentences and tags that begin with words in word_file
- from tagged sentences """
+"""
+Typical usage:
+    nohup python3 extract_sents.py -f tagged_sentences/tagged_sentences_6_13.txt -w Enumerate -c 20 -u
+"""
 
 def check_first_word(sent, word):
     # Input: sentence with tags (connected by _ ), word
@@ -37,6 +41,8 @@ def make_bins(args):
     for word in word_list:
         print(word)
         file_name = "word_bins/" + word + args.extension + ".txt"
+        
+        # Only keep unique sentences
         if args.unique:
             file_name_unique = "word_bins/unique/" + word + args.extension + ".txt"
             unique_sents = set()

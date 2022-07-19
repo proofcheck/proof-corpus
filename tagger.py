@@ -1,16 +1,23 @@
 #!/usr/bin/env python
 
+"""Writes part-of-speech tags for sentences using the default tagger (trained on WSJ)"""
+
 import argparse
 from nltk.tag.perceptron import PerceptronTagger
 import nicer
 from multiprocessing import Pool
 from itertools import repeat
-import sys
 import pickle
 
 from sent_tools import *
 from load_tagged_sent import load_tags
 from load_ontonotes_pos import *
+
+"""
+Typical usage:
+    nohup python3 tagger.py -f ../../stone/proof-corpus/sent**.tsv -c 50 -o tagged_sentences/tagged_sentences_6_13.txt
+
+"""
 
 def make_wsj_train():
     # creates training set from WSJ
@@ -45,7 +52,6 @@ def make_wsj_test():
             print("loaded")
 
     except FileNotFoundError:
-        
         with Pool(processes=3) as p:
                 for loaded_section in p.imap(
                     load_section,

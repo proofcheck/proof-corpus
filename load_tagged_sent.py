@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+"""Loads tagged sentences. (Do not run main script as it is memory intensive.)"""
+
 import argparse
 import nicer
 from multiprocessing import Pool
@@ -7,6 +9,11 @@ from itertools import repeat
 from nltk.probability import FreqDist
 
 from sent_tools import *
+
+"""
+Typical usage:
+    None. Mostly for imports.
+"""
 
 def dist_output(dist, output):
     # Writes distribution to output depending in order of frequency
@@ -97,7 +104,6 @@ def is_sent(sent):
             return False
     
     return True
-
 
 def main(args):
     # DO NOT RUN!

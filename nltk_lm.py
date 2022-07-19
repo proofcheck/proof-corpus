@@ -1,18 +1,18 @@
 #!/usr/bin/env python
 
+"""Acceptability experiment using NLTK LM. Use kenlm script."""
+
 import os
 os.environ['OPENBLAS_NUM_THREADS'] = '1'
 
 import argparse
 from more_itertools import flatten
-
 import nicer
 import dill as pickle
 
 from nltk.util import ngrams
 from nltk.lm.preprocessing import padded_everygram_pipeline
 from nltk.lm import MLE, KneserNeyInterpolated
-
 from sent_tools import *
 
 SENTS = ["Suppose MATH .",
