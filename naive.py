@@ -70,6 +70,8 @@ MATH_ENVS = {
     # 0412/math0412117
     "xalignat",  # obsolete amsmath?
     "xxalignat",  # obsolete amsmath?
+    # 0409/math0409109
+    "endproofeqnarray",
 }
 
 # Maps each LaTeX \ref-like command to its number of arguments
@@ -247,6 +249,7 @@ TEX_CITES = {
     "\\maskCiteauthort",
     "\\masknocite",
     "\\masktext",
+    "\\onlinecite",
 }
 
 
@@ -2193,6 +2196,11 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         get_arg(words)
         return []
 
+    if cmd == "\\setboolean":
+        get_arg(words)
+        get_arg(words)
+        return []
+
     if cmd in macros:
         if cmd == "\\BoxedEPSF":
             # Hack for 0002/math0002136/zinno.tex
@@ -2479,6 +2487,7 @@ def get_proofs(
                         "\\begin{equation}" in begin_code
                         and "\\end{equation}" not in begin_code
                     )
+                    or ("$$" in begin_code)
                 ):
                     MATH_ENVS.add(env_name)
 
@@ -2628,6 +2637,12 @@ def get_proofs(
                     current_proof_words.append(" MATH ")
                 if fp:
                     current_proof_words.append(" . ")
+
+        elif w == "\\csname":
+            name = ""
+            while (w2 := next(words)) != "\\endcsname":
+                name += w2
+            words.prepend("\\" + w)
 
         elif w in TEX_REFS and (w not in macros or macros[w] == "frozen"):
             # Skip optional asterisk
