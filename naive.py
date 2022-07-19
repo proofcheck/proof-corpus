@@ -65,6 +65,13 @@ MATH_ENVS = {
     "refeq",
     # 1901/1901.07820
     "myequation",
+    # 0408/math-ph0408016
+    "equa",
+    # 0412/math0412117
+    "xalignat",  # obsolete amsmath?
+    "xxalignat",  # obsolete amsmath?
+    # 0409/math0409109
+    "endproofeqnarray",
 }
 
 # Maps each LaTeX \ref-like command to its number of arguments
@@ -242,6 +249,7 @@ TEX_CITES = {
     "\\maskCiteauthort",
     "\\masknocite",
     "\\masktext",
+    "\\onlinecite",
 }
 
 
@@ -271,6 +279,8 @@ DELETE_ENVS = {
     "sequentdeduction",
     # 0610/math0610416
     "miniboard",
+    # 0011/math0011123
+    "diag",
 }
 
 DELETE_UNINTERPRETED_ENVS = {
@@ -547,7 +557,7 @@ TEX_COMMENT = re.compile(r"((?<!\\)(\\\\)+|(?<!\\))[%٪].*?\n[ \t]*")
 
 
 def decomment(tex_source: str) -> str:
-    """
+    r"""
     Delete all TeX comments from multiline source code.
 
     Assumes every line (including the last) ends with \n.
@@ -582,7 +592,7 @@ def fixup(filename: str, tex_source: str) -> str:
             "Moreover. the set", "Moreover, the set"
         )
     elif "Journal_Hyp_2020January" in filename:
-        tex_source = tex_source.replaceq(
+        tex_source = tex_source.replace(
             "same endpoints. and if", "same endpoints, and if"
         )
     elif "pseudo." in filename:
@@ -601,6 +611,18 @@ def fixup(filename: str, tex_source: str) -> str:
         tex_source = tex_source.replace("(??)", "")
     elif "46-100." in filename:
         tex_source = tex_source.replace("？？？？？？？", "")
+    elif "CDS-SU2n." in filename:
+        # Defines a 2-argument version of \fullref, which
+        # we can't handle (because reference commands like
+        # \fullref are considered immutable)
+        tex_source = tex_source.replace("\\fullref", "\\myfullref")
+        tex_source = tex_source.replace("\\pref", "\\mypref")
+    elif "modularDD." in filename:
+        tex_source = tex_source.replace("\\NewCons{}{} ", "MATH ")
+    elif "Harriss_OSTWI." in filename:
+        tex_source = tex_source.replace(
+            "\\WARMprocessEPS{2to1_three_steps_window}{eps}{bb}", ""
+        )
     return tex_source
 
 
@@ -699,6 +721,20 @@ def tokenize_string(filename: str, tex_source: str):
 
 def get_words(filename: str):
     """Get a stream of words from the given file."""
+
+    path = Path(filename)
+    if not path.exists():
+        # in case the source code is assuming a case-insensitive
+        # file system, and we're running on a linux server with a
+        # case-sensitive file system.
+        directory, name = os.path.split(path)
+        directory, name = (directory or "."), name.lower()
+        for f in os.listdir(directory):
+            newpath = os.path.join(directory, f)
+            if f.lower() == name:
+                filename = newpath
+                break
+
     with open(filename, "r") as fh:
         try:
             tex_source: str = fh.read()
@@ -1028,7 +1064,8 @@ def get_newcommand(words):
     skip_ws(words)
     # print(" definition getting body from", "".join(words[:100]))
     body = get_arg(words)
-    # print(f"Saw ndef {name} {num_params} {parameters} {optional_param} {body}")
+    # print(f"Saw ndef {name} {num_params} "
+    #       f"{parameters} {optional_param} {body}")
     return name, parameters, optional_param, body
 
 
@@ -1237,7 +1274,7 @@ def skip_rest_env(words, macros, stop_at=None) -> bool:
     nwords_seen = 0
     final_period = False
     env_nesting = 1
-    tag = random.random()
+    # tag = random.random()
     while words:
         w = next(words)
         # print("ske", w, tag, stop_at)
@@ -1478,9 +1515,15 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         # Allow user to override these, but otherwise
         # translate accent commands to unicode
         if cmd == "\\`":
-            return ["".join(get_arg(words)) + "\u0300"]
+            skip_ws(words)
+            if words.peek("!").isalpha():
+                # \` means something different in a tabbing environment
+                return ["".join(get_arg(words)) + "\u0300"]
         if cmd == "\\'":
-            return ["".join(get_arg(words)) + "\u0301"]
+            skip_ws(words)
+            if words.peek("!").isalpha():
+                # \' means something different in a tabbing environment
+                return ["".join(get_arg(words)) + "\u0301"]
         if cmd == "\\^":
             return ["".join(get_arg(words)) + "\u0302"]
         if cmd == "\\~":
@@ -1490,7 +1533,10 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
             else:
                 return "~"
         if cmd == "\\=":
-            return ["".join(get_arg(words)) + "\u0304"]
+            skip_ws(words)
+            if words.peek("!").isalpha():
+                # \= means something different in a tabbing environment
+                return ["".join(get_arg(words)) + "\u0304"]
         if cmd == "\\u" and cmd not in macros:
             return ["".join(get_arg(words)) + "\u0306"]
         if cmd == "\\.":
@@ -1858,7 +1904,7 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         words.prepend(*w1)
         return []
 
-    if cmd == "\\ifstrequal" or cmd == "\\ifnumequal" or cmd == "\IfEq":
+    if cmd == "\\ifstrequal" or cmd == "\\ifnumequal" or cmd == "\\IfEq":
         a1 = "".join(get_arg(words))
         a2 = "".join(get_arg(words))
         if a1 == a2:
@@ -2152,6 +2198,15 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         get_arg(words)
         return [" "]
 
+    if cmd == "\\glossary":
+        get_arg(words)
+        return []
+
+    if cmd == "\\setboolean":
+        get_arg(words)
+        get_arg(words)
+        return []
+
     if cmd in macros:
         if cmd == "\\BoxedEPSF":
             # Hack for 0002/math0002136/zinno.tex
@@ -2262,7 +2317,7 @@ def get_proofs(
     proof_nesting = 0
     current_proof_words: List[str] = []
 
-    tag = random.random()
+    tag = random.random()  # nosec
 
     while words:
         w = next(words)
@@ -2354,7 +2409,7 @@ def get_proofs(
                 optional = ""
             filenames = "".join(get_arg(words)).split(",")
             for filename in filenames:
-                fn = Path(filename.lower())
+                fn = Path(filename.strip().lower())
                 if fn.name == "babel":
                     if "german" in optional:
                         macros["german shorthands"] = True
@@ -2366,7 +2421,7 @@ def get_proofs(
                     fn = fn.with_suffix(".sty")
                 if fn.stem in IGNORED_INCLUDES or kpse.in_TeX_path(fn.name):
                     continue
-                subfname: Path = directory / (fn.with_suffix(".sty"))
+                subfname = directory / (fn.with_suffix(".sty"))
                 try:
                     subwords = get_words(subfname.as_posix())
                     if verbose or debug or True:
@@ -2413,14 +2468,45 @@ def get_proofs(
             # Skip optional asterisk
             if words.peek("!") == "*":
                 next(words)
-            get_arg(words)  # env name
-            skip_to_lbrace(words)
-            get_arg(words)  # begin part
-            get_arg(words)  # end part
+            env_name = "".join(get_arg(words))  # env name
+            skip_ws(words)
+            if words.peek("!") == "{":
+                begin_tokens = get_arg(words)
+                skip_ws(words)
+                end_tokens = get_arg(words)
+
+                # Disabled for now; usually the user-defined \begin{foo}
+                # invokes an internal \begin{bar}, and
+                # skip-rest-env looks for \end{bar}, not \end{foo},
+                # and skip-rest-env doesn't expand \begin{} or \end{}
+                # macros["\\" + env_name] = ([[]], [], begin_tokens)
+                # macros["\\end" + env_name] = ([[]], [], end_tokens)
+
+                begin_code = "".join(begin_tokens)
+                if (
+                    (
+                        "\\begin{array}" in begin_code
+                        and "\\end{array}" not in begin_code
+                    )
+                    or ("\[" in begin_code and "\]" not in begin_code)
+                    or (
+                        "\\begin{equation}" in begin_code
+                        and "\\end{equation}" not in begin_code
+                    )
+                    or ("$$" in begin_code)
+                ):
+                    MATH_ENVS.add(env_name)
+
+            else:
+                skip_to_lbrace(words)
+                get_arg(words)  # begin part
+                get_arg(words)  # end part
 
         elif w in ["\\newif"]:
             newif = next(words)
             macros["new ifs"].append(newif)
+            # hack. User-defined conditionals are always false.
+            macros[newif] = ([[]], [], ["\\iffalse"])
 
         elif w == "\\begin":
             env_name = "".join(get_arg(words))
@@ -2477,6 +2563,14 @@ def get_proofs(
                     # (step+ environment takes an extra label argument that
                     #  shouldn't appear in the output)
                     get_arg(words)
+                elif env_name == "list":
+                    # The list environment takes two arguments.
+                    get_arg(words)
+                    get_arg(words)
+                elif "\\" + env_name in macros:
+                    print("GGG entering user-defined environment", env_name)
+                    words.prepend("\\" + env_name)
+                    continue
 
                 if proof_nesting > 0:
                     current_proof_words.append(" ")
@@ -2503,6 +2597,10 @@ def get_proofs(
                             print("***", proof)
             elif env_name == "document":
                 break
+            elif "\\end" + env_name in macros:
+                print("GGG leaving user-defined environment", env_name)
+                words.prepend("\\end" + env_name)
+                continue
             else:
                 if proof_nesting > 0:
                     current_proof_words.append(" ")
@@ -2549,6 +2647,12 @@ def get_proofs(
                     current_proof_words.append(" MATH ")
                 if fp:
                     current_proof_words.append(" . ")
+
+        elif w == "\\csname":
+            name = ""
+            while (w2 := next(words)) != "\\endcsname":
+                name += w2
+            words.prepend("\\" + w)
 
         elif w in TEX_REFS and (w not in macros or macros[w] == "frozen"):
             # Skip optional asterisk

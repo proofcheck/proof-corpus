@@ -3,6 +3,9 @@
 from pathlib import Path
 import sys
 
+""" a quick script to run through every proof text file and compile them all into a proofs file for the given year """
+
+
 p = Path("proofs")
 
 for filename in p.glob(sys.argv[1] + "*/**/*.txt"):
