@@ -2389,7 +2389,7 @@ def get_proofs(
                 optional = ""
             filenames = "".join(get_arg(words)).split(",")
             for filename in filenames:
-                fn = Path(filename.lower())
+                fn = Path(filename.strip().lower())
                 if fn.name == "babel":
                     if "german" in optional:
                         macros["german shorthands"] = True
