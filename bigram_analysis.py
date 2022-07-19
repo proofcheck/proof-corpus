@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+"""Makes bigrams from sent file and writes the bigrams that pass the metrics (frequency, MI, chi-squared) with their scores."""
+
 import os
 os.environ['OPENBLAS_NUM_THREADS'] = '1'
 
@@ -16,6 +18,18 @@ from scipy.stats import chi2
 
 from ngrams import return_ngrams
 from sent_tools import *
+
+"""
+Typical usage:
+    python3 bigram_analysis.py -f merged_sents/*.txt -bf bigrams/merged_7_14.pk -o bigram_analysis/bigram_analysis_merged_7_14.txt -F 500
+
+Use dumped bigrams:
+    python3 bigram_analysis.py -bf bigrams/sent00/bigrams_sent00.pk -o bigram_analysis/sent00/bigram_analysis_sent00_all.txt
+
+Don't filter:
+    python3 bigram_analysis.py -bf bigrams/sent00/bigrams_sent00.pk -o bigram_analysis/sent00/bigram_analysis_sent00_all.txt -A
+
+"""
 
 BIGRAM_PATH = "bigrams/"
 ANALYSIS_PATH = "bigram_analysis/"
@@ -153,11 +167,13 @@ def make_unigrams_from_bigrams_sents(sents):
 def main(args):
     if args.files:
         bigrams_sents = save_bigrams_sents(args.files, args.bigram_file, args.n)
+        print("done dumping", flush=True)
+        gc.collect()
 
     else:
         print("loading bigrams", flush=True)
         with open(args.bigram_file, "rb") as resource:
-            bigrams = pickle.load(resource)
+            bigrams_sents = pickle.load(resource)
             print("done loading bigrams", flush=True)
     
     print("making unigrams", flush=True)
@@ -173,7 +189,12 @@ def main(args):
     bigram_sum = len(bigrams)
     unigram_sum = len(unigrams)
 
-    bigram_cnt = make_bigram_cnt(bigrams, args.frequency)
+    if args.all:
+        bigram_cnt = make_bigram_cnt(bigrams)
+    
+    else:
+        bigram_cnt = make_bigram_cnt(bigrams, args.frequency)
+
     del bigrams
     gc.collect()
 
@@ -202,7 +223,10 @@ def main(args):
     #                 )
     #               )
 
-    mi_filtered = [bigram for bigram in mi_dict.keys() if mi_dict[bigram] > args.mi]
+    if args.all:
+        mi_filtered = [bigram for bigram in mi_dict.keys()]
+    else:
+        mi_filtered = [bigram for bigram in mi_dict.keys() if mi_dict[bigram] > args.mi]
 
     print("chi", flush=True)
     bigram_sum = bigram_sum + 2 * sent_count
@@ -226,7 +250,10 @@ def main(args):
     gc.collect()
 
     print("done making dict", flush=True)
-    chi_filtered = [bigram for bigram in chi_dict.keys() if compare_critical(chi_dict[bigram], 1, args.chi_2)]
+    if args.all:
+        chi_filtered = [bigram for bigram in chi_dict.keys()]
+    else:
+        chi_filtered = [bigram for bigram in chi_dict.keys() if compare_critical(chi_dict[bigram], 1, args.chi_2)]
 
     print("done calculating", flush=True)
     for bigram in chi_filtered:
@@ -264,6 +291,9 @@ if __name__ == "__main__":
 
     parser.add_argument("--chi_2", "-C", type=float, default=0.95,
                         help="confidence interval for chi-squared")
+
+    parser.add_argument("--all", "-A", action='store_true',
+                        help="do not apply filter")
 
     args = parser.parse_args()
 

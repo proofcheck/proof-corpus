@@ -13,7 +13,6 @@ from sent_tools import *
 """
 Typical usage:
     nohup python3 extract_sents.py -f tagged_sentences/tagged_sentences_6_13.txt -w Enumerate -c 20 -u
-
 """
 
 def check_first_word(sent, word):
