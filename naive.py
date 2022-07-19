@@ -2174,6 +2174,10 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         get_arg(words)
         return [" "]
 
+    if cmd == "\\glossary":
+        get_arg(words)
+        return []
+
     if cmd in macros:
         if cmd == "\\BoxedEPSF":
             # Hack for 0002/math0002136/zinno.tex
