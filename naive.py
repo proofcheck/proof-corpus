@@ -1500,9 +1500,15 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         # Allow user to override these, but otherwise
         # translate accent commands to unicode
         if cmd == "\\`":
-            return ["".join(get_arg(words)) + "\u0300"]
+            skip_ws(words)
+            if words.peek("!").isalpha():
+                # \` means something different in a tabbing environment
+                return ["".join(get_arg(words)) + "\u0300"]
         if cmd == "\\'":
-            return ["".join(get_arg(words)) + "\u0301"]
+            skip_ws(words)
+            if words.peek("!").isalpha():
+                # \' means something different in a tabbing environment
+                return ["".join(get_arg(words)) + "\u0301"]
         if cmd == "\\^":
             return ["".join(get_arg(words)) + "\u0302"]
         if cmd == "\\~":
@@ -1512,7 +1518,10 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
             else:
                 return "~"
         if cmd == "\\=":
-            return ["".join(get_arg(words)) + "\u0304"]
+            skip_ws(words)
+            if words.peek("!").isalpha():
+                # \= means something different in a tabbing environment
+                return ["".join(get_arg(words)) + "\u0304"]
         if cmd == "\\u" and cmd not in macros:
             return ["".join(get_arg(words)) + "\u0306"]
         if cmd == "\\.":
