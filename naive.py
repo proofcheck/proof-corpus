@@ -2453,6 +2453,8 @@ def get_proofs(
         elif w in ["\\newif"]:
             newif = next(words)
             macros["new ifs"].append(newif)
+            # hack. User-defined conditionals are always false.
+            macros[newif] = ([[]], [], ["\\iffalse"])
 
         elif w == "\\begin":
             env_name = "".join(get_arg(words))
