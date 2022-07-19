@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Report unigram counts for file(s) or stdin."""
+"""Removes duplicate words from all proofs from a paper, the output can be fed into an unigram generator for use"""
 
 import argparse
 from collections import Counter
