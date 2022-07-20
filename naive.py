@@ -255,6 +255,16 @@ TEX_CITES = {
     "\\masktext",
     "\\onlinecite",
     "\\citeasnoun",  # harvard
+    # mlapa
+    "\\aucite",
+    "\\aunpcite",
+    "\\yrcite",
+    "\\yrnpcite",
+    "\\npcite",
+    "\\emcite",
+    "\\singlecite",
+    "\\singlenpcite",
+    "\\singleemcite",
 }
 
 
@@ -529,6 +539,7 @@ IGNORED_INCLUDES = {
     "myfloat",  # 0603/math0603228
     "myurl",  # 0110/cs0110030
     "psfig",
+    "psfrag",
     "scrpage2",  # 0501/math-ph0501039
     "sw20bams",  # 0102/math-ph0102018
     "warmread",  # 0601/math0601187
@@ -2237,6 +2248,17 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         get_arg(words)
         get_arg(words)
         return []
+
+    if cmd == "\\psfrag":
+        if words.peek("!") == "*":
+            next(words)
+        get_arg(words)
+        skip_optional_arg(words, macros)
+        skip_optional_arg(words, macros)
+        skip_optional_arg(words, macros)
+        skip_optional_arg(words, macros)
+        get_arg(words)
+        return [" "]
 
     if cmd in macros:
         if cmd == "\\BoxedEPSF":
