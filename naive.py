@@ -254,6 +254,7 @@ TEX_CITES = {
     "\\masknocite",
     "\\masktext",
     "\\onlinecite",
+    "\\citeasnoun",  # harvard
 }
 
 
@@ -2438,7 +2439,7 @@ def get_proofs(
                     if "german" in optional:
                         macros["german shorthands"] = True
                     continue
-                if fn.name == "amsmidx":
+                if fn.name in {"amsmidx", "multind"}:
                     macros["two-argument \\index"] = True
                     continue
                 if fn.suffix == "":
