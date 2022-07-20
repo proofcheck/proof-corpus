@@ -63,7 +63,7 @@ def get_joined_aggressive(match):
     colloc = match.group(0)
     return colloc.strip() + "_"
 
-def replace_collocations(line, collocations_dict, merge_collocations=False, print_status=False, use_regex=False):
+def replace_collocations(line, collocations_dict, merge_collocations=False, print_status=False, use_regex=False, search=None):
     # Use regex for replacements
     if use_regex:
         # Merge n > 2 grams (aggressive merging)
@@ -72,25 +72,26 @@ def replace_collocations(line, collocations_dict, merge_collocations=False, prin
                 print("making regex", flush=True)
                 start = time.clock_gettime(time.CLOCK_MONOTONIC)
 
-            search = [colloc if not_star(colloc) else unstar(colloc) for colloc in reversed(collocations_dict.keys())]
-            
-            """
-            # (\bwe\s(?=\bhave\b)|\bhave\s(?=\bMATH\b))
-            search = [f"\\b{colloc[0]}\\s(?=\\b{colloc[1]}\\b)" for colloc in search]
-            # negative lookhead for colloc[1]-
-            search = [f"(?<!-)\\b{colloc[0]}\\s(?=\\b{colloc[1]}\\b)(?!\\b{colloc[1]}-)" for colloc in search]
-            """
-            # (?<!-)\\b
-            search = [f"(?<!-)\\b{colloc[0]}\\s(?=\\b{colloc[1]}\\b[^-])" for colloc in search]
-            
-            search = "|".join(search)
-            search = (f"({search})")
+            if not search:
+                search = [colloc if not_star(colloc) else unstar(colloc) for colloc in reversed(collocations_dict.keys())]
+                
+                """
+                # (\bwe\s(?=\bhave\b)|\bhave\s(?=\bMATH\b))
+                search = [f"\\b{colloc[0]}\\s(?=\\b{colloc[1]}\\b)" for colloc in search]
+                # negative lookhead for colloc[1]-
+                search = [f"(?<!-)\\b{colloc[0]}\\s(?=\\b{colloc[1]}\\b)(?!\\b{colloc[1]}-)" for colloc in search]
+                """
 
-            if print_status:
-                end = time.clock_gettime(time.CLOCK_MONOTONIC)
-                print(end - start, "seconds to make regex", flush=True)
-                print("starting replacement", flush=True)
-                start = time.clock_gettime(time.CLOCK_MONOTONIC)
+                # (?<!-)\\b
+                search = [f"(?<!-)\\b{colloc[0]}\\s(?=\\b{colloc[1]}\\b[^-])" for colloc in search]
+                search = "|".join(search)
+                search = (f"({search})")
+
+                if print_status:
+                    end = time.clock_gettime(time.CLOCK_MONOTONIC)
+                    print(end - start, "seconds to make regex", flush=True)
+                    print("starting replacement", flush=True)
+                    start = time.clock_gettime(time.CLOCK_MONOTONIC)
 
             line = re.sub(search, get_joined_aggressive, line)
 
@@ -133,7 +134,7 @@ def replace_collocations(line, collocations_dict, merge_collocations=False, prin
             # Merge n > 2 grams (aggressive merging)
             if merge_collocations:
                 if print_status:
-                    print("replacing", flush=True)
+                    #print("replacing", flush=True)
                     start = time.clock_gettime(time.CLOCK_MONOTONIC)
                 line = line.replace(" " + spaced + " ", " " + joined + " ")
                 line = line.replace("_" + spaced + " ", "_" + joined + " ")
@@ -142,7 +143,7 @@ def replace_collocations(line, collocations_dict, merge_collocations=False, prin
                 
                 if print_status:
                     end = time.clock_gettime(time.CLOCK_MONOTONIC)
-                    print(end - start, "seconds to replace", flush=True)
+                    #print(end - start, "seconds to replace", flush=True)
                     
             # Only merge bigrams (non-aggressive merging)    
             else:
@@ -182,13 +183,16 @@ def test_collocation_file(f):
 
 def replace_collocations_by_file(fd, collocations_dict, merge_collocations, print_time=False, use_regex=False):
     if args.print_time:
-        print("read", time.clock_gettime(time.CLOCK_MONOTONIC))
+        print("start")
+        start = time.clock_gettime(time.CLOCK_MONOTONIC)
     
     sents = fd.read()
 
     if args.print_time:
-        print("replace", time.clock_gettime(time.CLOCK_MONOTONIC))
-    
+        end = time.clock_gettime(time.CLOCK_MONOTONIC)
+        print("replace", end - start)
+        start = end
+        
     joined_lines = replace_collocations(
                                             sents,
                                             collocations_dict,
@@ -196,7 +200,6 @@ def replace_collocations_by_file(fd, collocations_dict, merge_collocations, prin
                                             print_time,
                                             use_regex
                                         )
-
 
     # Output filename management
     if args.merge_collocations:
@@ -249,14 +252,18 @@ def main(args):
                     1
                 )
         """
+        print("start")
+
         for fd in args.files:            
             if args.print_time:
-                print("read", time.clock_gettime(time.CLOCK_MONOTONIC))
+                start = time.clock_gettime(time.CLOCK_MONOTONIC)
             
             sents = fd.read()
 
             if args.print_time:
-                print("replace", time.clock_gettime(time.CLOCK_MONOTONIC))
+                end = time.clock_gettime(time.CLOCK_MONOTONIC)
+                print("replace", end - start)
+                start = end
             
             joined_lines = replace_collocations(
                                                     sents,
@@ -290,6 +297,26 @@ def main(args):
     
     # Read and process by sentence
     else:
+        if args.use_regex and args.merge_collocations:
+            search = [colloc if not_star(colloc) else unstar(colloc) for colloc in reversed(collocations_dict.keys())]
+            
+            """
+            # (\bwe\s(?=\bhave\b)|\bhave\s(?=\bMATH\b))
+            search = [f"\\b{colloc[0]}\\s(?=\\b{colloc[1]}\\b)" for colloc in search]
+            # negative lookhead for colloc[1]-
+            search = [f"(?<!-)\\b{colloc[0]}\\s(?=\\b{colloc[1]}\\b)(?!\\b{colloc[1]}-)" for colloc in search]
+            """
+
+            # (?<!-)\\b
+            search = [f"(?<!-)\\b{colloc[0]}\\s(?=\\b{colloc[1]}\\b[^-])" for colloc in search]
+            search = "|".join(search)
+            search = (f"({search})")
+
+            search = re.compile(search)
+
+        else:
+            search = None
+
         for fd in args.files:
             with Pool(processes=args.cores) as p:
                 joined_lines = p.starmap(
@@ -299,9 +326,10 @@ def main(args):
                             repeat(collocations_dict),
                             repeat(args.merge_collocations),
                             repeat(False),
-                            repeat(False)
+                            repeat(args.use_regex),
+                            repeat(search)
                             ),
-                        50
+                        250
                     )
 
                 if args.merge_collocations:
@@ -342,20 +370,20 @@ if __name__ == "__main__":
     parser.add_argument("--underscore_test", "-t", action="store_true",
                         help="test output")
 
-    parser.add_argument("--by_sentence", "-S", action="store_true",
-                        help="replace collocations by sentence")
-
     parser.add_argument("--print_time", "-p", action="store_true",
                         help="print time")
-
-    parser.add_argument("--use_regex", "-r", action="store_true",
-                        help="use regex")
 
     parser.add_argument("--output", "-o",
                         help="output file")
 
     parser.add_argument("--extension", "-e",
                         help="extension")
+
+    parser.add_argument("--by_sentence", "-S", action="store_true",
+                        help="replace collocations by sentence")
+
+    parser.add_argument("--use_regex", "-r", action="store_true",
+                        help="use regex")
 
     args = parser.parse_args()
 
@@ -367,7 +395,6 @@ c = open(c_f, "r")
 c_dict = get_collocations_dict(c)
 c.close()
 sent = "integrating REF with respect to MATH it follows that we have to bound the integral over MATH of the four terms on the right hand side"
-
 sent = "As a MATH-module this algebra can be written as MATH ."
 sent1 = "Now there is a positive real-analytic function MATH such that a weighted configuration MATH is in MATH provided that MATH ."
 replace_collocations(sent1, c_dict)
