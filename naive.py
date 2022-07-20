@@ -762,7 +762,9 @@ def skip_ws(words: "more_itertools.peekable[str]"):
         next(words)
 
 
-def get_arg(words: "more_itertools.peekable[str]") -> List[str]:
+def get_arg(
+    words: "more_itertools.peekable[str]", macro_body: bool = False
+) -> List[str]:
     """Get contents (words) of a single macro argument."""
     skip_ws(words)
     # by default the argument is a single token/word
@@ -785,7 +787,7 @@ def get_arg(words: "more_itertools.peekable[str]") -> List[str]:
             arg.append(w)
     else:
         arg = [w]
-    if arg in [["}"], ["$"], ["\\begin"], ["\\end"]]:
+    if arg in [["}"], ["$"], ["\\begin"], ["\\end"]] and not macro_body:
         # Something went wrong (probably because we're not really
         # implementing the full LaTeX language, and the next word
         # can't possibly be a valid argument. Put back whatever we
@@ -985,7 +987,7 @@ def get_primitive_def(
 
     # Get body
     words.prepend(tok)  # put back the left brace
-    body = get_arg(words)
+    body = get_arg(words, macro_body=True)
 
     # Parse the parameter list
     if len(parameter_tokens) > 0 and parameter_tokens[-1] == "#":
@@ -1070,7 +1072,7 @@ def get_newcommand(words):
     # Get body
     skip_ws(words)
     # print(" definition getting body from", "".join(words[:100]))
-    body = get_arg(words)
+    body = get_arg(words, macro_body=True)
     # print(f"Saw ndef {name} {num_params} "
     #       f"{parameters} {optional_param} {body}")
     return name, parameters, optional_param, body
@@ -2353,6 +2355,9 @@ def get_proofs(
         # print(f"{w=} {current_proof_words=} {macros=}")
         if debug:
             print("get_proofs: ", w, w in macros, tag, tokens_at_this_level)
+            print("   ", words[:30])
+            if w in macros:
+                print(macros[w])
             # print(
             #     f"get proofs: {w=} {w in macros}"
             #     f" UPCOMING: {''.join(words[:60])}"
