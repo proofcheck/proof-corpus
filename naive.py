@@ -152,6 +152,10 @@ TEX_REFS = {
     # 1902/1902.07230
     # 1905/1905.13429
     "\\irref": 1,
+    # 1110/1110.1514
+    "\\namecref": 1,
+    # 1111/1111.0907
+    "\\refeq": 1,
 }
 
 # Set of LaTeX \cite-like commands
@@ -266,6 +270,13 @@ TEX_CITES = {
     "\\singlecite",
     "\\singlenpcite",
     "\\singleemcite",
+    # achicago
+    "\\citeN",
+    "\\citeNP",
+    "\\citeA",
+    "\\citeANP",
+    "\\citeyear",
+    "\\citeyearNP",
 }
 
 
@@ -548,6 +559,7 @@ IGNORED_INCLUDES = {
     "haskell",  # 1007.4266 1005.5278
     "mathlig",  # 1908.03268
     "figbox",  # 0009/cs0009023
+    "bcprules",  # 1110/1110.3470
 }
 
 
@@ -646,6 +658,10 @@ def fixup(filename: str, tex_source: str) -> str:
         tex_source = re.sub(
             r"\\begeq((.|\n)*?)\\endeq", "\\[\\1\\]", tex_source
         )
+    elif "ch." in filename:
+        tex_source = tex_source.replace("\\home ", "")
+    elif "AIJ-Crossover-v1-arxiv." in filename:
+        tex_source = tex_source.replace("{aligna}", "{align}")
     return tex_source
 
 
@@ -2261,6 +2277,19 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         get_arg(words)
         return [" "]
 
+    if cmd == "\\infax" and cmd not in macros:
+        # probably from bcprules.sty
+        skip_optional_arg(words, macros)
+        get_arg(words)
+        return [" MATH "]
+
+    if cmd == "\\infrule" and cmd not in macros:
+        # probably from bcprules.sty
+        skip_optional_arg(words, macros)
+        get_arg(words)
+        get_arg(words)
+        return [" MATH "]
+
     if cmd in macros:
         if cmd == "\\BoxedEPSF":
             # Hack for 0002/math0002136/zinno.tex
@@ -2382,9 +2411,9 @@ def get_proofs(
         # print(f"{w=} {current_proof_words=} {macros=}")
         if debug:
             print("get_proofs: ", w, w in macros, tag, tokens_at_this_level)
-            print("   ", words[:30])
-            if w in macros:
-                print(macros[w])
+            # print("   ", words[:30])
+            # if w in macros:
+            #     print(macros[w])
             # print(
             #     f"get proofs: {w=} {w in macros}"
             #     f" UPCOMING: {''.join(words[:60])}"
@@ -2553,6 +2582,7 @@ def get_proofs(
                     or ("$$" in begin_code)
                     or ("\\equation" in begin_code)
                     or ("\\flalign" in begin_code)
+                    or ("\\begin{align}" in begin_code)
                 ):
                     MATH_ENVS.add(env_name)
 
