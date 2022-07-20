@@ -254,6 +254,7 @@ TEX_CITES = {
     "\\masknocite",
     "\\masktext",
     "\\onlinecite",
+    "\\citeonline",
     "\\citeasnoun",  # harvard
     # mlapa
     "\\aucite",
