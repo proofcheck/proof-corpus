@@ -630,6 +630,10 @@ def fixup(filename: str, tex_source: str) -> str:
         )
     elif "mholy." in filename:
         tex_source = re.sub(r"\\beqn((.|\n)*?)\\eeqn", "\\[A=A\\]", tex_source)
+    elif "MaxMin." in filename:
+        tex_source = re.sub(
+            r"\\begeq((.|\n)*?)\\endeq", "\\[\\1\\]", tex_source
+        )
     return tex_source
 
 
@@ -2524,6 +2528,8 @@ def get_proofs(
                         and "\\end{equation}" not in begin_code
                     )
                     or ("$$" in begin_code)
+                    or ("\\equation" in begin_code)
+                    or ("\\flalign" in begin_code)
                 ):
                     MATH_ENVS.add(env_name)
 
@@ -2713,6 +2719,7 @@ def get_proofs(
             if words.peek("!") == "*":
                 next(words)
             skip_optional_arg(words, macros)
+            skip_optional_arg(words, macros)  # Some have two
             get_arg(words)
             if proof_nesting > 0:
                 current_proof_words.append("CITE")
