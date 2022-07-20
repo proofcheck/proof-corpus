@@ -623,6 +623,8 @@ def fixup(filename: str, tex_source: str) -> str:
         tex_source = tex_source.replace(
             "\\WARMprocessEPS{2to1_three_steps_window}{eps}{bb}", ""
         )
+    elif "mholy." in filename:
+        tex_source = re.sub(r"\\beqn((.|\n)*?)\\eeqn", "\\[A=A\\]", tex_source)
     return tex_source
 
 
