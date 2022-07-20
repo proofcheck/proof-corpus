@@ -28,35 +28,6 @@ Test non-aggressively merged sents:
 
 PATH = "merged_sents/"
 
-def not_star(collocation):
-    # True if collocation does not contain *
-    if collocation[0] == "*" or collocation[1] == "*":
-        return False
-    else:
-        return True
-
-def unstar(collocation):
-    # Escape * (for re.sub)
-    new_collocation = list(collocation)
-
-    if collocation[0] == "*":
-        new_collocation[0] = "\*"
-    if collocation[1] == "*":
-        new_collocation[1] = "\*"
-
-    return tuple(new_collocation)
-
-def get_joined(match):
-    # Get joined colloc for non-aggressive merging using re.sub
-    colloc = match.group(0)
-    joined = "_".join(colloc.split())
-    return " " + joined + " "
-
-def get_joined_aggressive(match):
-    # Get joined colloc for aggressive merging using re.sub
-    colloc = match.group(0)
-    return colloc.strip() + "_"
-
 def replace_collocations(line, collocations_dict, merge_collocations=False, print_time=False, use_regex=False, search=None):
     # Use python replace (not re.sub)
     if print_time:
@@ -99,7 +70,7 @@ def get_collocations_dict(collocations_file):
     lines = collocations_file.read().splitlines()
     lines.sort(key = lambda x: float(x.split("\t")[2]), reverse=True)
     collocations = [ tuple(colloc for colloc in line.split("\t")[0].split()) for line in lines ]
-    collocations_dict = { colloc : "_".join(colloc) for colloc in collocations}
+    collocations_dict = { colloc : "_".join(colloc) for colloc in collocations }
     return collocations_dict
 
 def test_collocation_file(f):
@@ -113,6 +84,36 @@ def test_collocation_file(f):
                     num += 1
             if num > 1:
                 print(token)
+
+"""Helper functions for re.sub"""
+def not_star(collocation):
+    # True if collocation does not contain *
+    if collocation[0] == "*" or collocation[1] == "*":
+        return False
+    else:
+        return True
+
+def unstar(collocation):
+    # Escape * (for re.sub)
+    new_collocation = list(collocation)
+
+    if collocation[0] == "*":
+        new_collocation[0] = "\*"
+    if collocation[1] == "*":
+        new_collocation[1] = "\*"
+
+    return tuple(new_collocation)
+
+def get_joined(match):
+    # Get joined colloc for non-aggressive merging using re.sub
+    colloc = match.group(0)
+    joined = "_".join(colloc.split())
+    return " " + joined + " "
+
+def get_joined_aggressive(match):
+    # Get joined colloc for aggressive merging using re.sub
+    colloc = match.group(0)
+    return colloc.strip() + "_"
 
 def main(args):
     # Testing for non-aggressive replacements
