@@ -72,6 +72,10 @@ MATH_ENVS = {
     "xxalignat",  # obsolete amsmath?
     # 0409/math0409109
     "endproofeqnarray",
+    # IEEEtran.cls
+    "IEEEeqnarray",
+    "IEEEeqnarraybox",
+    "IEEEeqnarrayboxm",
 }
 
 # Maps each LaTeX \ref-like command to its number of arguments
