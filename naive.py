@@ -72,6 +72,10 @@ MATH_ENVS = {
     "xxalignat",  # obsolete amsmath?
     # 0409/math0409109
     "endproofeqnarray",
+    # IEEEtran.cls
+    "IEEEeqnarray",
+    "IEEEeqnarraybox",
+    "IEEEeqnarrayboxm",
 }
 
 # Maps each LaTeX \ref-like command to its number of arguments
@@ -148,6 +152,10 @@ TEX_REFS = {
     # 1902/1902.07230
     # 1905/1905.13429
     "\\irref": 1,
+    # 1110/1110.1514
+    "\\namecref": 1,
+    # 1111/1111.0907
+    "\\refeq": 1,
 }
 
 # Set of LaTeX \cite-like commands
@@ -250,6 +258,25 @@ TEX_CITES = {
     "\\masknocite",
     "\\masktext",
     "\\onlinecite",
+    "\\citeonline",
+    "\\citeasnoun",  # harvard
+    # mlapa
+    "\\aucite",
+    "\\aunpcite",
+    "\\yrcite",
+    "\\yrnpcite",
+    "\\npcite",
+    "\\emcite",
+    "\\singlecite",
+    "\\singlenpcite",
+    "\\singleemcite",
+    # achicago
+    "\\citeN",
+    "\\citeNP",
+    "\\citeA",
+    "\\citeANP",
+    "\\citeyear",
+    "\\citeyearNP",
 }
 
 
@@ -524,6 +551,7 @@ IGNORED_INCLUDES = {
     "myfloat",  # 0603/math0603228
     "myurl",  # 0110/cs0110030
     "psfig",
+    "psfrag",
     "scrpage2",  # 0501/math-ph0501039
     "sw20bams",  # 0102/math-ph0102018
     "warmread",  # 0601/math0601187
@@ -531,6 +559,7 @@ IGNORED_INCLUDES = {
     "haskell",  # 1007.4266 1005.5278
     "mathlig",  # 1908.03268
     "figbox",  # 0009/cs0009023
+    "bcprules",  # 1110/1110.3470
 }
 
 
@@ -623,6 +652,16 @@ def fixup(filename: str, tex_source: str) -> str:
         tex_source = tex_source.replace(
             "\\WARMprocessEPS{2to1_three_steps_window}{eps}{bb}", ""
         )
+    elif "mholy." in filename:
+        tex_source = re.sub(r"\\beqn((.|\n)*?)\\eeqn", "\\[A=A\\]", tex_source)
+    elif "MaxMin." in filename:
+        tex_source = re.sub(
+            r"\\begeq((.|\n)*?)\\endeq", "\\[\\1\\]", tex_source
+        )
+    elif "ch." in filename:
+        tex_source = tex_source.replace("\\home ", "")
+    elif "AIJ-Crossover-v1-arxiv." in filename:
+        tex_source = tex_source.replace("{aligna}", "{align}")
     return tex_source
 
 
@@ -755,7 +794,9 @@ def skip_ws(words: "more_itertools.peekable[str]"):
         next(words)
 
 
-def get_arg(words: "more_itertools.peekable[str]") -> List[str]:
+def get_arg(
+    words: "more_itertools.peekable[str]", macro_body: bool = False
+) -> List[str]:
     """Get contents (words) of a single macro argument."""
     skip_ws(words)
     # by default the argument is a single token/word
@@ -778,7 +819,7 @@ def get_arg(words: "more_itertools.peekable[str]") -> List[str]:
             arg.append(w)
     else:
         arg = [w]
-    if arg in [["}"], ["$"], ["\\begin"], ["\\end"]]:
+    if arg in [["}"], ["$"], ["\\begin"], ["\\end"]] and not macro_body:
         # Something went wrong (probably because we're not really
         # implementing the full LaTeX language, and the next word
         # can't possibly be a valid argument. Put back whatever we
@@ -978,7 +1019,7 @@ def get_primitive_def(
 
     # Get body
     words.prepend(tok)  # put back the left brace
-    body = get_arg(words)
+    body = get_arg(words, macro_body=True)
 
     # Parse the parameter list
     if len(parameter_tokens) > 0 and parameter_tokens[-1] == "#":
@@ -1063,7 +1104,7 @@ def get_newcommand(words):
     # Get body
     skip_ws(words)
     # print(" definition getting body from", "".join(words[:100]))
-    body = get_arg(words)
+    body = get_arg(words, macro_body=True)
     # print(f"Saw ndef {name} {num_params} "
     #       f"{parameters} {optional_param} {body}")
     return name, parameters, optional_param, body
@@ -2225,6 +2266,30 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         get_arg(words)
         return []
 
+    if cmd == "\\psfrag":
+        if words.peek("!") == "*":
+            next(words)
+        get_arg(words)
+        skip_optional_arg(words, macros)
+        skip_optional_arg(words, macros)
+        skip_optional_arg(words, macros)
+        skip_optional_arg(words, macros)
+        get_arg(words)
+        return [" "]
+
+    if cmd == "\\infax" and cmd not in macros:
+        # probably from bcprules.sty
+        skip_optional_arg(words, macros)
+        get_arg(words)
+        return [" MATH "]
+
+    if cmd == "\\infrule" and cmd not in macros:
+        # probably from bcprules.sty
+        skip_optional_arg(words, macros)
+        get_arg(words)
+        get_arg(words)
+        return [" MATH "]
+
     if cmd in macros:
         if cmd == "\\BoxedEPSF":
             # Hack for 0002/math0002136/zinno.tex
@@ -2346,6 +2411,9 @@ def get_proofs(
         # print(f"{w=} {current_proof_words=} {macros=}")
         if debug:
             print("get_proofs: ", w, w in macros, tag, tokens_at_this_level)
+            # print("   ", words[:30])
+            # if w in macros:
+            #     print(macros[w])
             # print(
             #     f"get proofs: {w=} {w in macros}"
             #     f" UPCOMING: {''.join(words[:60])}"
@@ -2432,7 +2500,7 @@ def get_proofs(
                     if "german" in optional:
                         macros["german shorthands"] = True
                     continue
-                if fn.name == "amsmidx":
+                if fn.name in {"amsmidx", "multind"}:
                     macros["two-argument \\index"] = True
                     continue
                 if fn.suffix == "":
@@ -2512,6 +2580,9 @@ def get_proofs(
                         and "\\end{equation}" not in begin_code
                     )
                     or ("$$" in begin_code)
+                    or ("\\equation" in begin_code)
+                    or ("\\flalign" in begin_code)
+                    or ("\\begin{align}" in begin_code)
                 ):
                     MATH_ENVS.add(env_name)
 
@@ -2701,6 +2772,7 @@ def get_proofs(
             if words.peek("!") == "*":
                 next(words)
             skip_optional_arg(words, macros)
+            skip_optional_arg(words, macros)  # Some have two
             get_arg(words)
             if proof_nesting > 0:
                 current_proof_words.append("CITE")
