@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Makes bigrams from sent file and writes the bigrams that pass the metrics (frequency, MI, chi-squared) with their scores."""
+"""Makes bigrams from sent file, dumps them, and writes the bigrams that pass the metrics (frequency, MI, chi-squared) with their scores."""
 
 import os
 os.environ['OPENBLAS_NUM_THREADS'] = '1'
@@ -20,13 +20,25 @@ from ngrams import return_ngrams
 from sent_tools import *
 
 """
+Inputs:
+    -f : preprocessed (punctuation removed, sents separated by \n) files (in preprocessed_sents/) to make bigrams from (unnecessary if using dumped bigrams)
+    -bf : file to dump/load bigrams (in bigrams/)
+
+Output:
+    -o : text file formatted as follows:
+            w1 w2\tfrequency\tMI\tchi-squared
+        if (w1 w2) pass the threshold.
+        (in bigram_analysis/)
+"""
+
+"""
 Typical usage:
     python3 bigram_analysis.py -f merged_sents/*.txt -bf bigrams/merged_7_14.pk -o bigram_analysis/bigram_analysis_merged_7_14.txt -F 500
 
 Use dumped bigrams:
     python3 bigram_analysis.py -bf bigrams/sent00/bigrams_sent00.pk -o bigram_analysis/sent00/bigram_analysis_sent00_all.txt
 
-Don't filter:
+Don't filter (return results for all bigrams):
     python3 bigram_analysis.py -bf bigrams/sent00/bigrams_sent00.pk -o bigram_analysis/sent00/bigram_analysis_sent00_all.txt -A
 
 """

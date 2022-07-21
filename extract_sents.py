@@ -11,8 +11,21 @@ from load_tagged_sent import load_one_sent_tags
 from sent_tools import *
 
 """
+Input:
+    -f : tagged sentences (in tagged_sents/, output of tagger.py)
+    -wf or -w : txt file containing word list to make bins or word
+
+Output:
+    Output is saved in word_bins/ or word_bins/unique/ depending on whether the -u flag is used.
+    The file name is automatically formatted to be the word (by which we're creating the word bin)
+
+        file_name = "word_bins/" + word + args.extension + ".txt"
+        file_name_unique = "word_bins/unique/" + word + args.extension + ".txt"
+"""
+
+"""
 Typical usage:
-    nohup python3 extract_sents.py -f tagged_sentences/tagged_sentences_6_13.txt -w Enumerate -c 20 -u
+    nohup python3 extract_sents.py -f tagged_sents/tagged_sentences_6_13.txt -w Enumerate -c 20 -u
 """
 
 def check_first_word(sent, word):

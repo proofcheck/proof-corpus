@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+"""Preliminary experiment script that tags the part-of-speech using word sense. (Do not parallelize)"""
+
 import argparse
 import nicer
 from multiprocessing import Pool
@@ -58,7 +60,6 @@ def first_word(fname):
         first_words += [sent.split()[0]]   
         
     return first_words
-
 
 def first_word_pos_synset(fname, pos):
     # Returns list of first words of every sentence if the word has a pos sense

@@ -13,17 +13,28 @@ from itertools import repeat
 from sent_tools import *
 
 """
+Input:
+    -f : files to read sentences from (in merged_sents/ or preprocessed_sents/)
+    -cf : file to read collocations from (in bigram_analysis/, usually output of bigram_analysis.py)
+
+Output:
+    Merged sentences are saved in merged_sents/aggressive or merged_sents/non-aggressive depending on whether -m is used, (unless path is specified using -p).
+    Filenames are taken automatically from the input file.
+    If -p is used, the output is saved to that path with the automatically formatted file name.
+"""
+
+"""
 Typical usage:
-    python3 collocation_replacer.py -f merged_sents/sent00/sent00_5.txt -cf bigram_analysis/sent00/bigram_analysis_sent00_5.txt -o sent00/sent00_6.txt
+    nohup time python3 collocation_replacer.py -f preprocessed_sents/sent1*.txt -cf bigram_analysis/bigram_analysis_all_500_7_14.txt -p merged_sents/non-aggressive/time -c 50
 
 Merge aggressively:
-    python3 collocation_replacer.py -m -f preprocessed_sents/sent00.txt -cf bigram_analysis/sent00/non-aggressive/bigram_analysis_sent00.txt -o sent00/sent00_1.txt
+    nohup time python3 collocation_replacer.py -m -f preprocessed_sents/sent1*.txt -cf bigram_analysis/bigram_analysis_all_500_7_14.txt -m -p merged_sents/aggressive/time -c 50
 
 Print time:
-    python3 collocation_replacer.py -p -m -f preprocessed_sents/sent00.txt -cf bigram_analysis/sent00/non-aggressive/bigram_analysis_sent00.txt -o sent00/sent00_1.txt
+    python3 collocation_replacer.py -P -f preprocessed_sents/sent00.txt -cf bigram_analysis/bigram_analysis_all_500_7_14.txt -p merged_sents/non-aggressive/time -c 50
 
 Test non-aggressively merged sents:
-    python3 collocation_replacer.py -t -f merged_sents/sent00/sent00_6.txt
+    python3 collocation_replacer.py -t -f merged_sents/sent00/aggressive/sent00_6.txt
 """
 
 PATH = "merged_sents/"
@@ -145,14 +156,22 @@ def main(args):
 
             if args.merge_collocations:
                 if args.extension:
-                    fname = PATH + "merged_collocations/" + fd.name.split("/")[-1].split(".")[0] + "_" + args.extension + ".txt"
+                    fname = PATH + "aggressive/" + fd.name.split("/")[-1].split(".")[0] + "_" + args.extension + ".txt"
+                
+                elif args.path:
+                    fname = args.path + "/" + fd.name.split("/")[-1].split(".")[0] + ".txt"
+
                 else:
-                    fname = PATH + "merged_collocations/" + fd.name.split("/")[-1].split(".")[0] + ".txt"
+                    fname = PATH + "aggressive/" + fd.name.split("/")[-1].split(".")[0] + ".txt"
             else:
                 if args.extension:
-                    fname = PATH + fd.name.split("/")[-1].split(".")[0] + "_" + args.extension + ".txt"
+                    fname = PATH + "non-aggressive/" + fd.name.split("/")[-1].split(".")[0] + "_" + args.extension + ".txt"
+                
+                elif args.path:
+                    fname = args.path + "/" +  fd.name.split("/")[-1].split(".")[0] + ".txt"
+
                 else:
-                    fname = PATH + fd.name.split("/")[-1].split(".")[0] + ".txt"
+                    fname = PATH + "non-aggressive/" + fd.name.split("/")[-1].split(".")[0] + ".txt"
 
             with open(fname, "w") as o:
                 lines = "\n".join(joined_lines)
@@ -180,11 +199,11 @@ if __name__ == "__main__":
     parser.add_argument("--underscore_test", "-t", action="store_true",
                         help="test output")
 
-    parser.add_argument("--print_time", "-p", action="store_true",
+    parser.add_argument("--print_time", "-P", action="store_true",
                         help="print time")
 
-    parser.add_argument("--output", "-o",
-                        help="output file")
+    parser.add_argument("--path", "-p",
+                        help="output file path")
 
     parser.add_argument("--extension", "-e",
                         help="extension")

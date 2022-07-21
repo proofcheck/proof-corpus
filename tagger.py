@@ -15,7 +15,7 @@ from load_ontonotes_pos import *
 
 """
 Typical usage:
-    nohup python3 tagger.py -f ../../stone/proof-corpus/sent**.tsv -c 50 -o tagged_sentences/tagged_sentences_6_13.txt
+    nohup python3 tagger.py -f ../../stone/proof-corpus/sent**.tsv -c 50 -o tagged_sents/tagged_sentences_6_13.txt
 
 """
 

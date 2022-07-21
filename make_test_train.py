@@ -11,12 +11,18 @@ from load_ontonotes_pos import *
 from train_tagger import DEFAULT_TAGGER, mislabeled_vb, num_mislabelings, pick_sents, write_fixed_sents
 
 """
+Input:
+
+Output:
+"""
+
+"""
 Typical usage:
     Making training sets:
-    nohup python3 make_test_train.py -ntr 100 -nte 45 -wl nnp_verb_list_all.txt -e main3 -s
+        nohup python3 make_test_train.py -ntr 100 -nte 45 -wl nnp_verb_list_all.txt -e main3 -s
 
     Making testing sets:
-    nohup python3 make_test_train.py -tr training_set/optimal_handtagged.txt -nte 1 -te_e partition_handtagged -wl nnp_verb_list_partition.txt
+        nohup python3 make_test_train.py -tr training_set/optimal_handtagged.txt -nte 1 -te_e partition_handtagged -wl nnp_verb_list_partition.txt
 """
 
 # Use unique sentences by default

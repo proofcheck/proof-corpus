@@ -12,7 +12,7 @@ from sent_tools import *
 
 """
 Typical usage:
-    None. Mostly for imports.
+    (Imports)
 """
 
 def dist_output(dist, output):
