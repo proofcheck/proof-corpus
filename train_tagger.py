@@ -167,7 +167,7 @@ def make_training_set(train_lines, train_num=None, sample_all=False, testing=[],
 
 def do_experiments(args):
     """Preliminary experiment. Do not run."""
-    # Prints accuracy, number of VBs mistakenly tagged as NPP, number of mislabelled tokens overall
+    # Prints accuracy, number of VBs mistakenly tagged as NNP, number of mislabelled tokens overall
     # for default and trained taggers 
     # Tests tagger on args.test and WSJ corpus
 

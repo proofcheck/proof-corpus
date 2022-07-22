@@ -640,7 +640,11 @@ def cleanup(
     proof = re.sub(r"\(\s*MATH\s*\)\s*:", "CASE :", proof)
 
     # (Case 1) -> REF
-    proof = re.sub(f"\\((?i:case)\\s*{atomicID}+\\)", "REF ", proof,)
+    proof = re.sub(
+        f"\\((?i:case)\\s*{atomicID}+\\)",
+        "REF ",
+        proof,
+    )
 
     if aggressive:
         # dfajfdkls Case 1 dfhaslsfdlk -> dfajfdkls REF dfhaslsfdlk
@@ -672,7 +676,9 @@ def cleanup(
     )
     # We proceed in steps. 1. Let x be -> ...steps. CASE: Let x be
     proof = re.sub(
-        f"(^|[.;:\\])] ){atomicID}\\. ({upperLetter})", "\\1CASE: \\2", proof,
+        f"(^|[.;:\\])] ){atomicID}\\. ({upperLetter})",
+        "\\1CASE: \\2",
+        proof,
     )
 
     proof = re.sub(f"(?i:stage)\\s*{atomicID}\\s*(.)", "", proof)
@@ -689,7 +695,7 @@ def cleanup(
 
     # base and inductive step labeling to CASE only when followed by capital letter
     proof = re.sub(
-        fr"((\()?\s*(?i:basis)\s*(\))?|(\()?\s*(?i:induction)\s*(\))?)\s*(?!(?:MATH|REF|CASE|CITE|NAME))([A-Z])",
+        rf"((\()?\s*(?i:basis)\s*(\))?|(\()?\s*(?i:induction)\s*(\))?)\s*(?!(?:MATH|REF|CASE|CITE|NAME))([A-Z])",
         " CASE: \\6",
         proof,
     )
@@ -990,6 +996,8 @@ def skip_this_proof(proof: str) -> bool:
         "C1234, C23456, C2659",  # 2003/2003.06204
         "Pl-B-Match",  # 2001/2001.01493
         "if@tlamode",  # 1908/1908.05535, 2002/2002.03613, 1508/1508.02705
+        "10_139",  # 2004/2004.08699
+        "5_2(-1,1)",  # 2004/2004.08699
     ]
     for s in forbidden_strings:
         if s in proof:

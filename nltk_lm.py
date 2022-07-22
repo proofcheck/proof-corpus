@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Acceptability experiment using NLTK LM. Use kenlm script."""
+"""Acceptability experiment using NLTK LM. Don't run. Use KenLM script instead."""
 
 import os
 os.environ['OPENBLAS_NUM_THREADS'] = '1'
@@ -39,7 +39,12 @@ SENTS = ["Suppose MATH .",
 """
 
 def output(args):
-    ids, tokenized = read_files_tokenized(args.files, args.cores)
+    tokenized = []
+    for fd in args.files:
+        lines = fd.readlines()
+        for line in lines:
+            tokenized.extend([tokenize(line)])
+
     train, vocab = padded_everygram_pipeline(args.ngrams, tokenized)
     # lm = MLE(2)
     lm = KneserNeyInterpolated(args.ngrams)

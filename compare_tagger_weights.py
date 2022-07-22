@@ -13,10 +13,19 @@ from load_ontonotes_pos import *
 from find_disagreeing_sents import get_taggers_from_ids, get_tagger_ids_from_list
 
 """
+Input:
+    -f : file of sentences (in disagreeing_sents/, output of disagreeing_sents.py)
+
+Output:
+    -o : Writes output to file. If unspecified, prints results.
+"""
+
+"""
 Typical usage:
     python3 compare_tagger_weights.py -f disagreeing_sents_7_8.txt
 
-Uses get_tagger_ids_from_ids and get_tagger_ids_from_list to load dumped_taggers
+Uses get_tagger_ids_from_ids and get_tagger_ids_from_list in find_disagreeing_sents.py to load taggers from 
+    TAGGER_PATH = "tagger/7_5/5sents_5iters_7_5_trial"
 
 To specify tagger ids,
     python3 compare_tagger_weights.py -f disagreeing_sents_7_8.txt -b 41,9 -w 38,22
@@ -28,7 +37,6 @@ To use the default tagger as a worst tagger,
 """Start and end of sentence tags/words"""
 START = ["-START-", "-START2-"]
 END = ["-END-", "-END2-"]
-
 
 def get_key(name, *args):
     """Get weight_dict key name from dictionary keys used to update weights"""
