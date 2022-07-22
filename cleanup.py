@@ -937,8 +937,11 @@ def cleanup(
     proof = re.sub(r"([﹘–—⸺⸻])", r" - ", proof)
 
     # simplify and replace weird single and double quotation marks from proofs
-    proof = re.sub(r"[‘’‛′´❜❛]", "'")
-    proof = re.sub(r"[“”‟″˝¨❝❞]", '"')
+    proof = re.sub(r"[‘’‛′´❜❛]", "'", proof)
+    proof = re.sub(r"[“”‟″˝¨❝❞]", '"', proof)
+    
+    # replace two single quotes with a double quote
+    proof = re.sub("''", '"', proof)
 
     # Remove any duplicate spaces we introduced
     proof = re.sub("[ ]+", " ", proof)
