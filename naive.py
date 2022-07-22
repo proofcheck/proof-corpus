@@ -76,6 +76,8 @@ MATH_ENVS = {
     "IEEEeqnarray",
     "IEEEeqnarraybox",
     "IEEEeqnarrayboxm",
+    # cases.sty
+    "numcases",
 }
 
 # Maps each LaTeX \ref-like command to its number of arguments
@@ -156,6 +158,8 @@ TEX_REFS = {
     "\\namecref": 1,
     # 1111/1111.0907
     "\\refeq": 1,
+    # 2001/2001.02981
+    "\\smartref": 1,
 }
 
 # Set of LaTeX \cite-like commands
@@ -277,6 +281,10 @@ TEX_CITES = {
     "\\citeANP",
     "\\citeyear",
     "\\citeyearNP",
+    #
+    "\\autocite",
+    # 2002/2002.09099
+    "\\ocite",
 }
 
 
@@ -308,6 +316,8 @@ DELETE_ENVS = {
     "miniboard",
     # 0011/math0011123
     "diag",
+    # 2001/2001.09161
+    "quantikz",
 }
 
 DELETE_UNINTERPRETED_ENVS = {
@@ -662,6 +672,27 @@ def fixup(filename: str, tex_source: str) -> str:
         tex_source = tex_source.replace("\\home ", "")
     elif "AIJ-Crossover-v1-arxiv." in filename:
         tex_source = tex_source.replace("{aligna}", "{align}")
+    elif "2003.12106/macros." in filename:
+        tex_source = tex_source.replace(
+            "\\NewDocumentCommand\n  {\\HasTypeInCtx}\n  { O{} m m }\n  ",
+            "\\newcommand{\\HasTypeInCtx}[3][]",
+        )
+        tex_source = tex_source.replace(
+            "\\NewDocumentCommand\n  {\\Constructible}\n  { O{} m m }\n  ",
+            "\\newcommand{\\Constructible}[3][]",
+        )
+    elif "2003.04180" in filename:
+        TEX_REFS["\\objectref"] = 5
+    elif "2003.02840/simple_spinors_null_vectors_and_o_n__arxiv_2" in filename:
+        # Hack to ignore the second argument of \opt{margin_notes}
+        # but not every \opt
+        tex_source = tex_source.replace("\\opt{margin_notes}", "\\psfig")
+    elif "2001/2001.02981/main." in filename:
+        tex_source = tex_source.replace("\\usepackage{theorems}", "")
+    # print(tex_source)
+
+    # elif "regularisation_robustness." in filename:
+    #     tex_source = tex_source.replace("
     return tex_source
 
 
@@ -760,7 +791,6 @@ def tokenize_string(filename: str, tex_source: str):
 
 def get_words(filename: str):
     """Get a stream of words from the given file."""
-
     path = Path(filename)
     if not path.exists():
         # in case the source code is assuming a case-insensitive
@@ -778,8 +808,8 @@ def get_words(filename: str):
         try:
             tex_source: str = fh.read()
         except UnicodeDecodeError:
-            with open(filename, "rb") as f:
-                tex_bytes = f.read()
+            with open(filename, "rb") as fd:
+                tex_bytes = fd.read()
                 tex_source = bs4.UnicodeDammit.detwingle(tex_bytes)
                 tex_source = bs4.UnicodeDammit(tex_source).unicode_markup
                 if not tex_source:
@@ -1058,7 +1088,10 @@ def get_newcommand(words):
         skip_ws(words)
     # Get name
     names = get_arg(words)
-    if len(names) != 1 or names[0] in IGNORED_REDEFINES:
+    if len(names) != 1 or (
+        names[0] in IGNORED_REDEFINES and names[0] not in TEX_REFS
+    ):
+        skip_optional_arg(words, {})
         skip_optional_arg(words, {})
         get_arg(words)
         return None, 0, 0, None
@@ -1081,6 +1114,13 @@ def get_newcommand(words):
             else:
                 assert d == "]"  # nosec
                 break
+
+    if name in TEX_REFS and num_params == TEX_REFS[name]:
+        # We're redefining something like \ref, and with the same
+        # number of arguments, so don't bother.
+        skip_optional_arg(words, {})
+        get_arg(words)
+        return None, 0, 0, None
 
     skip_ws(words)
     # print(f" definition {num_params=}")
@@ -1950,10 +1990,16 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
     if cmd in {"\\ifthenelse", "\\IfFileExists", "\\iftoggle"}:
         # Assume the conditional is false;
         # remove braces around the result
-        get_arg(words)
-        get_arg(words)
-        words.prepend(*get_arg(words))
-        return []
+        condition = get_arg(words)
+        if condition == ["\\isempty", "{", "}"]:
+            # 2002/2002.1279
+            then = get_arg(words)
+            get_arg(words)
+            words.prepend(*then)
+        else:
+            get_arg(words)
+            words.prepend(*get_arg(words))
+            return []
 
     if cmd == "\\@ifstar":
         # Assume the conditional is _true_ (1708/1708.06228)
@@ -2244,6 +2290,18 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
                 next(words)
         return []
 
+    if cmd == "\\char":
+        if words.peek("x") == "`":
+            next(words)
+            character = next(words).lstrip("\\")
+            return [character]
+        else:
+            number: int = 0
+            while words.peek("x").isdigit():
+                number = number * 10 + ord(next(words)) - ord("0")
+            if number >= ord(" ") and number <= ord("~"):
+                return [chr(number)]
+
     if cmd == "\\ednote":
         # 2004/2004.08576
         get_arg(words)
@@ -2488,7 +2546,12 @@ def get_proofs(
                             file=sys.stderr,
                         )
 
-        elif w in ["\\usepackage", "\\RequirePackage"]:
+        elif w in {
+            "\\usepackage",
+            "\\RequirePackage",
+            "\\documentclass",
+            "\\LoadClass",
+        }:
             if words.peek() == "[":
                 optional = get_optional_arg(words)
             else:
@@ -2504,10 +2567,15 @@ def get_proofs(
                     macros["two-argument \\index"] = True
                     continue
                 if fn.suffix == "":
-                    fn = fn.with_suffix(".sty")
-                if fn.stem in IGNORED_INCLUDES or kpse.in_TeX_path(fn.name):
+                    if w in {"\\documentclass", "\\LoadClass"}:
+                        fn = fn.with_suffix(".cls")
+                    else:
+                        fn = fn.with_suffix(".sty")
+                if (
+                    fn.stem in IGNORED_INCLUDES
+                ):  # or kpse.in_TeX_path(fn.name):
                     continue
-                subfname = directory / (fn.with_suffix(".sty"))
+                subfname = directory / fn
                 try:
                     subwords = get_words(subfname.as_posix())
                     if verbose or debug or True:
@@ -2539,10 +2607,14 @@ def get_proofs(
             if words.peek("!") == "*":
                 next(words)
             name, parameters, optional_args, body = get_newcommand(words)
+            if debug:
+                print("  attempt to define", name)
             if body is not None:
                 if name in macros and macros[name] == "frozen":
                     pass
                 else:
+                    if debug:
+                        print("  defined", name)
                     macros[name] = (parameters, optional_args, body)
 
         elif w in ["\\newcounter"]:
@@ -2559,7 +2631,7 @@ def get_proofs(
             if words.peek("!") == "{":
                 begin_tokens = get_arg(words)
                 skip_ws(words)
-                end_tokens = get_arg(words)
+                get_arg(words)  # end_tokens
 
                 # Disabled for now; usually the user-defined \begin{foo}
                 # invokes an internal \begin{bar}, and
@@ -2574,7 +2646,7 @@ def get_proofs(
                         "\\begin{array}" in begin_code
                         and "\\end{array}" not in begin_code
                     )
-                    or ("\[" in begin_code and "\]" not in begin_code)
+                    or ("\\[" in begin_code and "\\]" not in begin_code)
                     or (
                         "\\begin{equation}" in begin_code
                         and "\\end{equation}" not in begin_code
@@ -2583,6 +2655,8 @@ def get_proofs(
                     or ("\\equation" in begin_code)
                     or ("\\flalign" in begin_code)
                     or ("\\begin{align}" in begin_code)
+                    or ("\\begin{eqnarray}" in begin_code)
+                    or ("\\begin{eqnarray*}" in begin_code)
                 ):
                     MATH_ENVS.add(env_name)
 
@@ -2594,8 +2668,20 @@ def get_proofs(
         elif w in ["\\newif"]:
             newif = next(words)
             macros["new ifs"].append(newif)
-            # hack. User-defined conditionals are always false.
+            # \iftest
             macros[newif] = ([[]], [], ["\\iffalse"])
+            # \testtrue
+            macros["\\" + newif[3:] + "true"] = (
+                [[]],
+                [],
+                ["\\let", newif, "\\iftrue"],
+            )
+            # \testfalse
+            macros["\\" + newif[3:] + "false"] = (
+                [[]],
+                [],
+                ["\\let", newif, "\\iffalse"],
+            )
 
         elif w == "\\begin":
             env_name = "".join(get_arg(words))
@@ -2741,7 +2827,7 @@ def get_proofs(
             name = ""
             while (w2 := next(words)) != "\\endcsname":
                 name += w2
-            words.prepend("\\" + w)
+            words.prepend("\\" + name)
 
         elif w in TEX_REFS and (w not in macros or macros[w] == "frozen"):
             # Skip optional asterisk
@@ -2759,6 +2845,7 @@ def get_proofs(
             # Skip optional asterisk
             if words.peek("!") == "*":
                 next(words)
+            skip_optional_arg(words, macros)
             skip_optional_arg(words, macros)
             get_arg(words)
             if words.peek("!") == "*":
@@ -2791,7 +2878,9 @@ def get_proofs(
                 print("  trying to define", lhs)
             skip_optional_eq(words)
             rhs = next(words)
-            if lhs in macros and macros[lhs] == "frozen":
+            if (lhs in macros and macros[lhs] == "frozen") or (
+                lhs in IGNORED_REDEFINES
+            ):
                 pass
                 if debug:
                     print("  ... definition ignored")
