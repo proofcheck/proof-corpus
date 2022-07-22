@@ -2571,9 +2571,7 @@ def get_proofs(
                         fn = fn.with_suffix(".cls")
                     else:
                         fn = fn.with_suffix(".sty")
-                if (
-                    fn.stem in IGNORED_INCLUDES
-                ):  # or kpse.in_TeX_path(fn.name):
+                if (fn.stem in IGNORED_INCLUDES) or kpse.in_TeX_path(fn.name):
                     continue
                 subfname = directory / fn
                 try:
