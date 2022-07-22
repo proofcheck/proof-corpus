@@ -8,7 +8,24 @@ import numpy as np
 import os
 
 """
-Typical usage:
+Input :
+    --files : txt files to read experiment results from
+            
+    Files should be outputs of main_experiment.py or dumped_main_experiment.py
+
+Output :
+    --output : txt file of results, summarized 
+    
+    Example output in experiments/summary
+
+How to look at results :
+    Takes the results of n trials of an experiment (done under the same condition) in one txt file, and writes the average and standard deviation for each metric.
+    Formatted :
+        file_name\taverage_of_first_metric,standard_deviation_of_first_metric\taverage_of_second_metric,standard_deviation_of_second_metric\t...\n
+"""
+
+"""
+Typical usage :
     python3 read_experiment_results.py -f experiments/*find3.txt experiments/*identify3.txt experiments/experiment_default_tagger_main3.txt experiments/experiment_100sents_5iters_main3.txt -o experiments/summary_all_find_identify3.txt
 """
 
@@ -23,7 +40,7 @@ def read_one_result(fname):
     return summary
 
 def main(args):
-    file_list = list(filter(lambda x: os.path.getsize(x)>1, args.results_files))
+    file_list = list(filter(lambda x: os.path.getsize(x)>1, args.files))
     # For each condition (file)
     for f in file_list:
         # Get condition from file name
@@ -43,7 +60,7 @@ if __name__ == '__main__':
     nicer.make_nice()
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--results_files", "-f", nargs='*', 
+    parser.add_argument("--files", "-f", nargs='*', 
                             help="txt file to read experiment results")
                             
     parser.add_argument("--output", "-o",type=argparse.FileType('w'),

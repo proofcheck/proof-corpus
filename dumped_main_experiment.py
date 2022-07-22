@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Do main experiment on dumped taggers and return accuracy, # of mislabelled tags etc. (Refer to main_experiment.py for more)"""
+"""Does main experiment on dumped taggers and return accuracy, # of mislabelled tags etc. (Refer to main_experiment.py for more)"""
 
 import argparse
 import nicer
@@ -15,25 +15,28 @@ from load_tagged_sent import load_tag_lines
 from main_experiment import save_results, get_one_trial_results, get_first_n_confusion, get_confusion_results
 
 """
-Input:
+Input :
     --tagger : dumped taggers (in tagger/, dumped using main_experiment.py)
     --test : testing set (in testing_set/, made using make_test_train.py)
     --tag_n : tags only first n words in each sentence (defaults to None, which tags all words)
+    (other arguments)
 
-Output:
+Output :
+    - txt file of results
+
     Output is written in experiments/, and the output is automatically formatted to be experiment_(conditions eg. 5sents_5iters).txt
-    By adding -e, extensions can be added to this filename before the .txt
     
-    output_test = "experiments/experiment_" + conditions + args.extension + ".txt"
+    By adding -e, extensions can be added to this filename before the .txt
+        output_test = "experiments/experiment_" + conditions + args.extension + ".txt"
 
     The output is formatted as in main_experiment.py
 """
 
 """
-Typical usage:
+Typical usage :
     nohup python3 dumped_main_experiment.py -ta tagger/7_5/*.pk -te testing_set/refer_handtagged.txt -e refer -c 25 -tn 3
 
-Test on WSJ_TEST (output is in separate file):
+Test on WSJ_TEST (output is in separate file) :
     nohup python3 dumped_main_experiment.py -ta tagger/7_5/*.pk -te testing_set/refer_handtagged.txt -e refer -c 25 -wt -tn 3
 """
 

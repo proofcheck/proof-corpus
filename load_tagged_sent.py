@@ -11,8 +11,8 @@ from nltk.probability import FreqDist
 from sent_tools import *
 
 """
-Typical usage:
-    (Imports)
+Typical usage :
+    Imports
 """
 
 def dist_output(dist, output):

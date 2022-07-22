@@ -14,9 +14,25 @@ from load_tagged_sent import load_tags
 from load_ontonotes_pos import *
 
 """
-Typical usage:
-    nohup python3 tagger.py -f ../../stone/proof-corpus/sent**.tsv -c 50 -o tagged_sents/tagged_sentences_6_13.txt
+Note : 
+    This file uses default_tagger.pk, wsj_train.txt, and wsj_test.txt to optimize.
+    If it does not exist in proof-corpus/, it will make these files.
+"""
 
+"""
+Input :
+    --files : txt files of sentences
+    (other arguments)
+
+Output :
+    --output : (a single) txt file of all the input sentences with their tag 
+
+    Example output in tagged_sents/
+"""
+
+"""
+Typical usage :
+    nohup python3 tagger.py -f ../../stone/proof-corpus/sent**.tsv -c 50 -o tagged_sents/tagged_sentences_6_13.txt
 """
 
 def make_wsj_train():

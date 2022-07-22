@@ -11,9 +11,20 @@ from itertools import repeat
 from sent_tools import *
 
 """
-Typical usage:
-    nohup python3 preprocessing_bigrams.py -f ../../stone/proof-corpus/sent*.tsv -c 25 -e
+Input :
+    --files : txt files of sentences
+    (other arguments)
 
+Output :
+    - txt files of preprocessed sentences (in preprocessed_sents/)
+
+    File name is automatically formatted using input file name.
+        fname = PATH + fd.name.split("/")[-1].split(".")[0] + "_" + args.extension + ".txt"
+"""
+
+"""
+Typical usage :
+    nohup python3 preprocessing_bigrams.py -f ../../stone/proof-corpus/sent*.tsv -c 25 -e
 """
 
 PATH = "preprocessed_sents/"

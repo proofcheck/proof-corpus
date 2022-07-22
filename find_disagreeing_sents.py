@@ -1,13 +1,6 @@
 #!/usr/bin/env python
 
-"""Find sentences such that 
-    - the best taggers agree on the tag (best tag)
-    - the worst taggers agree on the tag (worst tag)
-    - best tag and worst tag are not the same
-
-    and write it out in the following format:
-    best_tag\tworst_tag\tsent
-    """
+"""Find sentences with first words such that the best taggers agree on the tag (best tag), the worst taggers agree on the tag (worst tag), and best tag and worst tag are not the same."""
 
 import argparse
 import nicer
@@ -17,11 +10,30 @@ import sys
 from sent_tools import *
 from load_ontonotes_pos import *
 from train_tagger import DEFAULT_TAGGER
-from tagger import untag_sent_to_tokens, write_tags
+from tagger import write_tags
 from load_tagged_sent import untag_line_to_tokens
 
 """
-Typical usage:
+Input :
+    --file : txt files of tagged sentences to find disagreeing sentences from
+    --best_tagger : IDs of best taggers, split by commas (defaults to 41,9)
+    --worst_tagger : IDs of worst taggers, split by commas (defaults to 38,22)
+    (other arguments)
+
+    Taggers are loaded from :
+        TAGGER_PATH = "tagger/7_5/5sents_5iters_7_5_trial"
+
+Output :
+    --output : txt file with sentences that the taggers disagreed on, with the respective tags 
+    
+    Example output in disagreeing_sents/
+
+How to look at the output :
+    best_tag_of_first_word\tworst_tag_of_first_word\tsent
+"""
+
+"""
+Typical usage :
     python3 find_disagreeing_sents.py -f testing_set/4verbs_handtagged.txt -o disagreeing_sents_7_8.txt
 """
 
@@ -105,13 +117,13 @@ if __name__ == '__main__':
     parser.add_argument("--best_tagger", "-b", default="41,9",
                             help="trial number of best taggers")
 
-    parser.add_argument("--worst_tagger", "-te", default="38,22",
+    parser.add_argument("--worst_tagger", "-w", default="38,22",
                             help="trial number of worst taggers")
 
     parser.add_argument("--use_default", "-d", action='store_true',
                             help="use default tagger?")
 
-    parser.add_argument("--write_tags", "-w", action='store_true',
+    parser.add_argument("--write_tags", "-t", action='store_true',
                             help="write tags?")
 
     parser.add_argument("--output", "-o", type=argparse.FileType('w'), 

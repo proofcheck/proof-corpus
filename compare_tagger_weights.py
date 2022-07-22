@@ -13,28 +13,34 @@ from load_ontonotes_pos import *
 from find_disagreeing_sents import get_taggers_from_ids, get_tagger_ids_from_list
 
 """
-Input:
-    -f : file of sentences (in disagreeing_sents/, output of disagreeing_sents.py)
+Input :
+    --files : file of sentences (in disagreeing_sents/, output of disagreeing_sents.py)
+    --best_tagger : IDs of best taggers, split by commas (defaults to 41,9)
+    --worst_tagger : IDs of worst taggers, split by commas (defaults to 38,22)
+    (other arguments)
 
-Output:
-    -o : Writes output to file. If unspecified, prints results.
+    Taggers are loaded from :
+        TAGGER_PATH = "tagger/7_5/5sents_5iters_7_5_trial"
+
+Output :
+    --output : Writes output to file. If unspecified, prints results.
 """
 
 """
-Typical usage:
+Typical usage :
     python3 compare_tagger_weights.py -f disagreeing_sents_7_8.txt
 
-Uses get_tagger_ids_from_ids and get_tagger_ids_from_list in find_disagreeing_sents.py to load taggers from 
-    TAGGER_PATH = "tagger/7_5/5sents_5iters_7_5_trial"
+    Uses get_tagger_ids_from_ids and get_tagger_ids_from_list in find_disagreeing_sents.py to load taggers from 
+        TAGGER_PATH = "tagger/7_5/5sents_5iters_7_5_trial"
 
-To specify tagger ids,
+To specify tagger ids :
     python3 compare_tagger_weights.py -f disagreeing_sents_7_8.txt -b 41,9 -w 38,22
 
-To use the default tagger as a worst tagger,
+To use the default tagger as a worst tagger :
     python3 compare_tagger_weights.py -f disagreeing_sents_7_8.txt -b 41,9 -w 38,22 -d
 """
 
-"""Start and end of sentence tags/words"""
+# Start and end of sentence tags/words
 START = ["-START-", "-START2-"]
 END = ["-END-", "-END2-"]
 

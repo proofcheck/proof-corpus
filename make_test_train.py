@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Make training and testing sets for optimal tagger experiment."""
+"""Make training and testing sets from word bins for optimal tagger experiment."""
 
 import argparse
 import nicer
@@ -11,17 +11,43 @@ from load_ontonotes_pos import *
 from train_tagger import DEFAULT_TAGGER, mislabeled_vb, num_mislabelings, pick_sents, write_fixed_sents
 
 """
-Input:
+Input :
+    --word_list : txt file containing the list of words (format: word_tag\n) that should be used as the training/testing set (in word_lists/)
+                  Based on this word list, the script will look for the appropriate word bin to use in word_bins/unique and extract the specified number of sentences per bin.
+                  Then, the first word will be retagged correctly (based on the tag specified in the word list).
+                  Note that his retagging process is aggresive, and we can only specify one correct tag for each word.
+                  
+                  Words for the training set must be followed by the words for the testing set.
+                  --num_test_bins (=n) is used to split the word list into training and testing. (bottom n : testing, rest : training)
 
-Output:
+    --train (optional) : txt file containing training set (in training_set/)
+                         This is used when we want to create new testing sets for training sets that we made previously, 
+                         while ensuring that our training and testing sets do not have common sentences.
+                         (Training set will not be created if this argument is used)
+
+                         It is recommended to use this option whenever training and testing sets will be made using the same word bins.
+                         (ie do not try to make the training and testing sets in one go (without using --train) if they are going to be created from the same bins)
+    (other arguments)
+
+Output :
+    - (depending on flags used) txt file containing sentences for the training set (in training_set/)
+    - txt file containing sentences for the testing set (in testing_set/)
+
+    If --train is used, the training file will not be created.
+
+    The file names for both of these files can be specified using --train_extension and --test_extension.
+        save_test = "testing_set/" + args.test_extension + ".txt"
+        save_train = "training_set/" + args.train_extension + ".txt"
+
+    Overwriting is not permitted.
 """
 
 """
-Typical usage:
-    Making training sets:
-        nohup python3 make_test_train.py -ntr 100 -nte 45 -wl nnp_verb_list_all.txt -e main3 -s
+Typical usage :
+    Making training sets :
+        nohup python3 make_test_train.py -ntr 100 -nte 5 -wl nnp_verb_list_all.txt -te_e main3 -tr_e main3
 
-    Making testing sets:
+    Making testing sets based on training set :
         nohup python3 make_test_train.py -tr training_set/optimal_handtagged.txt -nte 1 -te_e partition_handtagged -wl nnp_verb_list_partition.txt
 """
 
@@ -142,6 +168,9 @@ if __name__ == '__main__':
     parser.add_argument("--train", "-tr",type=argparse.FileType('r'),
                             help="txt file to read training set")
 
+    parser.add_argument("--word_list", "-wl",type=argparse.FileType('r'),
+                            help="txt file to read imperative verbs")
+
     parser.add_argument("--num_train_sents", "-ntr",type=int, default=5,
                             help="number of training sentences per bin")
     
@@ -153,9 +182,6 @@ if __name__ == '__main__':
 
     parser.add_argument("--test_extension", "-te_e",
                             help="testing file extension")
-    
-    parser.add_argument("--word_list", "-wl",type=argparse.FileType('r'),
-                            help="txt file to read imperative verbs")
 
     args = parser.parse_args()
 

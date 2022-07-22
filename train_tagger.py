@@ -14,6 +14,11 @@ from load_tagged_sent import load_one_sent_tags, is_sent
 from load_ontonotes_pos import *
 from sent_tools import *
 
+"""
+Typical usage :
+    Imports
+"""
+
 WSJ_TRAIN = make_wsj_train()
 WSJ_TEST = make_wsj_test()
 

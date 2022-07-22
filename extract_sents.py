@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-"""Creates word bins for optimal tagger experiment. (Extracts sentences and tags that begin with words in word_file from tagged sentences.)""" 
+"""Creates word bins for optimal tagger experiment. 
+    Specifically, it extracts sentences that begin with words in word_file from tagged sentences.""" 
 
 import argparse
 import nicer
@@ -11,20 +12,29 @@ from load_tagged_sent import load_one_sent_tags
 from sent_tools import *
 
 """
-Input:
-    -f : tagged sentences (in tagged_sents/, output of tagger.py)
-    -wf or -w : txt file containing word list to make bins or word
+Input :
+    --files : tagged sentences (in tagged_sents/, output of tagger.py)
+    
+    --word_file : txt file containing word list to make bins (eg. optimal_tagger_extra/word_bin_list.txt)
+    or 
+    --word : the word itself as a string (eg. Note)
+    (other arguments)
 
-Output:
+    Note : The word must be capitalized for both --word and in --word_list
+           If this script is being run in order to make training/testing sets using make_test_train.py, 
+           add the -u flag as make_test_train.py uses unique sentences (sentences in word_bins/unique) by default.
+
+Output :
+    - txt files of sentences starting with specified word (in word_bins/ or word_bins/unique/)
+
     Output is saved in word_bins/ or word_bins/unique/ depending on whether the -u flag is used.
-    The file name is automatically formatted to be the word (by which we're creating the word bin)
-
+    The file name is automatically formatted to be the word (by which we're creating the word bin).
         file_name = "word_bins/" + word + args.extension + ".txt"
         file_name_unique = "word_bins/unique/" + word + args.extension + ".txt"
 """
 
 """
-Typical usage:
+Typical usage :
     nohup python3 extract_sents.py -f tagged_sents/tagged_sentences_6_13.txt -w Enumerate -c 20 -u
 """
 

@@ -16,23 +16,26 @@ from tagger import untag_sent_to_tokens
 from load_tagged_sent import load_tag_lines
 
 """
-Input:
+Input :
     --training_set : training set (txt file in training_set/)
     --testing_set : testing set (txt file in testing_set/)
+    (other arguments)
 
     Both training and testing sets are "correctly" tagged.
     They can be outputs of make_test_train.py but note that make_test_train only "corrects" the first word, according to the word list.
 
-Output:
-    Results are written in experiments/.
-        The file name is formatted automatically depending on the parameters
-            output_test = "experiments/experiment_" + str(num_train_sent) + "sents_" + str(nr_iter) + "iters_" + extension + ".txt"
-    
+Output :
+    - txt file of results (in experiments/)
+    - (depending on flags used) pickled taggers (in tagger/)
+
+    The file name is formatted automatically depending on the parameters
+        output_test = "experiments/experiment_" + str(num_train_sent) + "sents_" + str(nr_iter) + "iters_" + extension + ".txt"
+
     If the -d flag is added, the taggers are dumped for future use (use dumped_main_experiment.py)
         The file name is formatted automatically (similar to the results, but with the trial ID added at the end)
             output_dump = "tagger/" + str(num_train_sent) + "sents_" + str(nr_iter) + "iters_" + extension + "_" + str(trial_id) + ".pk"
 
-How to read results:
+How to read results :
     (Differs slightly depending on when the experiment was done)
     If there are 4 numbers : accuracy
                             \t# of VBs mislabeled as NNP
@@ -53,9 +56,8 @@ How to read results:
 """
 
 """
-Typical usage:
+Typical usage :
     nohup python3 main_experiment.py -tr training_set/optimal_handtagged.txt -te testing_set/optimal_handtagged3.txt -e optimal3 -c 25 -nt 50 -tnl 2 -inl 5 -wt -d -dr 
-
 """
 
 def save_results(results, output):

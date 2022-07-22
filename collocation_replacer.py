@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Merges collocations based on bigram_analysis output."""
+"""Rewrites preprocessed sents with merged collocations based on bigram_analysis output (or \n separated list of collocations)."""
 
 import argparse
 import nicer
@@ -13,27 +13,30 @@ from itertools import repeat
 from sent_tools import *
 
 """
-Input:
-    -f : files to read sentences from (in merged_sents/ or preprocessed_sents/)
-    -cf : file to read collocations from (in bigram_analysis/, usually output of bigram_analysis.py)
+Input :
+    --files : files to read sentences from (in merged_sents/ or preprocessed_sents/)
+    --collocation_file : file to read collocations from (in bigram_analysis/, usually output of bigram_analysis.py)
+    (other arguments)
 
-Output:
-    Merged sentences are saved in merged_sents/aggressive or merged_sents/non-aggressive depending on whether -m is used, (unless path is specified using -p).
+Output :
+    - txt file of merged sentences 
+    
+    The file is saved in merged_sents/aggressive or merged_sents/non-aggressive depending on whether -m is used, (unless path is specified using -p).
     Filenames are taken automatically from the input file.
     If -p is used, the output is saved to that path with the automatically formatted file name.
 """
 
 """
-Typical usage:
+Typical usage :
     nohup time python3 collocation_replacer.py -f preprocessed_sents/sent1*.txt -cf bigram_analysis/bigram_analysis_all_500_7_14.txt -p merged_sents/non-aggressive/time -c 50
 
-Merge aggressively:
+Merge aggressively :
     nohup time python3 collocation_replacer.py -m -f preprocessed_sents/sent1*.txt -cf bigram_analysis/bigram_analysis_all_500_7_14.txt -m -p merged_sents/aggressive/time -c 50
 
-Print time:
+Print time :
     python3 collocation_replacer.py -P -f preprocessed_sents/sent00.txt -cf bigram_analysis/bigram_analysis_all_500_7_14.txt -p merged_sents/non-aggressive/time -c 50
 
-Test non-aggressively merged sents:
+Test non-aggressively merged sents :
     python3 collocation_replacer.py -t -f merged_sents/sent00/aggressive/sent00_6.txt
 """
 
