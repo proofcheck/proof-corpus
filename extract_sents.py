@@ -14,9 +14,8 @@ from sent_tools import *
 """
 Input :
     --files : tagged sentences (in tagged_sents/, output of tagger.py)
-    
     --word_file : txt file containing word list to make bins (eg. optimal_tagger_extra/word_bin_list.txt)
-    or 
+        or 
     --word : the word itself as a string (eg. Note)
     (other arguments)
 
@@ -25,7 +24,7 @@ Input :
            add the -u flag as make_test_train.py uses unique sentences (sentences in word_bins/unique) by default.
 
 Output :
-    - txt files of sentences starting with specified word (in word_bins/ or word_bins/unique/)
+    txt files of sentences starting with specified word (in word_bins/ or word_bins/unique/)
 
     Output is saved in word_bins/ or word_bins/unique/ depending on whether the -u flag is used.
     The file name is automatically formatted to be the word (by which we're creating the word bin).

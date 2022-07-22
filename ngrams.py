@@ -17,11 +17,11 @@ from sent_tools import *
 
 """
 Input :
-    --files : txt files of sentences to make ngrams from
+    --files : tsv files of sentences to make ngrams from
     (other arguments)
 
 Output :
-    - txt file of ngrams with their counts if count > 10 (in ngrams/)
+    txt file of ngrams with their counts if count > 10 (in ngrams/)
 
     File name is automatically formatted to be ngrams/(n)grams.txt
         output = "ngrams/" + str(n) + "grams_" + extension + ".txt"

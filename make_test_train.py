@@ -30,8 +30,8 @@ Input :
     (other arguments)
 
 Output :
-    - (depending on flags used) txt file containing sentences for the training set (in training_set/)
-    - txt file containing sentences for the testing set (in testing_set/)
+    (depending on flags used) txt file containing sentences for the training set (in training_set/)
+    txt file containing sentences for the testing set (in testing_set/)
 
     If --train is used, the training file will not be created.
 

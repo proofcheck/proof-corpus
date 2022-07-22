@@ -25,8 +25,8 @@ Input :
     They can be outputs of make_test_train.py but note that make_test_train only "corrects" the first word, according to the word list.
 
 Output :
-    - txt file of results (in experiments/)
-    - (depending on flags used) pickled taggers (in tagger/)
+    txt file of results (in experiments/)
+    (depending on flags used) pickled taggers (in tagger/)
 
     The file name is formatted automatically depending on the parameters
         output_test = "experiments/experiment_" + str(num_train_sent) + "sents_" + str(nr_iter) + "iters_" + extension + ".txt"
@@ -71,7 +71,7 @@ def save_results(results, output):
         o.write(result_string)
 
 def get_first_n_confusion(testing, tagger, n=3):
-    """Compare tag of first n words only."""
+    # Compare tag of first n words only
     golden_tags = []
     trained_tags = []
 
@@ -88,7 +88,7 @@ def get_first_n_confusion(testing, tagger, n=3):
     return confusion
 
 def get_first_three_confusion(testing, tagger):
-    """Compare tag of first three words only."""
+    # Compare tag of first three words only.
     return get_first_n_confusion(testing, tagger, 3)
 
 def get_one_trial_results(testing, tagger, trial_id, dump_file=None, tag_n=3):

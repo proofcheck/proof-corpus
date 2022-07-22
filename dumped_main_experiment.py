@@ -22,7 +22,7 @@ Input :
     (other arguments)
 
 Output :
-    - txt file of results
+    txt file of results
 
     Output is written in experiments/, and the output is automatically formatted to be experiment_(conditions eg. 5sents_5iters).txt
     
@@ -115,7 +115,7 @@ def do_dumped_experiments(args):
             o.write(output_string)
 
 def do_dumped_trial(tagger_file, testing, wsj_test=False, print_mislabels=False, tag_n=3):
-    """Do experiment for one tagger"""
+    # Do experiment for one tagger
     with open(tagger_file, "rb") as resource:
         trained_tagger = pickle.load(resource)
 
@@ -151,10 +151,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--tagger", "-ta", nargs="*",
-                            help="txt files to read tagger")
+                            help=".pk files to read tagger")
 
     parser.add_argument("--test", "-te",type=argparse.FileType('r'),
-                            help="txt file to read testing set")
+                            help=".txt file to read testing set")
     
     parser.add_argument("--extension", "-e",
                             help="file extension for output")

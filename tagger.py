@@ -21,7 +21,7 @@ Note :
 
 """
 Input :
-    --files : txt files of sentences
+    --files : tsv files of sentences
     (other arguments)
 
 Output :
@@ -167,7 +167,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--files", "-f", nargs='*',type=argparse.FileType("r"),
-                            help="list of txt files to read proof from")
+                            help="list of tsv files to read proof from")
     
     parser.add_argument("--output", "-o", type=argparse.FileType("w"),
                             help="txt file to write results to")

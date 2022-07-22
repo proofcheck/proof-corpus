@@ -45,11 +45,11 @@ START = ["-START-", "-START2-"]
 END = ["-END-", "-END2-"]
 
 def get_key(name, *args):
-    """Get weight_dict key name from dictionary keys used to update weights"""
+    # Get weight_dict key name from dictionary keys used to update weights
     return " ".join((name,) + tuple(args))
 
 def find_significant_weights(tagger, sent_with_best_worst_tags):
-    """Return only the weights that influence the first tag"""
+    # Return only the weights that influence the first tag
     best_tag, worst_tag, sent = sent_with_best_worst_tags
     weight_dict = tagger.model.weights
     tokens = tokenize(sent)
@@ -78,7 +78,7 @@ def find_significant_weights(tagger, sent_with_best_worst_tags):
     return significant_weights
 
 def get_weights(key, weight_dict, best_tag, worst_tag):
-    """Get weights for the key and turn them into a dict that maps taggers onto weights"""
+    # Get weights for the key and turn them into a dict that maps taggers onto weights
     
     try:
         feature_dict = weight_dict[key]

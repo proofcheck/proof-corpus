@@ -19,7 +19,7 @@ Input :
     (other arguments)
 
 Output :
-    - txt file of merged sentences 
+    txt file of merged sentences 
     
     The file is saved in merged_sents/aggressive or merged_sents/non-aggressive depending on whether -m is used, (unless path is specified using -p).
     Filenames are taken automatically from the input file.
