@@ -906,6 +906,7 @@ def cleanup(
         proof,
     )
 
+
     # (see REF) -> (REF)
     proof = re.sub(r"\(\s*((?i:see)|(?i:by))\s*REF\s*\)", "(REF)", proof)
     # proof = re.sub(r"\(\s*(?i:see)\s*REF\s*.{0,100}\)", "(REF)", proof)
@@ -926,7 +927,12 @@ def cleanup(
         f"\\.({upperLetter}({upperLetter}|{lowerLetter})+)", ". \\1", proof
     )
 
-    proof = re.sub(r"([﹘–—⸺⸻])", r" \1 ", proof)
+    # add a space around and normalize any dashes
+    proof = re.sub(r"([﹘–—⸺⸻])", r" - ", proof)
+
+    # simplify and replace weird single and double quotation marks from proofs
+    proof = re.sub(r"[‘’‛′´❜❛]", "'")
+    proof = re.sub(r"[“”‟″˝¨❝❞]", '"')
 
     # Remove any duplicate spaces we introduced
     proof = re.sub("[ ]+", " ", proof)
@@ -962,7 +968,7 @@ def clean_proof(
         prefix += "\t"
     else:
         (prefix, line) = ("", orig)
-
+    
     clean = unicodedata.normalize("NFKC", line)
     clean = clean.replace("�", "")  # 0810/0810.4782
     if debug:
