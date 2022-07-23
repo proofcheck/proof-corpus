@@ -160,6 +160,8 @@ TEX_REFS = {
     "\\refeq": 1,
     # 2001/2001.02981
     "\\smartref": 1,
+    # 1406/1406.4015
+    "\\Ref": 1,
 }
 
 # Set of LaTeX \cite-like commands
@@ -570,6 +572,8 @@ IGNORED_INCLUDES = {
     "mathlig",  # 1908.03268
     "figbox",  # 0009/cs0009023
     "bcprules",  # 1110/1110.3470
+    "jmd",  # 1011/1011.0395
+    "theorems.sty",  # 1507/1507.01708 and others
 }
 
 
@@ -689,6 +693,10 @@ def fixup(filename: str, tex_source: str) -> str:
         tex_source = tex_source.replace("\\opt{margin_notes}", "\\psfig")
     elif "2001/2001.02981/main." in filename:
         tex_source = tex_source.replace("\\usepackage{theorems}", "")
+    elif "1308/1308.4171/CominiTitoloVillanueva-CR." in filename:
+        tex_source = tex_source.replace(
+            "\\usepackage[fancyproofs,noextended,squareitemtag]{theorems}", ""
+        )
     # print(tex_source)
 
     # elif "regularisation_robustness." in filename:
@@ -931,9 +939,16 @@ def skip_rest_conditional(
     Looks for \fi, and optionally \else. Skips nested
     conditionals, but does not pay attention to { } grouping.
     """
+    # print("skip_rest_conditional")
     while True:
         w = next(words)
-        # print(f"xxx skipping <<{w}>>")
+        # print(
+        #     f"xxx skipping <<{w}>>",
+        #     # stop_on_else,
+        #     # w == "\\else",
+        #     # w in TEX_IFS,
+        #     # w in macros["new ifs"],
+        # )
         if w == "\\fi" or (w == "\\else" and stop_on_else):
             return
         elif w == "\\loop" and w not in macros:
@@ -1317,7 +1332,7 @@ def skip_rest_math(
                 env_name = "".join(get_arg(words))
                 skip_optional_arg(words, macros)
                 if env_name.rstrip("*") in DELETE_UNINTERPRETED_ENVS:
-                    print("SKIPPING ", env_name)
+                    # print("SKIPPING ", env_name)
                     final_period = skip_rest_env(words, {}, stop_at=env_name)
                 else:
                     final_period = skip_rest_env(words, macros)
@@ -2549,8 +2564,8 @@ def get_proofs(
         elif w in {
             "\\usepackage",
             "\\RequirePackage",
-            "\\documentclass",
-            "\\LoadClass",
+            # "\\documentclass",
+            # "\\LoadClass",
         }:
             if words.peek() == "[":
                 optional = get_optional_arg(words)
@@ -2571,7 +2586,11 @@ def get_proofs(
                         fn = fn.with_suffix(".cls")
                     else:
                         fn = fn.with_suffix(".sty")
-                if (fn.stem in IGNORED_INCLUDES) or kpse.in_TeX_path(fn.name):
+                if (
+                    (fn.stem in IGNORED_INCLUDES)
+                    or (fn.name in IGNORED_INCLUDES)
+                    or kpse.in_TeX_path(fn.name)
+                ):
                     continue
                 subfname = directory / fn
                 try:
@@ -2664,7 +2683,7 @@ def get_proofs(
                 get_arg(words)  # end part
 
         elif w in ["\\newif"]:
-            newif = next(words)
+            newif = "".join(get_arg(words))
             macros["new ifs"].append(newif)
             # \iftest
             macros[newif] = ([[]], [], ["\\iffalse"])
