@@ -180,7 +180,7 @@ def ner(proof: str, debug: bool = False, aggressive: bool = True):
             and w != w.upper()
             and not (re.match(theorem_word, w))
         ):
-            print("lookup: ", w)
+            # print("lookup: ", w)
             if w.endswith("'s"):
                 w = w[:-2]
                 possessive = " 's"
@@ -591,7 +591,7 @@ def cleanup(
         )
 
         proof = re.sub(
-            r"\b(?i:(figure|fig))\s*([.]\s*[0-9]+)?(\s*REF)?", "REF", proof
+            r"\b(?i:(figure|fig))\s*([.]\s*[0-9]+)?(\s*REF)?", "REF ", proof
         )
 
     # eliminate extra spaces
@@ -912,7 +912,6 @@ def cleanup(
         proof,
     )
 
-
     # (see REF) -> (REF)
     proof = re.sub(r"\(\s*((?i:see)|(?i:by))\s*REF\s*\)", "(REF)", proof)
     # proof = re.sub(r"\(\s*(?i:see)\s*REF\s*.{0,100}\)", "(REF)", proof)
@@ -939,7 +938,7 @@ def cleanup(
     # simplify and replace weird single and double quotation marks from proofs
     proof = re.sub(r"[‘’‛′´❜❛]", "'", proof)
     proof = re.sub(r"[“”‟″˝¨❝❞]", '"', proof)
-    
+
     # replace two single quotes with a double quote
     proof = re.sub("''", '"', proof)
 
@@ -977,7 +976,7 @@ def clean_proof(
         prefix += "\t"
     else:
         (prefix, line) = ("", orig)
-    
+
     clean = unicodedata.normalize("NFKC", line)
     clean = clean.replace("�", "")  # 0810/0810.4782
     if debug:

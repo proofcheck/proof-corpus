@@ -195,3 +195,6 @@ proofs
 # Toy examples
 t.tex
 u.tex
+
+# VS Code
+.vscode

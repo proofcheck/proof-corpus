@@ -61,6 +61,9 @@ MATH_ENVS = {
     "equs",
     # tikz-cd package
     "tikzcd",
+    # tikz?
+    "tikzmath",  # 1711/1711.03061
+    "tikzequation",  # 1711/1711.03061
     # mathtools package
     "refeq",
     # 1901/1901.07820
@@ -320,6 +323,8 @@ DELETE_ENVS = {
     "diag",
     # 2001/2001.09161
     "quantikz",
+    # 0309/cs0309024/qMuGames.tex
+    "Reason",
 }
 
 DELETE_UNINTERPRETED_ENVS = {
@@ -360,6 +365,8 @@ DELETE_UNINTERPRETED_ENVS = {
     "codi",
     # pstricks
     "psmatrix",
+    # gastex
+    "gpicture",
 }
 
 
@@ -697,6 +704,29 @@ def fixup(filename: str, tex_source: str) -> str:
         tex_source = tex_source.replace(
             "\\usepackage[fancyproofs,noextended,squareitemtag]{theorems}", ""
         )
+    elif (
+        "thomp-genus0." in filename
+        or "hhn-swe-aug-12." in filename
+        or "somespectralpropertiesderivations." in filename
+        or "KT16." in filename
+        or "plan25_united." in filename
+        or "concatsakiris_arxiv-4oct19." in filename
+    ):
+        tex_source = tex_source.replace("'s's", "'s")
+    elif "primeness." in filename:
+        tex_source = re.sub(
+            r"\$\$ \$\$\s+with(\n|.)*\\end{proof}",
+            r"\\end{proof}",
+            tex_source,
+        )
+        # and as long as we're here
+        tex_source = tex_source.replace("encoded in v.", "encoded in $v$.")
+        tex_source = tex_source.replace("vector w,", "vector $w$,")
+        tex_source = tex_source.replace(
+            "$\mathfrak{X}=\mathfrak{U}(Q_{-1}'\cap Q_0)$ x $\mathfrak{U}(Q_{0}'\cap P_0)$ x $\mathfrak{U}(P_{-1}'\cap P_0)$ x $\mathfrak{U}(Q_{-1}'\cap P_{-1})$",
+            " MATH ",
+        )
+
     # print(tex_source)
 
     # elif "regularisation_robustness." in filename:
@@ -1956,9 +1986,21 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         get_arg(words)
         return [" "]
 
+    if cmd == "\\lstset":
+        # Ignore setting defaults for listings package
+        get_arg(words)
+        return []
+
     if cmd == "\\footnote":
         # Footnotes can interrupt sentences, and do not necessarily
         # contain normal "proof-like" wording.
+        get_arg(words)
+        return []
+
+    if cmd == "\\footnotetext":
+        # Footnotes can interrupt sentences, and do not necessarily
+        # contain normal "proof-like" wording.
+        skip_optional_arg(words, macros)
         get_arg(words)
         return []
 
@@ -2179,6 +2221,10 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         get_arg(words)  # ignore argument
         return []
 
+    if cmd == "\\tikzmath":
+        get_arg(words)  # ignore argument
+        return [" MATH "]
+
     if cmd == "\\adjustimage":
         get_arg(words)
         get_arg(words)
@@ -2362,6 +2408,17 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         get_arg(words)
         get_arg(words)
         return [" MATH "]
+
+    if cmd == "\hvFloat":
+        if words.peek("!") == "*":
+            next(words)
+        # from hvfloat.sty
+        skip_optional_arg(words, macros)
+        get_arg(words)
+        get_arg(words)
+        skip_optional_arg(words, macros)
+        get_arg(words)
+        get_arg(words)
 
     if cmd in macros:
         if cmd == "\\BoxedEPSF":
