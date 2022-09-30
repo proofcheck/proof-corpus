@@ -81,6 +81,9 @@ MATH_ENVS = {
     "IEEEeqnarrayboxm",
     # cases.sty
     "numcases",
+    # 0905/0905.4064/fulll.tex
+    "hs",
+
 }
 
 # Maps each LaTeX \ref-like command to its number of arguments
@@ -307,6 +310,7 @@ DELETE_ENVS = {
     "minipage",
     "prooftree",
     "tikzpicture",
+    "mathpar",
     "lpic",
     # 1509/1509.06811
     "tz",
