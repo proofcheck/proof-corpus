@@ -78,7 +78,7 @@ theorem_word = (
     r"Definitions?|Expressions?|Criteri(?:a|on)|Formulas?|"
     r"Steps?|Hypothes[ie]s|Observations?|"
     r"Algorithms?|Inequalit(?:y|ies)|Assumptions?|Problems?|Exercises?|"
-    r"Methods?|Facts?|Parts?|Rules?)\b)))"
+    r"Methods?|Facts?|Parts?|Rules?|Ad)\b)))"
 )
 
 # A set of words that probably are words, and not someone's name.
@@ -154,7 +154,7 @@ def ner(proof: str, debug: bool = False, aggressive: bool = True):
     # Guivarc'h is a name.
     # I've also seen Poincar'e and Maz'ya
     potential_name = (
-        "((?<!['`])(?:\\w'\\w|\\w)+[sz]')|"
+        "((?<!['`])(?:\\w'\\w|\\w)+[sz]'(?!s))|"
         "((?:\\w'\\w|\\w)+\\w(?:'s\\b|'h\\b|'e|'ya\\b)?)|"
         "\\bKy Fan\\b"  # 1911/1911.08637
     )
@@ -168,7 +168,7 @@ def ner(proof: str, debug: bool = False, aggressive: bool = True):
         like "Smith's", return "NAME 's")
         """
         w: str = g.group(0)
-        # print("NER?", w)
+        print("NER?", w)
         # Check that it's capitalized,
         # but not because of MATH token
         # and it's not completely uppercase (e.g., the author wrote "CASE")
@@ -530,10 +530,17 @@ def cleanup(
         # REF.1 to REF
         proof = re.sub(r"(MATH|CASE|REF|CITE)\.([0-9]){1,3}", r"\1", proof)
 
+
+        # (i) MATH (ii) -> MATH
+        # (i)MATH(ii) -> MATH
+        proof = re.sub(f"{parenID} ?(MATH ?{parenID})+", " MATH ", proof)
+
+
         # (iii 'a-ds,.) -> REF
+        # MATH(iii) -> REF
         proof = re.sub(
-            r"\((\s*(SII|[iI]+)([0-9]|[A-Za-z]|['.,\-–]|\s){0,10}\s*)+\)",
-            "REF ",
+            r"(MATH)?\((\s*(SII|[iI]+)([0-9]|[A-Za-z]|['.,\-–]|\s){0,10}\s*)+\)",
+            " REF ",
             proof,
         )
 
@@ -578,6 +585,9 @@ def cleanup(
         # by Theorem IIa we have -> by REF we have
         proof = re.sub(f"{theorem_word}\\s?[IVX]+[a-z]?\\b", "REF", proof)
 
+        # by Theorem MATH we have -> by REF we have
+        proof = re.sub(f"\\b(([Bb]y|of|that|apply|from|using|in|is|to|^|[.(,]\s*)\\s+){theorem_word}\\s*MATH", "\\1REF", proof)
+
         # Part 3 of the theorem -> REF of the theorem -> REF
         proof = re.sub(f"REF of the {theorem_word}", "REF", proof)
 
@@ -594,16 +604,19 @@ def cleanup(
             r"\b(?i:(figure|fig))\s*([.]\s*[0-9]+)?(\s*REF)?", "REF ", proof
         )
 
+
+        # Ad (i)MATH(ii) -> Ad MATH -> REF
+        # By Theorem MATH, ->
+        # oops... "by the mean value theorem MATH" -/->  "by the mean value REF"
+        # proof = re.sub(f"{theorem_word}\s*MATH\\b", "REF", proof)
+
+
     # eliminate extra spaces
     proof = re.sub("[ ]+", " ", proof)
 
     if debug:
         print(1200, proof)
 
-    # clean up weird parentheses around MATH
-
-    # (i) MATH (ii) -> MATH
-    proof = re.sub(f"{parenID} (MATH {parenID})+", "MATH", proof)
 
     if debug:
         print(1250, proof)
