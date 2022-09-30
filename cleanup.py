@@ -168,7 +168,7 @@ def ner(proof: str, debug: bool = False, aggressive: bool = True):
         like "Smith's", return "NAME 's")
         """
         w: str = g.group(0)
-        print("NER?", w)
+        # print("NER?", w)
         # Check that it's capitalized,
         # but not because of MATH token
         # and it's not completely uppercase (e.g., the author wrote "CASE")
@@ -817,7 +817,7 @@ def cleanup(
 
     # remove 2 = MATH or MATH = 2
     proof = re.sub(
-        r"([0-9]*\s*=\s*MATH|MATH\s*=\s*[0-9]*|MATH\s*=\s*MATH)", "MATH", proof
+        r"([0-9]+\s*=\s*MATH|MATH\s*=\s*[0-9]+|MATH\s*=\s*MATH)", "MATH", proof
     )
 
     # remove spurious periods after MATH
