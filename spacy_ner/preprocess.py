@@ -17,9 +17,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-d", "--debug", help="Show tracing output", action="store_true"
     )
-    parser.add_argument(
-        "-a", "--aggressive", help="Intensity of cleanup", action="store_false"
-    )
+    parser.add_argument("-k", "--key", help="Replacement key", default="REF")
     parser.add_argument(
         "files", nargs="*", type=argparse.FileType("r"), default=[sys.stdin]
     )
@@ -34,7 +32,7 @@ if __name__ == "__main__":
         for orig in fd.readlines():
             orig = orig.split("\t")[-1]
             clean = cleanup.clean_proof(
-                orig, args.debug, fd.name, args.aggressive
+                orig, args.debug, fd.name, aggressive=True
             )
             diff: List[Tuple[int, str]] = dmp.diff_main(  # type: ignore
                 orig, clean
@@ -60,13 +58,13 @@ if __name__ == "__main__":
                     #     or (key == "ITE" and string.endswith(" C"))
                     #     or (key == "AME" and string.endswith(" N"))
                     # ):
-                    if key == "REF":
+                    if key == args.key:
                         next = orig[len(string) + len(diff[i][1]) :][
-                            :20
+                            :40
                         ]  # diff[i + 2][1][:20] if i < len(diff) - 2 else ""
                         print(
-                            string[-20:].ljust(20, " "),
-                            diff[i][1].ljust(30, " "),
+                            string[-40:].rjust(40, " "),
+                            diff[i][1].ljust(40, " "),
                             next,
                         )
                         # print(key, diff[i][1], sep="\t")
