@@ -83,7 +83,6 @@ MATH_ENVS = {
     "numcases",
     # 0905/0905.4064/fulll.tex
     "hs",
-
 }
 
 # Maps each LaTeX \ref-like command to its number of arguments
@@ -730,6 +729,18 @@ def fixup(filename: str, tex_source: str) -> str:
             "$\mathfrak{X}=\mathfrak{U}(Q_{-1}'\cap Q_0)$ x $\mathfrak{U}(Q_{0}'\cap P_0)$ x $\mathfrak{U}(P_{-1}'\cap P_0)$ x $\mathfrak{U}(Q_{-1}'\cap P_{-1})$",
             " MATH ",
         )
+    # A bunch of files, including
+    # 0006/math-ph0006001/nonlinwa.tex
+    # 0202/math0202057/h1_hand0.tex
+    # 0507/math0507198/ass.tex
+    # 0510/math0510058/bounded_sp.tex
+    # 0710/0710.2682/cuspidal_sl_new.tex
+    # 0710/0710.0906/TheBigPreamble.sty
+    # 0810/0810.2637/paper1.tex
+    # 1306/1306.3673/bounded_sl_submitted.tex
+    tex_source = tex_source.replace(
+        "\\let\\myLabel\\@gobble", "\\def\\myLabel#1{\\label{#1}}"
+    )
 
     # print(tex_source)
 
