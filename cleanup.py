@@ -63,7 +63,7 @@ parenID = (
     f"(?:\\([A-Za-z][- ][0-9]\\)))"
 )
 #   (d(iv))
-parenID = f"(?:{parenID}|\\({atomicID}\\s*{parenID}\\))"
+parenID = f"(?:{parenID}|\\({atomicID}[. -]?{parenID}\\))"
 
 # REF, REF(3.2), REF.a, 3, 3.5a, (IV), (IV.2), 2(a), 4.1bc
 # Not: IV, IV.2
@@ -82,9 +82,9 @@ theorem_word = (
     r"Remarks?|Equations?|Diagrams?|Claims?|Statements?|Axioms?|Conditions?|"
     r"Definitions?|Expressions?|Criteri(?:a|on)|Formulas?|"
     r"Steps?|Hypothes[ie]s|Observations?|Conditions?|Items?|"
-    r"Figures?|Tables?|Examples?|Diagrams?|Property|Properties"
+    r"Figures?|Tables?|Examples?|Diagrams?|Property|Properties|Assertions?|"
     r"Algorithms?|Inequalit(?:y|ies)|Assumptions?|Problems?|Exercises?|"
-    r"Methods?|Parts?|Rules?|Ad)\b))|Facts?|(?<![Ii]n )fact)"
+    r"Methods?|Parts?|Rules?|Ad)\b))|Facts?\b|(?<![Ii]n )fact)"
 )
 
 # A set of words that probably are words, and not someone's name.
@@ -95,6 +95,11 @@ with open("words_alpha.txt") as fd:
         known_words.add(word)
     known_words.add("profinite")
     known_words.add("interpolants")
+    known_words.add("maximality")
+    known_words.add("poissonization")
+    known_words.add("hamiltonians")
+    known_words.add("lorentzian")
+    known_words.add("injectivity")
 
 # A set of names that might arise in Mathy text.
 known_names: set[str] = set()
@@ -110,6 +115,7 @@ with open("known_names.txt") as fd:
     known_names.remove("its")
     known_names.remove("small")
     known_names.remove("pick")
+    known_names.remove("block")
     # Hack, though really we should add this to known_names.txt
     known_names.add("gau")
 
@@ -183,10 +189,9 @@ def ner(proof: str, debug: bool = False, aggressive: bool = True):
             and "MATH" not in w
             and "REF" not in w
             and "CITE" not in w
-            and w != w.upper()
             and not (re.match(theorem_word, w))
         ):
-            # print("lookup: ", w)
+            # print("lookup ", w)
             if w.endswith("'s"):
                 w = w[:-2]
                 possessive = " 's"
@@ -195,8 +200,14 @@ def ner(proof: str, debug: bool = False, aggressive: bool = True):
                 possessive = " 's"
             else:
                 possessive = ""
+            if w == w.upper() or (
+                possessive == "" and w[-1] == "s" and w[:-1] == w[:-1].upper()
+            ):
+                # If the word is all uppercase (except for the possessive or plural),
+                # then it's probably an acronym, and not a name.
+                return g.group(0)
             wl = w.lower()
-            if possessive or (wl not in known_words) or (wl in known_names):
+            if (wl not in known_words) or (wl in known_names):
                 return "NAME" + possessive
             else:
                 return g.group(0)
@@ -234,7 +245,9 @@ def ner(proof: str, debug: bool = False, aggressive: bool = True):
     proof = re.sub(f"\\bNAME and {upperLetter}\\w+\\b", "NAME and NAME", proof)
 
     proof = re.sub(
-        f"(\\s){upperLetter}\\w+\\b and NAME\\b", "\\1NAME and NAME", proof
+        f"(\\s)(?!MATH|CITE|REF){upperLetter}\\w+\\b and NAME\\b",
+        "\\1NAME and NAME",
+        proof,
     )
 
     proof = re.sub(
@@ -286,7 +299,7 @@ def ner(proof: str, debug: bool = False, aggressive: bool = True):
         print("0160", proof)
 
     proof = re.sub(
-        f"([Tt]he )?NAME( and NAME)*\\s*('s)? (\\w+\\s*)?(?i:{theorem_word})",
+        f"([Tt]he )?NAME( and NAME)*\\s*('s)? (\\w+\\s*)?(?i:{theorem_word}\b)",
         "REF",
         proof,
     )
@@ -389,8 +402,9 @@ def treat_unbalanced_parens(
             if nesting > 0:
                 nesting -= 1
             else:
-                # Skip this open paren
-                continue
+                # Delete this open paren (but replace it by a space
+                # to avoid smushing words together)
+                c = " "
         cs2.append(c)
 
     proof = "".join(reversed(cs2))
@@ -628,9 +642,15 @@ def cleanup(
     #     proof,
     # )
 
+    # [42] -> CITE
     proof = re.sub(r"\[\d+\]", " CITE ", proof)
 
-    proof = re.sub(f"(MATH\\s*)?{parenID}", " REF ", proof)
+    # [D-G-Z] -> CITE
+    proof = re.sub(r"\[[A-Z](-[A-Z])+\]", " CITE ", proof)
+
+    proof = re.sub(
+        f"(MATH\\s*)?({theoremNumber}[.-])?{parenID}", " REF ", proof
+    )
 
     # eliminate extra spaces
     proof = re.sub("[ ]+", " ", proof)
@@ -790,14 +810,14 @@ def cleanup(
     if debug:
         print(9600, proof)
 
-    page = "([Pp][PpGg]?\\.?|[Pp]ages?\\b)"
+    page = "\\b([Pp][PpGg]?\\.?|[Pp]ages?\\b)"
     num_or_range = "\\d+(\\s*[-–—]\\s*\\d+)?"
 
     proof = re.sub(
         f"\\bCITE(\\s|[,])+({page}\\s*{num_or_range})", r"CITE", proof
     )
 
-    proof = re.sub(r"(?i:subref)", "REF", proof)
+    proof = re.sub(r"(?i:\bsubref\b)", "REF", proof)
 
     # p.45 of CITE -> REF of CITE
     proof = re.sub(f"{page}\\s*{num_or_range}", r"REF", proof)
@@ -923,8 +943,9 @@ def cleanup(
     # Case REF -> REF
     # the cases MATH and MATH -> REF
     # NOT:  in this case MATH. -> in this REF.
+    # NOT:  in the first case MATH
     proof = re.sub(
-        r"(?<![Ii]n this )(?<![Ff]or this )\b([Tt]he )?([Ss]ub)?(?i:case(s)?)\s*(MATH|REF)"
+        r"(?<![Ii]n this )(?<![Ff]or this )\b([Tt]he )?(?<!first )(?<!second )(?<!third )(?!< fourth)(?!<both )([Ss]ub)?(?i:case(s)?)\s*REF\b"
         r"(\s*(, (MATH|REF)|(, )?and\s*(MATH|REF)))*\s*\.?\b",
         "REF ",
         proof,
@@ -1010,6 +1031,11 @@ def urls(proof, debug=False):
     return proof
 
 
+def spellcheck(proof):
+    proof = proof.replace("Propostion", "Proposition")
+    return proof
+
+
 def clean_proof(
     orig: str,
     debug: bool = False,
@@ -1024,6 +1050,7 @@ def clean_proof(
 
     clean = unicodedata.normalize("NFKC", line)
     clean = clean.replace("�", "")  # 0810/0810.4782
+    clean = spellcheck(clean)
     if debug:
         print("0000", clean)
     clean = urls(clean, debug)
