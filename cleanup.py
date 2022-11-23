@@ -550,6 +550,11 @@ def cleanup(
         # REF.1 to REF
         proof = re.sub(r"(MATH|CASE|REF|CITE)\.([0-9]){1,3}", r"\1", proof)
 
+        # 11111 -> MATH
+        #  because for some reason,  (1111111111223344,22222222) really
+        #   makes the next subsitution exponentially(?) slow
+        proof = re.sub(f"[0-9][0-9][0-9][0-9][0-9]+", " MATH ", proof)
+
         # (i) MATH (ii) -> MATH
         # (i)MATH(ii) -> MATH
         proof = re.sub(f"{parenID} ?(MATH ?{parenID})+", " MATH ", proof)
