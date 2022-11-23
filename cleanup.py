@@ -76,7 +76,7 @@ theoremNumber = (
 # Prop, Th., Theorem, Formula, ...
 # But not "in fact"
 theorem_word = (
-    r"(?:(?i:(?:\b(?:Props?|Prps?|prps?|Thms?|Cor|Th|Lem|Rem|Eqn?s?|Defs?|Ex|Alg)(?:\b|\.))"
+    r"(?:(?i:(?:\b(?:Props?|Prps?|prps?|Thms?|Cor|Th|Lem|Rem|Eqn?s?|Defs?|Ex|Alg|Fig)(?:\b|\.))"
     r"|"
     r"(?:\b(?:Propositions?|Theorems?|Corollar(?:y|ies)|Lemm(?:a|as|e|ata)|"
     r"Remarks?|Equations?|Diagrams?|Claims?|Statements?|Axioms?|Conditions?|"
@@ -1033,6 +1033,7 @@ def urls(proof, debug=False):
 
 def spellcheck(proof):
     proof = proof.replace("Propostion", "Proposition")
+
     return proof
 
 
