@@ -630,12 +630,15 @@ def decomment(tex_source: str) -> str:
 
 def fixup(filename: str, tex_source: str) -> str:
     """
-    Fixup annoyances in isolated .tex inputs.
+    Fixup annoyances (especially in isolated .tex inputs).
 
     I had been modifying the actual file in texes/*, but
     that's dangerous since there are copies of this
     directory floating around on different computers.
     """
+
+
+
     if "solpara-arxiv-2" in filename:
         tex_source = tex_source.replace(
             "\\providecommand{ }[1]{\\textcolor{blue}{#1}}", ""
@@ -748,6 +751,20 @@ def fixup(filename: str, tex_source: str) -> str:
     #     tex_source = tex_source.replace("
     return tex_source
 
+def highlight_arrows(tex_source: str):
+    arrows = ["leftarrow", "rightarrow", "leftrightarrow",
+    "Leftarrow", "Rightarrow", "Leftrightarrow"
+    "longleftarrow", "longrightarrow", "longleftrightarrow",
+    "Longleftarrow", "Longrightarrow", "Longleftrightarrow",
+    "nleftarrow", "nLeftarrow", "nLeftrightarrow", "nleftrightarrow",
+    "nRightarrow", "nrightarrow",
+    "shortleftarrow", "shortrightarrow"]
+    arrow_regex = "\\s*\\\\(" + "|".join(arrows) + ")\\s*"
+    tex_source = re.sub("(\\s+|(?<![$]))[$]" + arrow_regex + "[$]\\s*", " ARROW ", tex_source)
+    tex_source = re.sub("\\s*\\\\\\(" + arrow_regex + "\\\\\)\\s*", " ARROW ", tex_source)
+    return tex_source
+
+
 
 def tokenize_string(filename: str, tex_source: str):
     """
@@ -775,6 +792,9 @@ def tokenize_string(filename: str, tex_source: str):
 
     # Ad-hoc fixups
     tex_source = fixup(filename, tex_source)
+
+    # Handle single-arrow $..$'s
+    tex_source = highlight_arrows(tex_source)
 
     # Insert "\par" where there were blank lines
     tex_source = re.sub("^[ \\t]*$", "\\\\par", tex_source, flags=re.MULTILINE)
@@ -2858,7 +2878,7 @@ def get_proofs(
                         proof = re.sub("\\s+", " ", proof)
                         proofs.append(proof)
                         if verbose:
-                            print("***", proof)
+                            print("***\n ", proof)
             elif env_name == "document":
                 break
             elif "\\end" + env_name in macros:

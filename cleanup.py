@@ -845,8 +845,6 @@ def cleanup(
     # (REF) -> REF
     proof = re.sub("\\(\\s*REF\\s*\\)", " REF ", proof)
 
-    # (1) $\Rightarrow$ (2) => REF MATH REF => MATH
-    proof = re.sub("\\bREF(\\s*MATH\\s*REF)+\\b", "MATH", proof)
 
     if debug:
         print(9750, proof)
@@ -959,14 +957,19 @@ def cleanup(
     proof = re.sub(r"\(\s*REF\s*\)\s*([A-Z])", "REF \\1", proof)
 
     # (i) We have -> REF We have -> CASE: We have
+    # (1) $\Rightarrow$ (2) => REF ARROW REF => MATH
     # BUT NOT:  T's Theorem CITE implies -> REF CITE implies -> CASE: implies
     proof = re.sub(
-        f"(^\\s*|[.;:]\\s+)REF[.: ]+({upperLetter}\\w+)",
+        f"(^\\s*|[.;:]\\s+)REF(?:\\s*ARROW\\s*REF)*[.: ]+({upperLetter}\\w+)",
         lambda m: m.group(1) + "CASE: " + m.group(2)
         if m.group(2) not in {"CITE", "REF"}
         else m.group(0),
         proof,
     )
+
+    # (i) $\longrightarrow$ (ii)  ->   MATH
+    #  (some instances might be CASE: not caught above, but it's hard to tell)
+    proof = re.sub(f"\\s*\\bREF(\\s*ARROW\\s*REF)+\\b\\s*", " MATH ", proof)
 
     if debug:
         print(9890, proof)
