@@ -794,7 +794,7 @@ def tokenize_string(filename: str, tex_source: str):
     tex_source = fixup(filename, tex_source)
 
     # Handle single-arrow $..$'s
-    tex_source = highlight_arrows(tex_source)
+    # tex_source = highlight_arrows(tex_source)
 
     # Insert "\par" where there were blank lines
     tex_source = re.sub("^[ \\t]*$", "\\\\par", tex_source, flags=re.MULTILINE)
