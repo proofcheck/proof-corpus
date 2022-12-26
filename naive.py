@@ -637,8 +637,6 @@ def fixup(filename: str, tex_source: str) -> str:
     directory floating around on different computers.
     """
 
-
-
     if "solpara-arxiv-2" in filename:
         tex_source = tex_source.replace(
             "\\providecommand{ }[1]{\\textcolor{blue}{#1}}", ""
@@ -751,19 +749,37 @@ def fixup(filename: str, tex_source: str) -> str:
     #     tex_source = tex_source.replace("
     return tex_source
 
-def highlight_arrows(tex_source: str):
-    arrows = ["leftarrow", "rightarrow", "leftrightarrow",
-    "Leftarrow", "Rightarrow", "Leftrightarrow"
-    "longleftarrow", "longrightarrow", "longleftrightarrow",
-    "Longleftarrow", "Longrightarrow", "Longleftrightarrow",
-    "nleftarrow", "nLeftarrow", "nLeftrightarrow", "nleftrightarrow",
-    "nRightarrow", "nrightarrow",
-    "shortleftarrow", "shortrightarrow"]
-    arrow_regex = "\\s*\\\\(" + "|".join(arrows) + ")\\s*"
-    tex_source = re.sub("(\\s+|(?<![$]))[$]" + arrow_regex + "[$]\\s*", " ARROW ", tex_source)
-    tex_source = re.sub("\\s*\\\\\\(" + arrow_regex + "\\\\\)\\s*", " ARROW ", tex_source)
-    return tex_source
 
+def highlight_arrows(tex_source: str):
+    arrows = [
+        "leftarrow",
+        "rightarrow",
+        "leftrightarrow",
+        "Leftarrow",
+        "Rightarrow",
+        "Leftrightarrow" "longleftarrow",
+        "longrightarrow",
+        "longleftrightarrow",
+        "Longleftarrow",
+        "Longrightarrow",
+        "Longleftrightarrow",
+        "nleftarrow",
+        "nLeftarrow",
+        "nLeftrightarrow",
+        "nleftrightarrow",
+        "nRightarrow",
+        "nrightarrow",
+        "shortleftarrow",
+        "shortrightarrow",
+    ]
+    arrow_regex = "\\s*\\\\(" + "|".join(arrows) + ")\\s*"
+    tex_source = re.sub(
+        "(\\s+|(?<![$]))[$]" + arrow_regex + "[$]\\s*", " ARROW ", tex_source
+    )
+    tex_source = re.sub(
+        "\\s*\\\\\\(" + arrow_regex + "\\\\\)\\s*", " ARROW ", tex_source
+    )
+    return tex_source
 
 
 def tokenize_string(filename: str, tex_source: str):
@@ -794,7 +810,7 @@ def tokenize_string(filename: str, tex_source: str):
     tex_source = fixup(filename, tex_source)
 
     # Handle single-arrow $..$'s
-    # tex_source = highlight_arrows(tex_source)
+    tex_source = highlight_arrows(tex_source)
 
     # Insert "\par" where there were blank lines
     tex_source = re.sub("^[ \\t]*$", "\\\\par", tex_source, flags=re.MULTILINE)
