@@ -1,10 +1,10 @@
 SHELL=/bin/zsh
 
-test: new_cleanproofs99.tsv
-	./linediff.py 2022-12-26/cleanproofs99.tsv new_cleanproofs99.tsv | less -R
+test: new_cleanproofs10.tsv
+	./linediff.py 2022-12-26/cleanproofs10.tsv new_cleanproofs10.tsv | less -R
 
-new_cleanproofs99.tsv: cleanup.py
-	./cleanup.py -p15 2022-12-26/cleanproofs99.tsv > new_cleanproofs99.tsv
+new_cleanproofs10.tsv: cleanup.py
+	./cleanup.py -p15 2022-12-26/cleanproofs10.tsv > new_cleanproofs10.tsv
 
 all:
 	-rm -rf proofs

@@ -375,7 +375,7 @@ def treat_unbalanced_parens(
     if proof.count("(") == proof.count(")"):
         return proof
 
-    proof = re.sub(f"(^| ){atomicID}[.]?\\)", "\\1REF", proof)
+    proof = re.sub(f'(^|[ "(]){atomicID}[.]?\\)', "\\1REF", proof)
 
     if debug:
         print(1530, proof)
@@ -762,7 +762,7 @@ def cleanup(
     )
     # We proceed in steps. 1. Let x be -> ...steps. CASE: Let x be
     proof = re.sub(
-        f"(^|[.;:\\])] ){atomicID}\\. ({upperLetter})",
+        f"(^|[.;:\\])] ){atomicID}\\. ((?!ARROW){upperLetter})",
         "\\1CASE: \\2",
         proof,
     )
@@ -988,19 +988,31 @@ def cleanup(
 
     proof = re.sub(r"\(\s*REF\s*\)\s*([A-Z])", "REF \\1", proof)
 
+    # "implication REF ARROW REF -> "implication MATH"
+    proof = re.sub("(?<=[Ii]mplication )REF\\s*ARROW\\s*REF", "MATH", proof)
+    proof = re.sub(
+        '(?<=[Ii]mplication )"\\s*REF\\s*ARROW\\s*REF\\s*"', "MATH", proof
+    )
+
+    # REF ARROW REF follows" -> "MATH follows"
+    proof = re.sub("REF\\s*ARROW\\s*REF\\s*follows", "MATH follows", proof)
+
     # REF ARROW REF -> REF
+    # "REF AROW REF" -> REF
     #  ...or this could be MATH, but REF works better when it's
     #     really a CASE: label
+    proof = re.sub('"REF\\s*(ARROW\\s*REF)+"', "REF", proof)
     proof = re.sub("REF\\s*(ARROW\\s*REF)+", "REF", proof)
 
     # 3 ARROW 2 -> REF
-    proof = re.sub("\\d+\\s*ARROW\\s*\\d+", "REF", proof)
+    # 3. ARROW 2. -> REF
+    proof = re.sub("\\d+[.]?\\s*ARROW\\s*\\d+([.](?= [a-z]))?", "REF", proof)
 
     # ARROW REF => REF
     proof = re.sub("ARROW\\s*REF", "REF", proof)
 
     # ARROW (ARROW) => REF (REF)   ... when talking about fwd/back respectively
-    proof = re.sub("ARROW\\s*(\\s*ARROW\\s*)", "REF (REF)", proof)
+    proof = re.sub("ARROW\\s*\\(\\s*ARROW\\s*\\)", "REF (REF)", proof)
 
     # ARROW (iii+iv) => REF
     proof = re.sub(f"ARROW \\(([ +]|{atomicID})+\\)", "REF", proof)
@@ -1019,6 +1031,8 @@ def cleanup(
     proof = re.sub("ARROW\\s*:", "REF:", proof)
 
     proof = re.sub("\\(REF\\)", "REF", proof)
+
+    proof = re.sub(r"REF(\s+REF)+", "REF", proof)
 
     if debug:
         print(9890, proof)
@@ -1078,6 +1092,9 @@ def cleanup(
     proof = re.sub(
         f"\\.({upperLetter}({upperLetter}|{lowerLetter})+)", ". \\1", proof
     )
+
+    if debug:
+        print(9900, proof)
 
     # add a space around and normalize any dashes
     proof = re.sub(r"([﹘–—⸺⸻])", r" - ", proof)
