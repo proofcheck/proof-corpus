@@ -44,8 +44,8 @@ numAlpha = "(?:(?![.])[a-zA-Z0-9.]*\\d[a-zA-Z0-9.-]*(?<![.]))"
 # Regular expression (as a string) for anything of the form
 #    3,  5a, IV, i, xii, ..., A, a, 1.C  eq:symmetric
 atomicID = (
-    f"(?:(?<![.])(?:{numAlpha}|[IVX]+|[ivx]+|"
-    f"\\b[A-Z][A-Z]?\\b|\\b[a-z]\\b|\\bREF\\b|\\(REF\\))(?![.]\\S)|"
+    f"(?:(?:{numAlpha}|[IVX]+|[ivx]+|"
+    f"\\b[A-Z][A-Z]?\\b|\\b[a-z]\\b|\\bREF\\b|\\(REF\\))|"
     f"\\b(?:eq|thm|fig):[A-Za-z0-9][A-Za-z0-9:]*)"
 )
 
@@ -56,7 +56,7 @@ atomicID = (
 #     r"(MATH)?\((?![Ii][Nn] )(\s*(SII|[iI]+)([0-9]|[A-Za-z]|['.,\-–]|\s){0,10}\s*)+\)",
 
 parenID = (
-    f"(?:(?:\\({atomicID}(?:(?:['.,\-–])?{atomicID})*\\))|"
+    f"(?:(?:\\({atomicID}(?:(?:['.,\-–]){atomicID})*\\))|"
     f"(?:\\[{atomicID}(?:\\.{atomicID})*\\])|"
     f"(?:\\[\\({atomicID}(?:\\.{atomicID})*\\)\\])|"
     f"(?:\\([A-Za-z][- ]?MATH\\))|"
@@ -70,13 +70,13 @@ parenID = f"(?:{parenID}|\\({atomicID}[. -]?{parenID}\\))"
 theoremNumber = (
     f"(?:REF(?:\\s?[.]?{parenID}|[.][a-z]\\b)?|{parenID}+|"
     f"{numAlpha}(?:[.]{numAlpha}|[.]?{parenID}|[.][a-z]\\b)*|"
-    f"(?<![A-Za-z]){atomicID}(?![A-Za-z]))"
+    f"(?<![A-Za-z]){atomicID}([.]{atomicID})?(?![A-Za-z]))"
 )
 
 # Prop, Th., Theorem, Formula, ...
 # But not "in fact"
 theorem_word = (
-    r"(?:(?i:(?:\b(?:Props?|Prps?|prps?|Thms?|Cor|Th|Lem|Rem|Eqn?s?|Defs?|Ex|Alg|Fig)(?:\b|\.))"
+    r"(?:(?i:(?:\b(?:Props?|Prps?|prps?|Thms?|Cor|Th|Lem|Rem|Eqn?s?|Defs?|Ex|Alg|Fig|Tab)(?:\b|\.))"
     r"|"
     r"(?:\b(?:Propositions?|Theorems?|Corollar(?:y|ies)|Lemm(?:a|as|e|ata)|"
     r"Remarks?|Equations?|Diagrams?|Claims?|Statements?|Axioms?|Conditions?|"
@@ -360,6 +360,7 @@ def treat_unbalanced_parens(
             "REF \\1",
             proof,
         )
+
     if debug:
         print(1520, proof)
 
@@ -588,6 +589,14 @@ def cleanup(
 
     if aggressive:
 
+        # by Properties a.-c.
+        proof = re.sub(
+            f"{theorem_word}(?<=s) {theoremNumber}[.]?\\s*-\\s*"
+            f"{theoremNumber}([.](?! [A-Z]))?",
+            "REF",
+            proof,
+        )
+
         # Simplify references to theorems, etc.
         # Prop. 2.1 -> REF
         # by Propositions 6.3 and 6.4. -> by REF.
@@ -597,11 +606,11 @@ def cleanup(
         # NOT by definition a nonempty -> by REF nonempty
         # NOT in fact a very -> in REF very
         # NOT uses Theorem 2. A consequence of -> uses REF . REF consequence of
-
+        # NOT by Corollary 3, i.e. -> by REF, REF .e.
         proof = re.sub(
             f"{theorem_word}\\s?((?![Aa]n?[ ])"
             f"{theoremNumber}(?:\\s?(?:[,-—]|and|or|with)\\s*"
-            f"(?![Aa]n?[ ]){theoremNumber})*)",
+            f"(?![Aa]n?[ ]){theoremNumber}(?![.][A-Z][a-z])(?! [A-Z]))*)",
             lambda m: re.sub(theoremNumber, "REF ", m.group(1)),
             proof,
         )
@@ -637,6 +646,14 @@ def cleanup(
         # By Theorem MATH, ->
         # oops... "by the mean value theorem MATH" -/->  "by the mean value REF"
         # proof = re.sub(f"{theorem_word}\s*MATH\\b", "REF", proof)
+
+    if debug:
+        print(1101, proof)
+
+    proof = re.sub("REF\\s*([.]\\s*REF)+(\\s*[.](?=[.,)]|\]))?", "REF", proof)
+
+    if debug:
+        print(1102, proof)
 
     # (iii 'a-ds,.) -> REF
     # MATH(iii) -> REF
@@ -801,7 +818,7 @@ def cleanup(
         f"(?:{section_identifier}(?:\\s*[-–—,]\\s*{section_identifier})?)"
     )
 
-    section_name = f"(?i:{section_word}\\s+(?:{section_maybe_range}))"
+    section_name = f"(?i:{section_word}[ -]+(?:{section_maybe_range}))"
 
     # Simplify references to sections, e.g.,
     # Appendix A -> REF
@@ -839,12 +856,14 @@ def cleanup(
     # Theorem 2 in CITE -> REF in CITE -> REF
     proof = re.sub("\\bREF (of|in) CITE\\b", r"REF", proof)
 
+    # Section 2 of Chapter 3 -> REF of REF -> REF
+    proof = re.sub("\\bREF (of|in) REF\\b", r"REF", proof)
+
     if debug:
         print(9700, proof)
 
     # (REF) -> REF
     proof = re.sub("\\(\\s*REF\\s*\\)", " REF ", proof)
-
 
     if debug:
         print(9750, proof)
@@ -881,8 +900,8 @@ def cleanup(
 
     # Remove sub-references in citations
     # \cite{smith}, Section 4 -> CITE, REF -> CITE
-    # But Smoth \cite{smith} Theorem 2 -> NAME CITE, REF -> REF
-    # proof = re.sub("CITE,? REF", "REF", proof)
+    # NOT Smith \cite{smith} Theorem 2 -> NAME CITE, REF -> REF
+    # proof = re.sub("(?!<NAME )CITE,? REF", "REF", proof)
 
     # Remove sub-references in citations
     # the theorem of Pick CITE -> REF CITE -> REF
@@ -892,7 +911,9 @@ def cleanup(
 
     # ( CITE, Theorem 2) -> (CITE, REF) -> REF
     # ( CITE, 5.2) -> REF
+    # [ CITE, REF] -> REF
     proof = re.sub(f"\\(\\s*CITE[ ,]+(REF|{numAlpha})\\s*\\)", " REF ", proof)
+    proof = re.sub(f"\\[\\s*CITE[ ,]+(REF|{numAlpha})\\s*\\]", " REF ", proof)
 
     # ( CITE ) -> CITE
     proof = re.sub("\\(\\s*CITE\\s*\\)", "CITE", proof)
