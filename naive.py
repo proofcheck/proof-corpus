@@ -730,6 +730,9 @@ def fixup(filename: str, tex_source: str) -> str:
             "$\mathfrak{X}=\mathfrak{U}(Q_{-1}'\cap Q_0)$ x $\mathfrak{U}(Q_{0}'\cap P_0)$ x $\mathfrak{U}(P_{-1}'\cap P_0)$ x $\mathfrak{U}(Q_{-1}'\cap P_{-1})$",
             " MATH ",
         )
+    elif "eqm7-x" in filename:
+        tex_source = tex_source.replace("Gel\\acc fand", "NAME")
+
     # A bunch of files, including
     # 0006/math-ph0006001/nonlinwa.tex
     # 0202/math0202057/h1_hand0.tex
@@ -757,7 +760,8 @@ def highlight_arrows(tex_source: str):
         "leftrightarrow",
         "Leftarrow",
         "Rightarrow",
-        "Leftrightarrow" "longleftarrow",
+        "Leftrightarrow",
+        "longleftarrow",
         "longrightarrow",
         "longleftrightarrow",
         "Longleftarrow",
@@ -772,12 +776,19 @@ def highlight_arrows(tex_source: str):
         "shortleftarrow",
         "shortrightarrow",
     ]
-    arrow_regex = "\\s*\\\\(" + "|".join(arrows) + ")\\s*"
+    arrow_regex = "\\s*\\\\(?:" + "|".join(arrows) + ")\\s*"
     tex_source = re.sub(
         "(\\s+|(?<![$]))[$]" + arrow_regex + "[$]\\s*", " ARROW ", tex_source
     )
     tex_source = re.sub(
         "\\s*\\\\\\(" + arrow_regex + "\\\\\)\\s*", " ARROW ", tex_source
+    )
+    section_regex = "\\s*\\\\S\\s*"
+    tex_source = re.sub(
+        "(\\s+|(?<![$]))[$]" + section_regex + "[$]\\s*", " ARROW ", tex_source
+    )
+    tex_source = re.sub(
+        "\\s*\\\\\\(" + section_regex + "\\\\\)\\s*", " Section ", tex_source
     )
     return tex_source
 
