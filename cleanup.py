@@ -42,11 +42,12 @@ lowerLetter = "[{}]".format(
 numAlpha = "(?:(?![.])[a-zA-Z0-9.]*\\d[a-zA-Z0-9.-]*(?<![.]))"
 
 # Regular expression (as a string) for anything of the form
-#    3,  5a, IV, i, xii, ..., A, a, 1.C  eq:symmetric
+#    3,  5a, IV, i, xii, ..., A, a, 1.C  eq:symmetric, *, **
 atomicID = (
     f"(?:(?:{numAlpha}|[IVX]+|[ivx]+|"
     f"\\b[A-Z][A-Z]?\\b|\\b[a-z]\\b|\\bREF\\b|\\(REF\\))|"
-    f"\\b(?:eq|thm|fig):[A-Za-z0-9][A-Za-z0-9:]*)"
+    f"\\b(?:eq|thm|fig):[A-Za-z0-9][A-Za-z0-9:]*|"
+    f"[*]+)"
 )
 
 # Regular expression (as a string) for anytinng of the form
@@ -56,7 +57,7 @@ atomicID = (
 #     r"(MATH)?\((?![Ii][Nn] )(\s*(SII|[iI]+)([0-9]|[A-Za-z]|['.,\-–]|\s){0,10}\s*)+\)",
 
 parenID = (
-    f"(?:(?:\\({atomicID}(?:(?:['.,\-–]){atomicID})*\\))|"
+    f"(?:(?:\\({atomicID}(?:['.,\-–]?{atomicID})*\\))|"
     f"(?:\\[{atomicID}(?:\\.{atomicID})*\\])|"
     f"(?:\\[\\({atomicID}(?:\\.{atomicID})*\\)\\])|"
     f"(?:\\([A-Za-z][- ]?MATH\\))|"
@@ -250,9 +251,16 @@ def ner(proof: str, debug: bool = False, aggressive: bool = True):
         proof,
     )
 
-    proof = re.sub(
-        f"(?<![.] )\\b{upperLetter}\\w+ CITE\\b", "NAME CITE", proof
-    )
+    # # NotRecognizedAsName CITE -> NAME CITE
+    # # but not "Foo. By CITE" -> "Foo. NAME CITE"
+    # # but not "By CITE we have" -> "NAME CITE we have"
+    # # but not "by the Connectedness CITE" -> "by the NAME CITE"
+    # Ack. "By the Dominated Convergence CITE."
+    # proof = re.sub(
+    #     f"(?<![.] )(?<![Tt]he )(?<=\\S )\\b{upperLetter}\\w+ CITE\\b",
+    #     "NAME CITE",
+    #     proof,
+    # )
 
     # proof = re.sub("NNAME", "NAME", proof)
 
@@ -550,6 +558,9 @@ def cleanup(
         # MATH.1 to MATH
         # REF.1 to REF
         proof = re.sub(r"(MATH|CASE|REF|CITE)\.([0-9]){1,3}", r"\1", proof)
+
+        # MATH=MATH -> MATH
+        proof = re.sub(r"MATH\\s*[=<>]+\\s*MATH", "MATH", proof)
 
         # 11111 -> MATH
         #  because for some reason,  (1111111111223344,22222222) really
@@ -977,23 +988,64 @@ def cleanup(
 
     proof = re.sub(r"\(\s*REF\s*\)\s*([A-Z])", "REF \\1", proof)
 
-    # (i) We have -> REF We have -> CASE: We have
-    # (1) $\Rightarrow$ (2) => REF ARROW REF => MATH
-    # BUT NOT:  T's Theorem CITE implies -> REF CITE implies -> CASE: implies
-    proof = re.sub(
-        f"(^\\s*|[.;:]\\s+)REF(?:\\s*ARROW\\s*REF)*[.: ]+({upperLetter}\\w+)",
-        lambda m: m.group(1) + "CASE: " + m.group(2)
-        if m.group(2) not in {"CITE", "REF"}
-        else m.group(0),
-        proof,
-    )
+    # REF ARROW REF -> REF
+    #  ...or this could be MATH, but REF works better when it's
+    #     really a CASE: label
+    proof = re.sub("REF\\s*(ARROW\\s*REF)+", "REF", proof)
+
+    # 3 ARROW 2 -> REF
+    proof = re.sub("\\d+\\s*ARROW\\s*\\d+", "REF", proof)
+
+    # ARROW REF => REF
+    proof = re.sub("ARROW\\s*REF", "REF", proof)
+
+    # ARROW (ARROW) => REF (REF)   ... when talking about fwd/back respectively
+    proof = re.sub("ARROW\\s*(\\s*ARROW\\s*)", "REF (REF)", proof)
+
+    # ARROW (iii+iv) => REF
+    proof = re.sub(f"ARROW \\(([ +]|{atomicID})+\\)", "REF", proof)
 
     # (i) $\longrightarrow$ (ii)  ->   MATH
     #  (some instances might be CASE: not caught above, but it's hard to tell)
     proof = re.sub(f"\\s*\\bREF(\\s*ARROW\\s*REF)+\\b\\s*", " MATH ", proof)
 
+    # ( ARROW ) -> REF
+    # ( REF ARROW ) -> REF
+    # " ARROW " -> REF
+    proof = re.sub("\\(\\s*(?:REF\\s*)?ARROW\\s*\\)", " REF ", proof)
+    proof = re.sub(r'"\s*ARROW\s*"', " REF ", proof)
+
+    # ARROW : If -> REF: If ( -> CASE: If just below)
+    proof = re.sub("ARROW\\s*:", "REF:", proof)
+
+    proof = re.sub("\\(REF\\)", "REF", proof)
+
     if debug:
         print(9890, proof)
+
+    # (i) We have -> REF We have -> CASE: We have
+    # (1) $\Rightarrow$ (2) => REF ARROW REF => MATH
+    # BUT NOT:  T's Theorem CITE implies -> REF CITE implies -> CASE: implies
+    proof = re.sub(
+        f"(^\\s*|[.;:]+\\s+)REF(?:\\s*ARROW\\s*REF)*[.: ]+({upperLetter}\\w+)",
+        lambda m: m.group(1) + "CASE: " + m.group(2)
+        if m.group(2) not in {"CITE", "REF"}
+        else m.group(0),
+        proof,
+    )
+    proof = re.sub(f"^\\s*REF(?:\\s*ARROW\\s*REF)*[.:]+", "CASE:", proof)
+
+    # ". ARROW Suppose" -> ". CASE: Suppose"
+    proof = re.sub(
+        f"(^\\s*|[.;:]+\\s+)ARROW[.: ]+({upperLetter}\\w+)",
+        lambda m: m.group(1) + "CASE: " + m.group(2)
+        if m.group(2) not in {"CITE", "REF", "ARROW"}
+        else m.group(0),
+        proof,
+    )
+
+    if debug:
+        print(9895, proof)
 
     # MATH.1 to MATH
     # REF.1 to REF
@@ -1062,6 +1114,8 @@ def urls(proof, debug=False):
 
 def spellcheck(proof):
     proof = proof.replace("Propostion", "Proposition")
+    proof = proof.replace("defintions", "definitions")
+    proof = proof.replace("modifiy", "modify")
 
     return proof
 
