@@ -57,11 +57,12 @@ atomicID = (
 #     r"(MATH)?\((?![Ii][Nn] )(\s*(SII|[iI]+)([0-9]|[A-Za-z]|['.,\-–]|\s){0,10}\s*)+\)",
 
 parenID = (
-    f"(?:(?:\\({atomicID}(?:['.,\-–]?{atomicID})*\\))|"
-    f"(?:\\[{atomicID}(?:\\.{atomicID})*\\])|"
-    f"(?:\\[\\({atomicID}(?:\\.{atomicID})*\\)\\])|"
+    f"(?:(?:\\({atomicID}(?:['.,\-–]?{atomicID})*'*\\))|"
+    f"(?:\\[{atomicID}(?:\\.{atomicID})*'*\\])|"
+    f"(?:\\[\\({atomicID}(?:\\.{atomicID})*'*\\)'*\\])|"
     f"(?:\\([A-Za-z][- ]?MATH\\))|"
-    f"(?:\\([A-Za-z][- ][0-9]\\)))"
+    f"(?:\\([A-Za-z][- ][0-9]'*\\))|"
+    f"(?:\\([*]+'*\\)))"
 )
 #   (d(iv))
 parenID = f"(?:{parenID}|\\({atomicID}[. -]?{parenID}\\))"
@@ -560,7 +561,8 @@ def cleanup(
         proof = re.sub(r"(MATH|CASE|REF|CITE)\.([0-9]){1,3}", r"\1", proof)
 
         # MATH=MATH -> MATH
-        proof = re.sub(r"MATH\\s*[=<>]+\\s*MATH", "MATH", proof)
+        # MATH ARROW MATH -> MATH
+        proof = re.sub(r"MATH(?:\s*(?:[=<>]+|ARROW)\s*MATH)+", "MATH", proof)
 
         # 11111 -> MATH
         #  because for some reason,  (1111111111223344,22222222) really
@@ -594,6 +596,22 @@ def cleanup(
 
     # ad 1 -> CASE
     proof = re.sub(f"(?i:ad)\\s*{numAlpha}(.)?", " CASE:", proof)
+
+    if debug:
+        print(1045, proof)
+
+    # 3 ARROW 2 -> MATH
+    # 3. ARROW 2. -> MATH
+    proof = re.sub("\\d+[.]?\\s*ARROW\\s*\\d+([.](?= [a-z]))?", "MATH", proof)
+
+    # i. ARROW ii. -> MATH
+    # II ARROW III -> MATH
+    proof = re.sub(
+        "[ixv]+[.]?\\s*ARROW\\s*[ixv]+([.](?= [a-z]))?", "MATH", proof
+    )
+    proof = re.sub(
+        "[IXV]+[.]?\\s*ARROW\\s*[IXV]+([.](?= [a-z]))?", "MATH", proof
+    )
 
     if debug:
         print(1050, proof)
@@ -988,6 +1006,12 @@ def cleanup(
 
     proof = re.sub(r"\(\s*REF\s*\)\s*([A-Z])", "REF \\1", proof)
 
+    # "implication ARROW -> "implication MATH"
+    # "ARROW direction" -> "MATH direction"
+    proof = re.sub("(?<=[Ii]mplication) ARROW", " MATH", proof)
+    proof = re.sub("(?<=[Dd]irection) ARROW", " MATH", proof)
+    proof = re.sub("ARROW(?= [Dd]irection)", " MATH", proof)
+
     # "implication REF ARROW REF -> "implication MATH"
     proof = re.sub("(?<=[Ii]mplication )REF\\s*ARROW\\s*REF", "MATH", proof)
     proof = re.sub(
@@ -1003,10 +1027,6 @@ def cleanup(
     #     really a CASE: label
     proof = re.sub('"REF\\s*(ARROW\\s*REF)+"', "REF", proof)
     proof = re.sub("REF\\s*(ARROW\\s*REF)+", "REF", proof)
-
-    # 3 ARROW 2 -> REF
-    # 3. ARROW 2. -> REF
-    proof = re.sub("\\d+[.]?\\s*ARROW\\s*\\d+([.](?= [a-z]))?", "REF", proof)
 
     # ARROW REF => REF
     proof = re.sub("ARROW\\s*REF", "REF", proof)
@@ -1024,8 +1044,11 @@ def cleanup(
     # ( ARROW ) -> REF
     # ( REF ARROW ) -> REF
     # " ARROW " -> REF
+    # ' ARROW ' -> REF
+    # (' ARROW ') -> REF
+    proof = re.sub(r'\(\s*["`\']+\s*ARROW\s*["`\']+\s*\)', " REF ", proof)
     proof = re.sub("\\(\\s*(?:REF\\s*)?ARROW\\s*\\)", " REF ", proof)
-    proof = re.sub(r'"\s*ARROW\s*"', " REF ", proof)
+    proof = re.sub(r'["`\']\s*ARROW\s*["`\']', " REF ", proof)
 
     # ARROW : If -> REF: If ( -> CASE: If just below)
     proof = re.sub("ARROW\\s*:", "REF:", proof)
@@ -1057,6 +1080,12 @@ def cleanup(
         else m.group(0),
         proof,
     )
+
+    if debug:
+        print(9893, proof)
+
+    # Give up
+    proof = proof.replace("ARROW", "MATH")
 
     if debug:
         print(9895, proof)
