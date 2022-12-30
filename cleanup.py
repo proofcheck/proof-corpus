@@ -57,13 +57,15 @@ atomicID = (
 #     r"(MATH)?\((?![Ii][Nn] )(\s*(SII|[iI]+)([0-9]|[A-Za-z]|['.,\-–]|\s){0,10}\s*)+\)",
 
 parenID = (
-    f"(?:(?:\\({atomicID}(?:['.,\-–]?{atomicID})*'*\\))|"
-    f"(?:\\[{atomicID}(?:\\.{atomicID})*'*\\])|"
-    f"(?:\\[\\({atomicID}(?:\\.{atomicID})*'*\\)'*\\])|"
+    f"(?:(?:\\({atomicID}(?:['.,\-–]?{atomicID})*\"*'*\\))|"
+    f"(?:\\[{atomicID}(?:\\.{atomicID})*\"*'*\\])|"
+    f"(?:\\[\\({atomicID}(?:\\.{atomicID})*'*\\)\"*'*\\])|"
     f"(?:\\([A-Za-z][- ]?MATH\\))|"
     f"(?:\\([A-Za-z][- ][0-9]'*\\))|"
-    f"(?:\\([*]+'*\\)))"
+    f"(?:\\([*]+'*\\))|\\(\\s?NAME\\s?\\)|"
+    f"(?:\\(\\s?[IV]+[a-e]?(?:-\\d)?\"*'*\\s?(?:: ?MATH)? ?\\)))"
 )
+
 #   (d(iv))
 parenID = f"(?:{parenID}|\\({atomicID}[. -]?{parenID}\\))"
 
@@ -551,6 +553,14 @@ def cleanup(
             f"in CITE, {numAlpha}[.](\\s+[a-z])", "in CITE \\1", proof
         )
         proof = re.sub(f"in CITE, {numAlpha}", "in CITE", proof)
+
+        # (REF.), -> (REF),
+        # (REF.): -> (REF):
+        proof = re.sub(
+            "(?:(?!<[ahj-uwyz])|(?<=\\d[a-z]))\\.\\s?\\)\\s?([,;:])",
+            ")\\1",
+            proof,
+        )
 
         # .. -> .
         # . . -> .

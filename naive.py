@@ -61,9 +61,11 @@ MATH_ENVS = {
     "equs",
     # tikz-cd package
     "tikzcd",
+    "cd",  # tikzcd alias in 1711/1711.04871
     # tikz?
     "tikzmath",  # 1711/1711.03061
     "tikzequation",  # 1711/1711.03061
+    "tikzeq",  # 1709/1709.09519
     # mathtools package
     "refeq",
     # 1901/1901.07820
@@ -83,6 +85,11 @@ MATH_ENVS = {
     "numcases",
     # 0905/0905.4064/fulll.tex
     "hs",
+    # 1112/1112.3060
+    "young",
+    "Young",  # youngtab package
+    # 1305/1305.1342
+    "ytableau",
 }
 
 # Maps each LaTeX \ref-like command to its number of arguments
@@ -292,6 +299,7 @@ TEX_CITES = {
     "\\autocite",
     # 2002/2002.09099
     "\\ocite",
+    "\\citen",  # 1103/1103.6148
 }
 
 
@@ -304,6 +312,7 @@ DELETE_ENVS = {
     "tabu",
     "tabular",
     "tabularx",
+    "array",
     # Other
     "diagram",
     "minipage",
@@ -328,6 +337,13 @@ DELETE_ENVS = {
     "quantikz",
     # 0309/cs0309024/qMuGames.tex
     "Reason",
+    # 1506/1506.08681
+    "ctikzpicture",
+    # 1506/1506.06197
+    "general-diagram",
+    "squisheddiagram",
+    # 1709/1709.09589 blkarray.sty
+    "blockarray",
 }
 
 DELETE_UNINTERPRETED_ENVS = {
@@ -641,53 +657,53 @@ def fixup(filename: str, tex_source: str) -> str:
         tex_source = tex_source.replace(
             "\\providecommand{ }[1]{\\textcolor{blue}{#1}}", ""
         )
-    elif "Leb2Poi" in filename:
+    if "Leb2Poi" in filename:
         tex_source = tex_source.replace(
             "Moreover. the set", "Moreover, the set"
         )
-    elif "Journal_Hyp_2020January" in filename:
+    if "Journal_Hyp_2020January" in filename:
         tex_source = tex_source.replace(
             "same endpoints. and if", "same endpoints, and if"
         )
-    elif "pseudo." in filename:
+    if "pseudo." in filename:
         tex_source = re.sub(r"\{e\}\$.\s+for \$j", r"{e}$ for $j", tex_source)
-    elif "canonicaldomainDMT." in filename:
+    if "canonicaldomainDMT." in filename:
         tex_source = tex_source.replace(r"\alpha^\sigma$.", r"\alpha^\sigma$,")
-    elif "paper_beta_arxiv." in filename:
+    if "paper_beta_arxiv." in filename:
         tex_source = tex_source.replace("(???)", " REF ")
-    elif "abci." in filename:
+    if "abci." in filename:
         tex_source = tex_source.replace("Picture?????", "")
-    elif "monotone." in filename:
+    if "monotone." in filename:
         tex_source = tex_source.replace("see??.", ".")
-    elif "lipschitzfree." in filename:
+    if "lipschitzfree." in filename:
         tex_source = tex_source.replace("Proposition ???", "Proposition 42")
-    elif "shi-yang-eppo." in filename:
+    if "shi-yang-eppo." in filename:
         tex_source = tex_source.replace("(??)", "")
-    elif "46-100." in filename:
+    if "46-100." in filename:
         tex_source = tex_source.replace("？？？？？？？", "")
-    elif "CDS-SU2n." in filename:
+    if "CDS-SU2n." in filename:
         # Defines a 2-argument version of \fullref, which
         # we can't handle (because reference commands like
         # \fullref are considered immutable)
         tex_source = tex_source.replace("\\fullref", "\\myfullref")
         tex_source = tex_source.replace("\\pref", "\\mypref")
-    elif "modularDD." in filename:
+    if "modularDD." in filename:
         tex_source = tex_source.replace("\\NewCons{}{} ", "MATH ")
-    elif "Harriss_OSTWI." in filename:
+    if "Harriss_OSTWI." in filename:
         tex_source = tex_source.replace(
             "\\WARMprocessEPS{2to1_three_steps_window}{eps}{bb}", ""
         )
-    elif "mholy." in filename:
+    if "mholy." in filename:
         tex_source = re.sub(r"\\beqn((.|\n)*?)\\eeqn", "\\[A=A\\]", tex_source)
-    elif "MaxMin." in filename:
+    if "MaxMin." in filename:
         tex_source = re.sub(
             r"\\begeq((.|\n)*?)\\endeq", "\\[\\1\\]", tex_source
         )
-    elif "ch." in filename:
+    if "ch." in filename:
         tex_source = tex_source.replace("\\home ", "")
-    elif "AIJ-Crossover-v1-arxiv." in filename:
+    if "AIJ-Crossover-v1-arxiv." in filename:
         tex_source = tex_source.replace("{aligna}", "{align}")
-    elif "2003.12106/macros." in filename:
+    if "2003.12106/macros." in filename:
         tex_source = tex_source.replace(
             "\\NewDocumentCommand\n  {\\HasTypeInCtx}\n  { O{} m m }\n  ",
             "\\newcommand{\\HasTypeInCtx}[3][]",
@@ -696,19 +712,19 @@ def fixup(filename: str, tex_source: str) -> str:
             "\\NewDocumentCommand\n  {\\Constructible}\n  { O{} m m }\n  ",
             "\\newcommand{\\Constructible}[3][]",
         )
-    elif "2003.04180" in filename:
+    if "2003.04180" in filename:
         TEX_REFS["\\objectref"] = 5
-    elif "2003.02840/simple_spinors_null_vectors_and_o_n__arxiv_2" in filename:
+    if "2003.02840/simple_spinors_null_vectors_and_o_n__arxiv_2" in filename:
         # Hack to ignore the second argument of \opt{margin_notes}
         # but not every \opt
         tex_source = tex_source.replace("\\opt{margin_notes}", "\\psfig")
-    elif "2001/2001.02981/main." in filename:
+    if "2001/2001.02981/main." in filename:
         tex_source = tex_source.replace("\\usepackage{theorems}", "")
-    elif "1308/1308.4171/CominiTitoloVillanueva-CR." in filename:
+    if "1308/1308.4171/CominiTitoloVillanueva-CR." in filename:
         tex_source = tex_source.replace(
             "\\usepackage[fancyproofs,noextended,squareitemtag]{theorems}", ""
         )
-    elif (
+    if (
         "thomp-genus0." in filename
         or "hhn-swe-aug-12." in filename
         or "somespectralpropertiesderivations." in filename
@@ -717,7 +733,7 @@ def fixup(filename: str, tex_source: str) -> str:
         or "concatsakiris_arxiv-4oct19." in filename
     ):
         tex_source = tex_source.replace("'s's", "'s")
-    elif "primeness." in filename:
+    if "primeness." in filename:
         tex_source = re.sub(
             r"\$\$ \$\$\s+with(\n|.)*\\end{proof}",
             r"\\end{proof}",
@@ -730,9 +746,10 @@ def fixup(filename: str, tex_source: str) -> str:
             "$\mathfrak{X}=\mathfrak{U}(Q_{-1}'\cap Q_0)$ x $\mathfrak{U}(Q_{0}'\cap P_0)$ x $\mathfrak{U}(P_{-1}'\cap P_0)$ x $\mathfrak{U}(Q_{-1}'\cap P_{-1})$",
             " MATH ",
         )
-    elif "eqm7-x" in filename:
+    if "eqm7-x" in filename:
         tex_source = tex_source.replace("Gel\\acc fand", "NAME")
-
+    if "GTasOS-Main-EPTCS" in filename:
+        tex_source = tex_source.replace("?!-determinism", "MATH-determinism")
     # A bunch of files, including
     # 0006/math-ph0006001/nonlinwa.tex
     # 0202/math0202057/h1_hand0.tex
@@ -2050,6 +2067,11 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
 
     if cmd == "\\lstset":
         # Ignore setting defaults for listings package
+        get_arg(words)
+        return []
+
+    if cmd == "\\ytableausetup":
+        # Ignore settings for ytableau package
         get_arg(words)
         return []
 
