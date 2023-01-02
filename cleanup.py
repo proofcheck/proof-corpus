@@ -73,8 +73,7 @@ parenID = f"(?:{parenID}|\\({atomicID}[. -]?{parenID}\\))"
 # Not: IV, IV.2
 theoremNumber = (
     f"(?:REF(?:\\s?[.]?{parenID}|[.][a-z]\\b)?|{parenID}+|"
-    f"{numAlpha}(?:[.]{numAlpha}|[.]?{parenID}|[.][a-z]\\b)*|"
-    f"(?<![A-Za-z]){atomicID}([.]{atomicID})?(?![A-Za-z]))"
+    f"{numAlpha}(?:[.]{numAlpha}|[.]?{parenID}|[.][a-z]\\b)*)"
 )
 
 # Prop, Th., Theorem, Formula, ...
@@ -443,6 +442,10 @@ def cleanup(
         proof = re.sub(r"\be[. ]?g[.]?,?(?!\w)", "for example ", proof)
         proof = re.sub(r"\bE[. ]?g[.]?,?(?!\w)", "For example ", proof)
 
+        # leaving in the space screws up sentence splitting
+        proof = re.sub(r"\ba[.] e[.]", "a.e.", proof)
+        proof = re.sub(r"\ba[.] s[.]", "a.s.", proof)
+
         # w.l.o.g  wlog ... -> without loss of generality
         # WLOG  W.l.o.g ... -> Without loss of generality
         proof = re.sub(
@@ -646,6 +649,8 @@ def cleanup(
         # NOT in fact a very -> in REF very
         # NOT uses Theorem 2. A consequence of -> uses REF . REF consequence of
         # NOT by Corollary 3, i.e. -> by REF, REF .e.
+
+        # NOT using LEMMA REF, w.h.p. there exists -> REF, REF .REF there exists
         proof = re.sub(
             f"{theorem_word}\\s?((?![Aa]n?[ ])"
             f"{theoremNumber}(?:\\s?(?:[,-—]|and|or|with)\\s*"
@@ -893,16 +898,17 @@ def cleanup(
 
     # p.45 of CITE -> REF of CITE -> REF
     # Theorem 2 in CITE -> REF in CITE -> REF
-    proof = re.sub("\\bREF (of|in) CITE\\b", r"REF", proof)
+    # Theorem 2.2. of CITE -> REF . of CITE -> REF
+    proof = re.sub("\\bREF(?:\\s*[.])? (of|in) CITE\\b", r"REF", proof)
 
     # Section 2 of Chapter 3 -> REF of REF -> REF
-    proof = re.sub("\\bREF (of|in) REF\\b", r"REF", proof)
+    proof = re.sub("\\bREF(?:\\s*[.])? (of|in) REF\\b", r"REF", proof)
 
     if debug:
         print(9700, proof)
 
     # (REF) -> REF
-    proof = re.sub("\\(\\s*REF\\s*\\)", " REF ", proof)
+    proof = re.sub("\\(\\s*REF[.]?\\s*\\)", " REF ", proof)
 
     if debug:
         print(9750, proof)
@@ -1032,11 +1038,15 @@ def cleanup(
     proof = re.sub("REF\\s*ARROW\\s*REF\\s*follows", "MATH follows", proof)
 
     # REF ARROW REF -> REF
-    # "REF AROW REF" -> REF
+    # "REF ARROW REF" -> REF
     #  ...or this could be MATH, but REF works better when it's
     #     really a CASE: label
     proof = re.sub('"REF\\s*(ARROW\\s*REF)+"', "REF", proof)
     proof = re.sub("REF\\s*(ARROW\\s*REF)+", "REF", proof)
+
+    # REF MATH ARROW REF MATH -> REF
+    proof = re.sub("REF MATH(\\s+ARROW\\s+REF\\s+MATH)+", "REF", proof)
+
 
     # ARROW REF => REF
     proof = re.sub("ARROW\\s*REF", "REF", proof)
@@ -1157,7 +1167,8 @@ def cleanup(
 
 
 URL = re.compile(
-    r"""\b(?:https?|ftp|gopher)\s?:\s?/{1,3}\s?(?:[-a-z0-9_%@']+[.])+[-a-z0-9_%@]+(?:[:][0-9]+)?(?:\s*[/]\s*[.a-z0-9_%#~&@*()'~-]*)*\s*(?:[/]\s*[a-z0-9_%#~&@*()'~-]*[/]|[/][a-z0-9_%#~&@*()'~-]*)""",
+    # globlular.science is in 1601/1601.05372
+    r"""\b(?:(?:https?|ftp|gopher)\s?:\s?/{1,3}\s?(?:[-a-z0-9_%@']+[.])+[-a-z0-9_%@]+(?:[:][0-9]+)?(?:\s*[/]\s*[.a-z0-9_%#~&@*()'~-]*)*\s*(?:[/]\s*[a-z0-9_%#~&@*()'~-]*[/]|[/][a-z0-9_%#~&@*()'~-]*)|globular[.]science[/][0-9.]+)""",
     re.IGNORECASE,
 )
 
@@ -1169,9 +1180,32 @@ def urls(proof, debug=False):
 
 
 def spellcheck(proof):
-    proof = proof.replace("Propostion", "Proposition")
+    proof = re.sub("([Pp])ropostion", "\\1roposition", proof)
     proof = proof.replace("defintions", "definitions")
     proof = proof.replace("modifiy", "modify")
+    proof = re.sub("([Re]?[Oo])cur", "\\1occur", proof)
+    proof = re.sub("ccur[ae]nce", "ccurrence", proof)
+    proof = re.sub("\\b([Pp])aralell", "\\1arallel", proof)
+    proof = re.sub("([Ee])xistance", "\\1xistence", proof)
+    proof = re.sub("([Ii])ndependant((?:ly|s)?)", "\\1ndependent\\2", proof)
+    proof = re.sub("([Ss])im[aei]l[aei]r", "\\1imilar", proof)
+    proof = re.sub("([Oo])perater", "\\1perator", proof)
+    proof = proof.replace("perpindicular", "perpendicular")
+    proof = re.sub("([Cc])o(?:rol|rroll?)ar", "\\1orollar", proof)
+    proof = proof.replace("corella", "correla")
+    proof = proof.replace("corrella", "correla")
+    proof = proof.replace("frustrum", "frustum")
+    proof = proof.replace("nieghbor", "neighbor")
+    proof = re.sub("\\b([Tt])eh\\b", "\\1he", proof)
+    proof = proof.replace("pulback", "pullback")
+    proof = re.sub("([Nn])eg[ei]tive", "\\1egative", proof)
+    proof = re.sub("a+range", "arrange", proof)
+    proof = re.sub(
+        "([Ss])s*ymetric", "\\1ymmetric", proof
+    )  # also catches assymetric
+    proof = proof.replace("composible", "composable")
+    proof = proof.replace("correspondance", "correspondence")
+    proof = proof.replace("corespond", "correspond")
 
     return proof
 

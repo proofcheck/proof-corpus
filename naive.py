@@ -90,6 +90,12 @@ MATH_ENVS = {
     "Young",  # youngtab package
     # 1305/1305.1342
     "ytableau",
+    # 1503/1503.07792
+    "llproof",
+    # 1802/1802.10511
+    "tikzccd",
+    # 1801/1801.08288
+    "talign",
 }
 
 # Maps each LaTeX \ref-like command to its number of arguments
@@ -174,6 +180,14 @@ TEX_REFS = {
     "\\smartref": 1,
     # 1406/1406.4015
     "\\Ref": 1,
+    # 0703/math070392
+    "\\refsec": 1,
+    "\\reflem": 1,
+    "\\reffig": 1,
+    "\\refthm": 1,
+    "\\refalg": 1,
+    "\\refcor": 1,
+    "\\refprop": 1,
 }
 
 # Set of LaTeX \cite-like commands
@@ -344,6 +358,18 @@ DELETE_ENVS = {
     "squisheddiagram",
     # 1709/1709.09589 blkarray.sty
     "blockarray",
+    # 0702/math0702892
+    "figtabular",
+    # 1601/1601.05372
+    "calign",
+    # 1611/1611.06276
+    "proofcase",
+    # 1805/1805.02859
+    "grammar",
+    # 1102/1102.2003
+    "pj",
+    # 0810/0810.0753
+    "prooftable",
 }
 
 DELETE_UNINTERPRETED_ENVS = {
@@ -750,6 +776,11 @@ def fixup(filename: str, tex_source: str) -> str:
         tex_source = tex_source.replace("Gel\\acc fand", "NAME")
     if "GTasOS-Main-EPTCS" in filename:
         tex_source = tex_source.replace("?!-determinism", "MATH-determinism")
+    if "g3arxiv." in filename:
+        tex_source = tex_source.replace("{footnotesize}", "{align}")
+    if "naaut70409sub." in filename:
+        tex_source = tex_source.replace("By applying ?", "By applying REF")
+
     # A bunch of files, including
     # 0006/math-ph0006001/nonlinwa.tex
     # 0202/math0202057/h1_hand0.tex
@@ -1413,6 +1444,10 @@ def skip_rest_math(
                     debug=debug,
                     verbose=verbose,
                 )
+            elif w == "\\right":
+                # We don't want math ending with the "empty" \right. to signal as ending with a period.
+                if words.peek("x") == ".":
+                    next(words)
             elif w == ".":
                 final_period = True
             elif w == "\\end":
@@ -1502,6 +1537,10 @@ def skip_rest_env(words, macros, stop_at=None) -> bool:
             if (env_nesting == 0 and stop_at is None) or env_name == stop_at:
                 break
 
+        elif w == "\\right":
+            # We don't want math ending with the "empty" \right. to signal as ending with a period.
+            if words.peek("x") == ".":
+                next(words)
         elif w == ".":
             final_period = True
         elif w == "\\label" and stop_at is None:
@@ -1867,6 +1906,14 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         get_arg(words)
         get_arg(words)
         get_arg(words)
+        return [" "]
+
+    if cmd == "\\fig" and cmd not in macros:
+        # 0703/math070392
+        get_arg(words)
+        get_arg(words)
+        get_arg(words)
+        return [" "]
 
     if cmd in ["\\DeclareMathSymbol", "\\mathchoice"]:
         get_arg(words)
@@ -1957,6 +2004,11 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         skip_optional_arg(words, macros)
         return []
 
+    if cmd == "\\scalebox":
+        get_arg(words)
+        skip_optional_arg(words, macros)
+        return []
+
     if cmd == "\\parbox":
         skip_optional_arg(words, macros)
         get_arg(words)
@@ -1967,7 +2019,7 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         skip_optional_arg(words, macros)
         return []
 
-    if cmd in ["\\resizebox"]:
+    if cmd == "\\resizebox":
         if words.peek("!") == "*":
             next(words)
         get_arg(words)
@@ -2493,6 +2545,10 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         get_arg(words)
         return [" MATH "]
 
+    if cmd == "\\bordermatrix":
+        get_arg(words)
+        return [" MATH "]
+
     if cmd == "\hvFloat":
         if words.peek("!") == "*":
             next(words)
@@ -2851,7 +2907,10 @@ def get_proofs(
             if debug:
                 print("   ", env_name, env_name.rstrip("*"))
                 print(words[:80])
-            if env_name.startswith(("proof", "Proof")):
+            if (
+                env_name.startswith(("proof", "Proof"))
+                and env_name.rstrip("*") not in DELETE_ENVS
+            ):
                 if proof_nesting == 0:
                     current_proof_words = []
                 proof_nesting += 1
@@ -2867,7 +2926,7 @@ def get_proofs(
                 # than one such argument, but just in case...
                 guessed_args = 0
                 while words.peek() == "{":
-                    get_arg(words)
+                    maybe_arg = get_arg(words)
                     guessed_args += 1
                 if guessed_args:
                     # Handle things like
@@ -2876,6 +2935,11 @@ def get_proofs(
                     skip_ws(words)
                     if words.peek("x") in {".", ":"}:
                         next(words)
+                    if words.peek("X").islower():
+                        # Oops. it's something like
+                        # \begin{proof}
+                        #   {\myref{foo}} gives us...
+                        words.prepend(*(["{"] + maybe_arg + ["}", " "]))
 
             elif env_name.rstrip("*") in MATH_ENVS:
                 fp = skip_rest_env(words, macros)
