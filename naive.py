@@ -104,6 +104,8 @@ MATH_ENVS = {
     "theoremtable",
     # 1911/1911.01788
     "ctikzcd",
+    # 1812/1812.04698
+    "equationcd",
 }
 
 # Maps each LaTeX \ref-like command to its number of arguments
