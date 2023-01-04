@@ -96,6 +96,14 @@ MATH_ENVS = {
     "tikzccd",
     # 1801/1801.08288
     "talign",
+    # 1011/1011.6448
+    "sdp",
+    # 0908/0908.3994
+    "mymath",
+    # 1911/1911.09624
+    "theoremtable",
+    # 1911/1911.01788
+    "ctikzcd",
 }
 
 # Maps each LaTeX \ref-like command to its number of arguments
@@ -334,6 +342,8 @@ DELETE_ENVS = {
     "tikzpicture",
     "mathpar",
     "lpic",
+    "supertabular",
+    "xtabular",
     # 1509/1509.06811
     "tz",
     # 2004/2004.04514
@@ -370,6 +380,8 @@ DELETE_ENVS = {
     "pj",
     # 0810/0810.0753
     "prooftable",
+    # 1911/1911.09379
+    "defproblemx"
 }
 
 DELETE_UNINTERPRETED_ENVS = {
@@ -412,6 +424,8 @@ DELETE_UNINTERPRETED_ENVS = {
     "psmatrix",
     # gastex
     "gpicture",
+    # 0711/0711.0572
+    "FigTab",
 }
 
 
@@ -780,6 +794,17 @@ def fixup(filename: str, tex_source: str) -> str:
         tex_source = tex_source.replace("{footnotesize}", "{align}")
     if "naaut70409sub." in filename:
         tex_source = tex_source.replace("By applying ?", "By applying REF")
+    if "math0003081/paper." in filename:
+        regex = re.compile("following table:.*?\\\\smallskip.*?\\\\smallskip.*?\\\\smallskip", re.DOTALL)
+        tex_source = re.sub(regex, "following table: MATH.", tex_source)
+    if "imperfect-best-response-journal4." in filename:
+        regex = re.compile("\\\\begin\{game\}.*?\\\\end\{game\}", re.DOTALL)
+        tex_source = re.sub(regex, "", tex_source)
+    if "selfish13." in filename:
+        regex = re.compile("\\\\begin\{game\}.*?\\\\end\{game\}", re.DOTALL)
+        tex_source = re.sub(regex, " MATH ", tex_source)
+    if "Maximizers_non_endpoint_Tomas_Stein_20190923." in filename:
+        tex_source = tex_source.replace("TAB", "align")
 
     # A bunch of files, including
     # 0006/math-ph0006001/nonlinwa.tex
@@ -2094,6 +2119,12 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         get_arg(words)
         get_arg(words)
         skip_optional_arg(words, macros)
+        get_arg(words)
+        return []
+
+
+    if cmd == "\\tablehead" or cmd == "\\tablefirsthead":
+        # supertabular?
         get_arg(words)
         return []
 

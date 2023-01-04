@@ -24,7 +24,6 @@ import unicodedata
 
 import nicer
 
-
 # Regular expression for uppercase letters (as a string)n
 #   equivalent to "[A-Z]" but also including non-ASCII
 upperLetter = "[{}]".format(
@@ -79,7 +78,7 @@ theoremNumber = (
 # Prop, Th., Theorem, Formula, ...
 # But not "in fact"
 theorem_word = (
-    r"(?:(?i:(?:\b(?:Props?|Prps?|prps?|Thms?|Cor|Th|Lem|Rem|Eqn?s?|Defs?|Ex|Alg|Fig|Tab)(?:\b|\.))"
+    r"(?:(?i:(?:\b(?:Props?|Prps?|prps?|Thms?|Cor|Th|Lem|Rem|Eqn?s?|Defs?|Ex|Alg|Fig|Tab)(?:\.(?:'s)?|\b))"
     r"|"
     r"(?:\b(?:Propositions?|Theorems?|Corollar(?:y|ies)|Lemm(?:a|as|e|ata)|"
     r"Remarks?|Equations?|Diagrams?|Claims?|Statements?|Axioms?|Conditions?|"
@@ -169,9 +168,10 @@ def ner(proof: str, debug: bool = False, aggressive: bool = True):
     # Guivarc'h is a name.
     # I've also seen Poincar'e and Maz'ya
     potential_name = (
-        "((?<!['`])(?:\\w'\\w|\\w)+[sz]'(?!s))|"
-        "((?:\\w'\\w|\\w)+\\w(?:'s\\b|'h\\b|'e|'ya\\b)?)|"
-        "\\bKy Fan\\b"  # 1911/1911.08637
+        "(?:\\bJr[.](?:'s)?)|(?:\\bJnr[.](?:'s)?)|"  # 0803/0803.3805
+        "(?:(?<!['`])(?:\\w'\\w|\\w)+[sz]'(?!s))|"
+        "(?:(?:\\w'\\w|\\w)+\\w(?:'s\\b|'h\\b|'e|'ya\\b)?)|"
+        "(?:\\bKy Fan\\b)"  # 1911/1911.08637
     )
 
     def lookup(g: Match[str]) -> str:
@@ -1046,7 +1046,6 @@ def cleanup(
 
     # REF MATH ARROW REF MATH -> REF
     proof = re.sub("REF MATH(\\s+ARROW\\s+REF\\s+MATH)+", "REF", proof)
-
 
     # ARROW REF => REF
     proof = re.sub("ARROW\\s*REF", "REF", proof)
