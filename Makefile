@@ -1,12 +1,18 @@
 SHELL=/bin/zsh
 
+test: new_cleanproofs10.tsv
+	./linediff.py 2023-01-01/cleanproofs10.tsv new_cleanproofs10.tsv | less -R
+
+new_cleanproofs10.tsv: cleanup.py
+	./cleanup.py -p15 2023-01-01/proofs10.tsv > new_cleanproofs10.tsv
+
 all:
 	-rm -rf proofs
 	-rm -rf proofs*.tsv
 	-rm -rf cleanproofs*.tsv
 	-rm -rf sent*.tsv
 	-rm -rf sorted.txt
-	./naive.py -p36 -m matches/eng-matches > log.txt 2>&1 
+	./naive.py -p36 -m matches/eng-matches > log.txt 2>&1
 	foreach y (`seq 92 99` `seq -w 0 20`); ./collect_raw_proofs.py $$y >! proofs$$y.tsv; end
 	foreach y (`seq 92 99` `seq -w 0 20`); ./cleanup.py -p36 proofs$$y.tsv > cleanproofs$$y.tsv; end
 	foreach y (`seq 92 99` `seq -w 0 20`); ./sentize2.py -p36 cleanproofs$$y.tsv > sent$$y.tsv; end
@@ -38,3 +44,4 @@ successful-proof-ids:
 	find proofs -name "*.txt" -not -empty | cut -d'/' -f3 > successful-proof-ids
 
 .PRECIOUS: matches/matches% proofs%.tsv cleanproofs%.tsv sent%.tsv sorted%.txt
+.PHONY: test
