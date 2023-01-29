@@ -28,13 +28,13 @@ Output :
 
 """
 Typical usage :
-    nohup time python3 collocation_replacer.py -f preprocessed_sents/sent1*.txt -cf bigram_analysis/bigram_analysis_all_500_7_14.txt -p merged_sents/non-aggressive/time -c 50
+    nohup time python3 collocation_replacer.py -f preprocessed_sents/sent1*.txt -cf bigram_analysis/bigram_analysis_all_500_7_14.txt -p merged_sents/non-aggressive/time -p 50
 
 Merge aggressively :
-    nohup time python3 collocation_replacer.py -m -f preprocessed_sents/sent1*.txt -cf bigram_analysis/bigram_analysis_all_500_7_14.txt -m -p merged_sents/aggressive/time -c 50
+    nohup time python3 collocation_replacer.py -m -f preprocessed_sents/sent1*.txt -cf bigram_analysis/bigram_analysis_all_500_7_14.txt -m -p merged_sents/aggressive/time -p 50
 
 Print time :
-    python3 collocation_replacer.py -P -f preprocessed_sents/sent00.txt -cf bigram_analysis/bigram_analysis_all_500_7_14.txt -p merged_sents/non-aggressive/time -c 50
+    python3 collocation_replacer.py -P -f preprocessed_sents/sent00.txt -cf bigram_analysis/bigram_analysis_all_500_7_14.txt -p merged_sents/non-aggressive/time -p 50
 
 Test non-aggressively merged sents :
     python3 collocation_replacer.py -t -f merged_sents/sent00/aggressive/sent00_6.txt

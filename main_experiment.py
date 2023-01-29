@@ -57,7 +57,7 @@ How to read results :
 
 """
 Typical usage :
-    nohup python3 main_experiment.py -tr training_set/optimal_handtagged.txt -te testing_set/optimal_handtagged3.txt -e optimal3 -c 25 -nt 50 -tnl 2 -inl 5 -wt -d -dr 
+    nohup python3 main_experiment.py -tr training_set/optimal_handtagged.txt -te testing_set/optimal_handtagged3.txt -e optimal3 -p 25 -nt 50 -tnl 2 -inl 5 -wt -d -dr 
 """
 
 def save_results(results, output):
@@ -269,7 +269,7 @@ if __name__ == '__main__':
     parser.add_argument("--extension", "-e",
                             help="file extension")
     
-    parser.add_argument("--cores", "-c", type=int, default=5,
+    parser.add_argument("--cores", "-p", type=int, default=5,
                             help="cores")
 
     parser.add_argument("--num_trials", "-nt", type=int, default=10,

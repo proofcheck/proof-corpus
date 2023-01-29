@@ -34,7 +34,7 @@ Output :
 
 """
 Typical usage :
-    nohup python3 extract_sents.py -f tagged_sents/tagged_sentences_6_13.txt -w Enumerate -c 20 -u
+    nohup python3 extract_sents.py -f tagged_sents/tagged_sentences_6_13.txt -w Enumerate -p 20 -u
 """
 
 def check_first_word(sent, word):
@@ -69,7 +69,7 @@ def make_bins(args):
             file_name_unique = "word_bins/unique/" + word + args.extension + ".txt"
             unique_sents = set()
             unique_output = open(file_name_unique, "w")
-          
+
         with open(file_name, "w") as output:  
             with Pool(processes=args.cores) as p:          
                 for ind, line in enumerate(p.starmap(
@@ -104,10 +104,10 @@ if __name__ == '__main__':
     parser.add_argument("--file", "-f", 
                             help="txt file to read tags from")
     
-    parser.add_argument("--output", "-o", type=argparse.FileType('w'),
+    parser.add_argument("--output", "-o",
                             help="txt file to write results to")
 
-    parser.add_argument( "--cores", "-c",
+    parser.add_argument( "--cores", "-p",
                             help="number of cores to use", type=int, default=4)
     
     parser.add_argument("--word", "-w", 

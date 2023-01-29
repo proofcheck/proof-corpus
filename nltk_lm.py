@@ -144,7 +144,7 @@ if __name__ == '__main__':
     parser.add_argument( "--files", "-f", nargs='*',type=argparse.FileType("r"),
                             help="List of txt files to read sentences from (for generating lm)")
 
-    parser.add_argument( "--cores", "-c",
+    parser.add_argument( "--cores", "-p",
                             help="Number of cores to use", type=int, default=4)
 
     parser.add_argument( "--lm", "-lm",

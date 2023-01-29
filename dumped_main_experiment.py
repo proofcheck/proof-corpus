@@ -34,10 +34,10 @@ Output :
 
 """
 Typical usage :
-    nohup python3 dumped_main_experiment.py -ta tagger/7_5/*.pk -te testing_set/refer_handtagged.txt -e refer -c 25 -tn 3
+    nohup python3 dumped_main_experiment.py -ta tagger/7_5/*.pk -te testing_set/refer_handtagged.txt -e refer -p 25 -tn 3
 
 Test on WSJ_TEST (output is in separate file) :
-    nohup python3 dumped_main_experiment.py -ta tagger/7_5/*.pk -te testing_set/refer_handtagged.txt -e refer -c 25 -wt -tn 3
+    nohup python3 dumped_main_experiment.py -ta tagger/7_5/*.pk -te testing_set/refer_handtagged.txt -e refer -p 25 -wt -tn 3
 """
 
 def do_dumped_experiments(args):

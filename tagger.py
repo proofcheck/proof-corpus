@@ -32,7 +32,7 @@ Output :
 
 """
 Typical usage :
-    nohup python3 tagger.py -f ../../stone/proof-corpus/sent**.tsv -c 50 -o tagged_sents/tagged_sentences_6_13.txt
+    nohup python3 tagger.py -f ../../stone/proof-corpus/sent**.tsv -p 50 -o tagged_sents/tagged_sentences_6_13.txt
 """
 
 def make_wsj_train():
@@ -172,7 +172,7 @@ if __name__ == '__main__':
     parser.add_argument("--output", "-o", type=argparse.FileType("w"),
                             help="txt file to write results to")
 
-    parser.add_argument( "--cores", "-c",
+    parser.add_argument( "--cores", "-p",
                             help="Number of cores to use", type=int, default=4)
 
     parser.add_argument( "--test", "-t",

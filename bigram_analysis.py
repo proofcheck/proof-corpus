@@ -43,8 +43,8 @@ Don't filter (return results for all bigrams) :
     python3 bigram_analysis.py -bf bigrams/sent00/bigrams_sent00.pk -o bigram_analysis/sent00/bigram_analysis_sent00_all.txt -A
 """
 
-BIGRAM_PATH = "bigrams/"
-ANALYSIS_PATH = "bigram_analysis/"
+BIGRAM_PATH = "french/bigrams/"
+ANALYSIS_PATH = "french/bigram_analysis/"
 
 def save_bigrams_sents(files, output, n=2):
     sentences = []
@@ -289,7 +289,7 @@ if __name__ == "__main__":
     parser.add_argument("--n", "-n", type=int, default=2,
                         help="value of n for bigrams")
 
-    # parser.add_argument("--cores", "-c", type=int, default=4,
+    # parser.add_argument("--cores", "-p", type=int, default=4,
     #                     help="number of cores")
 
     parser.add_argument("--output", "-o", default=sys.stdout, type=argparse.FileType("w"),
