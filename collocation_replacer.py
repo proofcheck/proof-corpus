@@ -21,20 +21,20 @@ Input :
 Output :
     txt file of merged sentences 
     
-    The file is saved in merged_sents/aggressive or merged_sents/non-aggressive depending on whether -m is used, (unless path is specified using -p).
+    The file is saved in merged_sents/aggressive or merged_sents/non-aggressive depending on whether -m is used, (unless path is specified using -fp).
     Filenames are taken automatically from the input file.
-    If -p is used, the output is saved to that path with the automatically formatted file name.
+    If -fp is used, the output is saved to that path with the automatically formatted file name.
 """
 
 """
 Typical usage :
-    nohup time python3 collocation_replacer.py -f preprocessed_sents/sent1*.txt -cf bigram_analysis/bigram_analysis_all_500_7_14.txt -p merged_sents/non-aggressive/time -p 50
+    nohup time python3 collocation_replacer.py -f preprocessed_sents/sent1*.txt -cf bigram_analysis/bigram_analysis_all_500_7_14.txt -fp merged_sents/non-aggressive/time -p 50
 
 Merge aggressively :
-    nohup time python3 collocation_replacer.py -m -f preprocessed_sents/sent1*.txt -cf bigram_analysis/bigram_analysis_all_500_7_14.txt -m -p merged_sents/aggressive/time -p 50
+    nohup time python3 collocation_replacer.py -m -f preprocessed_sents/sent1*.txt -cf bigram_analysis/bigram_analysis_all_500_7_14.txt -m -fp merged_sents/aggressive/time -p 50
 
 Print time :
-    python3 collocation_replacer.py -P -f preprocessed_sents/sent00.txt -cf bigram_analysis/bigram_analysis_all_500_7_14.txt -p merged_sents/non-aggressive/time -p 50
+    python3 collocation_replacer.py -P -f preprocessed_sents/sent00.txt -cf bigram_analysis/bigram_analysis_all_500_7_14.txt -fp merged_sents/non-aggressive/time -p 50
 
 Test non-aggressively merged sents :
     python3 collocation_replacer.py -t -f merged_sents/sent00/aggressive/sent00_6.txt
@@ -190,7 +190,7 @@ if __name__ == "__main__":
     parser.add_argument("--files", "-f", nargs="*", type=argparse.FileType("r"),
                         help="txt file to read sents from")
 
-    parser.add_argument("--cores", "-c", type=int, default=4,
+    parser.add_argument("--cores", "-p", type=int, default=4,
                         help="number of cores")
 
     parser.add_argument("--collocation_file", "-cf", type=argparse.FileType("r"),
@@ -205,7 +205,7 @@ if __name__ == "__main__":
     parser.add_argument("--print_time", "-P", action="store_true",
                         help="print time")
 
-    parser.add_argument("--path", "-p",
+    parser.add_argument("--path", "-fp",
                         help="output file path")
 
     parser.add_argument("--extension", "-e",
