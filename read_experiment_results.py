@@ -6,6 +6,7 @@ import argparse
 import nicer
 import numpy as np
 import os
+os.environ['OPENBLAS_NUM_THREADS'] = '1'
 
 """
 Input :
@@ -33,11 +34,29 @@ def read_one_result(fname):
     # Reads in one result file (result of multiple trials under the same condition) and return average/standard deviation of all the metrics
     with open(fname, "r") as fd:
         results_str_list = fd.read().splitlines()
-    trial_results = np.array([[float(num) for num in trial.split("\t")] for trial in results_str_list])
-    averages = np.mean(trial_results, axis=0)
-    standard_deviations = np.std(trial_results, axis=0)
+    
+    trial_results = [[item for item in trial.split("\t")] for trial in results_str_list]
+    
+    # Check if results has trial name
+    if is_float(trial_results[0][0]) is False:
+        trial_names = [item[0] for item in trial_results]
+        trial_results = [item[1:] for item in trial_results]
+
+    floated_results = np.array([[float(item) for item in trial] for trial in trial_results])
+    averages = np.mean(floated_results, axis=0)
+    standard_deviations = np.std(floated_results, axis=0)
     summary = np.column_stack((averages, standard_deviations))
+    
     return summary
+
+def is_float(item):
+    try:
+        if float(item):
+            return True
+
+    except ValueError:
+        return False
+
 
 def main(args):
     file_list = list(filter(lambda x: os.path.getsize(x)>1, args.files))

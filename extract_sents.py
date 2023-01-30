@@ -61,14 +61,19 @@ def make_bins(args):
         lines = fd.readlines()
 
     for word in word_list:
-        print(word)
-        file_name = "word_bins/" + word + args.extension + ".txt"
+        if args.output:
+            file_name = args.output
+        else:
+            file_name = "word_bins/" + word + args.extension + ".txt"
         
         # Only keep unique sentences
         if args.unique:
-            file_name_unique = "word_bins/unique/" + word + args.extension + ".txt"
+            if args.unique_output:
+                file_name_unique = args.unique_output
+
+            else:
+                file_name_unique = "word_bins/unique/" + word + args.extension + ".txt"
             unique_sents = set()
-            unique_output = open(file_name_unique, "w")
 
         with open(file_name, "w") as output:  
             with Pool(processes=args.cores) as p:          
@@ -87,9 +92,10 @@ def make_bins(args):
                             sent = line.split("\t")[1]
                             output.write(sent)
                             if args.unique:
-                                if sent not in unique_sents:
-                                    unique_sents.add(sent)
-                                    unique_output.write(sent) 
+                                with open(unique_output, "w"):
+                                    if sent not in unique_sents:
+                                        unique_sents.add(sent)
+                                        unique_output.write(sent) 
                             
                 if args.unique:
                     unique_output.close()
@@ -105,7 +111,10 @@ if __name__ == '__main__':
                             help="txt file to read tags from")
     
     parser.add_argument("--output", "-o",
-                            help="txt file to write results to")
+                            help="txt file to write sentences to")
+
+    parser.add_argument("--unique_output", "-uo",
+                            help="txt file to write unique sentences to")
 
     parser.add_argument( "--cores", "-p",
                             help="number of cores to use", type=int, default=4)

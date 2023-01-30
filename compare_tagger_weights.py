@@ -14,7 +14,7 @@ from find_disagreeing_sents import get_taggers_from_ids, get_tagger_ids_from_lis
 
 """
 Input :
-    --files : file of sentences (in disagreeing_sents/, output of disagreeing_sents.py)
+    --file : file of sentences (in disagreeing_sents/, output of disagreeing_sents.py)
     --best_tagger : IDs of best taggers, split by commas (defaults to 41,9)
     --worst_tagger : IDs of worst taggers, split by commas (defaults to 38,22)
     (other arguments)

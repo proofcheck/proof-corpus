@@ -3,6 +3,8 @@
 """Main experiment script for finding the optimal tagger that tags imperative verbs accurately."""
 
 import argparse
+import os
+os.environ['OPENBLAS_NUM_THREADS'] = '1'
 
 import nicer
 from multiprocessing import Pool
@@ -284,7 +286,7 @@ if __name__ == '__main__':
     parser.add_argument("--wsj_test", "-wt", action='store_true',
                             help="test on WSJ?")
 
-    parser.add_argument("--print_mislabels", "-p", action='store_true',
+    parser.add_argument("--print_mislabels", "-m", action='store_true',
                             help="output non-VB tags?")
 
     parser.add_argument("--dump", "-d", action='store_true',

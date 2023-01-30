@@ -159,13 +159,13 @@ if __name__ == '__main__':
     parser.add_argument("--extension", "-e",
                             help="file extension for output")
     
-    parser.add_argument("--cores", "-c", type=int, default=5,
+    parser.add_argument("--cores", "-p", type=int, default=5,
                             help="cores")
 
     parser.add_argument("--wsj_test", "-wt", action='store_true',
                             help="test on WSJ?")
 
-    parser.add_argument("--print_mislabels", "-p", action='store_true',
+    parser.add_argument("--print_mislabels", "-m", action='store_true',
                             help="output non-VB tags?")
 
     parser.add_argument("--tag_n", "-tn", type=int, default=None,

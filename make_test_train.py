@@ -5,7 +5,10 @@
 import argparse
 import nicer
 import os
+os.environ['OPENBLAS_NUM_THREADS'] = '1'
+
 import nltk
+
 
 from load_ontonotes_pos import *
 from train_tagger import DEFAULT_TAGGER, mislabeled_vb, num_mislabelings, pick_sents, write_fixed_sents
@@ -103,8 +106,8 @@ def make_train_test(args):
     # Make word list from word_list file 
     # (with the first n being training words and the rest being testing words)
     word_list = args.word_list.read().splitlines()
-    
     num_train_bins = len(word_list) - args.num_test_bins
+
     # Get list of training and testing bins
     train_files, test_files = get_train_test_files(word_list, num_train_bins)
 
