@@ -250,10 +250,13 @@ def do_one_trial(training, nr_iter, testing, trial_id=None, wsj_test=False, prin
 
 def get_confusion_results(confusion, mislabel_pair):
     try:
-        return confusion[mislabel_pair]
+        if confusion[mislabel_pair] is None:
+            return 0
+        else:
+            return confusion[mislabel_pair]
 
     except KeyError:
-        return None
+        return 0
 
 def main(args):
     do_experiments(args)
