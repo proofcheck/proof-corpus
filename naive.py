@@ -944,14 +944,14 @@ def tokenize_string(filename: str, tex_source: str):
             if d.isdigit() and d != "0":
                 next(chars)
                 word += d
-        elif word == "`":
-            if chars.peek("!") == "`":
-                next(chars)
-                word = '"'
-        elif word == "'":
-            if chars.peek("!") == "'":
-                next(chars)
-                word = '"'
+        # elif word == "`":
+        #     if chars.peek("!") == "`":
+        #         next(chars)
+        #         word = '"'
+        # elif word == "'":
+        #     if chars.peek("!") == "'":
+        #         next(chars)
+        #         word = '"'
         elif word == "-":
             if chars.peek("!") == "-":
                 next(chars)
@@ -2998,7 +2998,7 @@ def get_proofs(
                     get_arg(words)
                     get_arg(words)
                 elif "\\" + env_name in macros:
-                    print("GGG entering user-defined environment", env_name)
+                    # print("GGG entering user-defined environment", env_name)
                     words.prepend("\\" + env_name)
                     continue
 
@@ -3028,7 +3028,7 @@ def get_proofs(
             elif env_name == "document":
                 break
             elif "\\end" + env_name in macros:
-                print("GGG leaving user-defined environment", env_name)
+                # print("GGG leaving user-defined environment", env_name)
                 words.prepend("\\end" + env_name)
                 continue
             else:
