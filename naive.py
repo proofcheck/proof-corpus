@@ -2308,6 +2308,27 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
             # leave the else alone (in braces)
             return []
 
+    if cmd == "\\IfEqCase":
+        # still from xstring
+        if words.peek("!") == "*":
+            next(words)
+        skip_optional_arg(words, macros)
+        a1 = "".join(get_arg(words))
+        skip_ws(words)
+        found = False
+        then_arg = []
+        if next(words) == "{":
+            while words.peek("!") != "}":
+                a2 = "".join(get_arg(words))
+                if a1 == a2 and not found:
+                    found = True
+                    then_arg = get_arg(words)
+                else:
+                    get_arg(words)
+                skip_ws(words)
+            next(words)  # skip the "}"
+            words.prepend(*then_arg)
+
     if cmd == "\\write":
         if words.peek("q").isdigit():
             while words.peek("q").isdigit():
