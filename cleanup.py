@@ -36,6 +36,12 @@ lowerLetter = "[{}]".format(
     "".join([chr(i) for i in range(sys.maxunicode) if chr(i).islower()])
 )
 
+# Regular expression for lowercase letters (as a string)n
+#   equivalent to "[a-z]" but also including non-ASCII
+nameChar = "[{}'-]".format(
+    "".join([chr(i) for i in range(sys.maxunicode) if chr(i).islower() or chr(i).isupper()])
+)
+
 # Regular expression (as a string) for anything of the form
 #     42, 5a, 4.1bc, 1.C. 3-5, ...
 numAlpha = "(?:(?![.])[a-zA-Z0-9.]*\\d[a-zA-Z0-9.-]*(?<![.]))"
@@ -169,8 +175,8 @@ def ner(proof: str, debug: bool = False, aggressive: bool = True):
     # I've also seen Poincar'e and Maz'ya
     potential_name = (
         "(?:\\bJr[.](?:'s)?)|(?:\\bJnr[.](?:'s)?)|"  # 0803/0803.3805
-        "(?:(?<!['`])(?:\\w'\\w|\\w)+[sz]'(?!s))|"
-        "(?:(?:\\w'\\w|\\w)+\\w(?:'s\\b|'h\\b|'e|'ya\\b)?)|"
+        f"(?:(?<!['`])(?:{nameChar}'{nameChar}|{nameChar})+[sz]'(?!s))|"
+        f"(?:(?:{nameChar}'{nameChar}|{nameChar})+{nameChar}(?:'s\\b|'h\\b|'e|'ya\\b)?)|"
         "(?:\\bKy Fan\\b)"  # 1911/1911.08637
     )
 
