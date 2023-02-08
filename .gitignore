@@ -192,6 +192,9 @@ proofs
 
 *.trace
 
+# Too variant
+successful-proof-ids
+
 # Toy examples
 t.tex
 u.tex
