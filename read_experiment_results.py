@@ -60,7 +60,6 @@ def is_float(item):
     except ValueError:
         return False
 
-
 def main(args):
     file_list = list(filter(lambda x: os.path.getsize(x)>1, args.files))
     # For each condition (file)
