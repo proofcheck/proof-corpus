@@ -5,6 +5,8 @@
 import argparse
 import nicer
 import sys
+import os
+os.environ['OPENBLAS_NUM_THREADS'] = '1'
 
 from nltk.tag.perceptron import *
 

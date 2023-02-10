@@ -31,7 +31,7 @@ Typical usage :
 """
 
 def read_one_result(fname):
-    # Reads in one result file (result of multiple trials under the same condition) and return average/standard deviation of all the metrics
+    # Reads in one result file (result of multiple trials under the same condition) and returns the names of the trials and average/standard deviation of all the metrics
     with open(fname, "r") as fd:
         results_str_list = fd.read().splitlines()
     
@@ -41,13 +41,16 @@ def read_one_result(fname):
     if is_float(trial_results[0][0]) is False:
         trial_names = [item[0] for item in trial_results]
         trial_results = [item[1:] for item in trial_results]
-
+    
+    else:
+        trial_names = []
+    print(trial_results)
     floated_results = np.array([[float(item) for item in trial] for trial in trial_results])
     averages = np.mean(floated_results, axis=0)
     standard_deviations = np.std(floated_results, axis=0)
     summary = np.column_stack((averages, standard_deviations))
     
-    return summary
+    return trial_names, summary
 
 def is_float(item):
     try:
@@ -63,9 +66,12 @@ def main(args):
     # For each condition (file)
     for f in file_list:
         # Get condition from file name
-        conditions = f.split("_")
-        condition = "_".join(conditions[1:4])
-        summary_list = read_one_result(f).tolist()
+        # conditions = (f.split(".")[:-1]).split("_")
+        # condition = "_".join(conditions[1:])
+        condition = (f.split("/")[-1]).split(".")[0]
+        print(condition)
+        trial_names, summary = read_one_result(f)
+        summary_list = summary.tolist()
         summary_strings_list = [[str(num) for num in metric] for metric in summary_list]
         summary_joined_list = []
         for metric in summary_strings_list:
