@@ -15,13 +15,7 @@ ifeq ($(NUMPROC),0)
 endif
 
 
-all:
-	-rm -rf proofs
-	-rm -f proofs*.tsv
-	-rm -f cleanproofs*.tsv
-	-rm -f sent*.tsv
-	-rm -f sorted.txt
-	-rm -f successful-proof-ids
+all: clean
 	hostname > log.txt
 	date >> log.txt
 	./naive.py -p$(NUMPROC) -m matches/eng-matches >> log.txt 2>&1
@@ -31,6 +25,15 @@ all:
 	find proofs -name "*.txt" -not -empty | cut -d'/' -f3 | sort > successful-proof-ids
 	cut -f2 sent*.tsv | sort | uniq -c | sort -rn > sorted.txt
 	date >> log.txt
+
+clean:
+	-rm -rf proofs
+	-rm -f proofs*.tsv
+	-rm -f cleanproofs*.tsv
+	-rm -f sent*.tsv
+	-rm -f sorted.txt
+	-rm -f successful-proof-ids
+
 
 reclean:
 	foreach y (`seq 92 99` `seq -w 0 20`); ./cleanup.py -p$(NUMPROC) proofs$$y.tsv > cleanproofs$$y.tsv; end
@@ -60,7 +63,7 @@ successful-proof-ids:
 	find proofs -name "*.txt" -not -empty | cut -d'/' -f3 > successful-proof-ids
 
 .PRECIOUS: matches/matches% proofs%.tsv cleanproofs%.tsv sent%.tsv sorted%.txt
-.PHONY: test archive reclean
+.PHONY: test archive reclean clean
 
 DATE=$(shell date "+%Y-%m-%d")
 archive:
