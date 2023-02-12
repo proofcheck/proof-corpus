@@ -46,7 +46,7 @@ Don't filter (return results for all bigrams) :
 BIGRAM_PATH = "french/bigrams/"
 ANALYSIS_PATH = "french/bigram_analysis/"
 
-def save_bigrams_sents(files, output, n=2):
+def save_bigrams_sents(files, output):
     sentences = []
     for fd in files:
         for line in fd.readlines():
@@ -178,7 +178,7 @@ def make_unigrams_from_bigrams_sents(sents):
 
 def main(args):
     if args.files:
-        bigrams_sents = save_bigrams_sents(args.files, args.bigram_file, args.n)
+        bigrams_sents = save_bigrams_sents(args.files, args.bigram_file)
         print("done dumping", flush=True)
         gc.collect()
 
@@ -286,8 +286,8 @@ if __name__ == "__main__":
     parser.add_argument("--bigram_file", "-bf",
                         help="pk file to read/write bigrams")
     
-    parser.add_argument("--n", "-n", type=int, default=2,
-                        help="value of n for bigrams")
+    # parser.add_argument("--n", "-n", type=int, default=2,
+    #                     help="value of n for bigrams")
 
     # parser.add_argument("--cores", "-p", type=int, default=4,
     #                     help="number of cores")
