@@ -2,6 +2,16 @@
 
 """Report unigram counts for file(s) or stdin."""
 
+# E.g.,
+
+#  ./quick_unigrams.py today/sent00.tsv | less
+#  ./quick_unigrams.py today/sent*.tsv > unigrams.txt
+
+# Look for words not in the dictionary (mostly math jargon or typos)
+#  ./quick_unigrams.py --spellcheck today/sent00.tsv | less
+#  ./quick_unigrams.py --spellcheck today/sent*.tsv > spellcheck.txt
+
+
 import argparse
 from collections import Counter
 import sys
@@ -62,6 +72,25 @@ def main(args):
 
     cnt_uni = get_unigrams(sentences)
 
+    if args.spellcheck:
+        known_words: set[str] = set()
+        with open("words_alpha.txt") as fd:
+            for word in fd.readlines():
+                word = word.strip()
+                known_words.add(word)
+            known_words.add("profinite")
+            known_words.add("interpolants")
+            known_words.add("maximality")
+            known_words.add("poissonization")
+            known_words.add("hamiltonians")
+            known_words.add("lorentzian")
+            known_words.add("injectivity")
+        for (w, c) in cnt_uni.most_common():
+            w1 = w.lower().removeprefix("math-").removeprefix("non-").removeprefix("-").removeprefix("sub-")
+            if w1 not in known_words and w1.removesuffix("s") not in known_words:
+                print(f"{c}\t{w}")
+        return
+
     for (w, c) in cnt_uni.most_common():
         print(f"{c}\t{w}")
 
@@ -75,6 +104,13 @@ if __name__ == "__main__":
         action="store_true",
         default=False,
         help="keep punctuation",
+    )
+
+    parser.add_argument(
+        "--spellcheck",
+        action="store_true",
+        default=False,
+        help="Show only words not in the dictionary",
     )
 
     parser.add_argument(
