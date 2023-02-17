@@ -1982,7 +1982,7 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         return [" "]
 
     if cmd == "\\epsfbox":
-        skip_optional_arg(words)
+        skip_optional_arg(words, macros)
         get_arg(words)
         return [" "]
 
@@ -2222,7 +2222,7 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         #         arg.append(w)
 
     if cmd == "\\lstinputlisting":
-        skip_optional_arg(words)
+        skip_optional_arg(words, macros)
         get_arg(words)
         return [" "]
 
@@ -2917,6 +2917,8 @@ def get_proofs(
                 optional = ""
             filenames = "".join(get_arg(words)).split(",")
             for filename in filenames:
+                if filename == "":  # e.g., 1903/1903.03668 has \usepackage{}
+                    continue
                 fn = Path(filename.strip().lower())
                 if fn.name == "babel":
                     if "german" in optional:
