@@ -43,8 +43,8 @@ Don't filter (return results for all bigrams) :
     python3 bigram_analysis.py -bf bigrams/sent00/bigrams_sent00.pk -o bigram_analysis/sent00/bigram_analysis_sent00_all.txt -A
 """
 
-BIGRAM_PATH = "french/bigrams/"
-ANALYSIS_PATH = "french/bigram_analysis/"
+FRENCH_BIGRAM_PATH = "french/bigrams/"
+FRENCH_ANALYSIS_PATH = "french/bigram_analysis/"
 
 def save_bigrams_sents(files, output):
     sentences = []
