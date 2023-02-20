@@ -62,7 +62,7 @@ def save_bigrams_sents(files, output):
         if ind % 1000000 == 0:
             print("Percent done: {}%".format(round(ind/len_sent*100, 2)), flush=True)
         
-        sent_bigrams = list(return_ngrams(sent, n))
+        sent_bigrams = list(return_ngrams(sent, 2))
         if sent_bigrams is not []:
             bigrams.extend([sent_bigrams])
 
