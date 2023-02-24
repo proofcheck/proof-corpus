@@ -36,6 +36,12 @@ lowerLetter = "[{}]".format(
     "".join([chr(i) for i in range(sys.maxunicode) if chr(i).islower()])
 )
 
+# Regular expression for lowercase letters (as a string)n
+#   equivalent to "[a-z]" but also including non-ASCII
+nameChar = "[{}'-]".format(
+    "".join([chr(i) for i in range(sys.maxunicode) if chr(i).islower() or chr(i).isupper()])
+)
+
 # Regular expression (as a string) for anything of the form
 #     42, 5a, 4.1bc, 1.C. 3-5, ...
 numAlpha = "(?:(?![.])[a-zA-Z0-9.]*\\d[a-zA-Z0-9.-]*(?<![.]))"
@@ -62,7 +68,8 @@ parenID = (
     f"(?:\\([A-Za-z][- ]?MATH\\))|"
     f"(?:\\([A-Za-z][- ][0-9]'*\\))|"
     f"(?:\\([*]+'*\\))|\\(\\s?NAME\\s?\\)|"
-    f"(?:\\(\\s?[IV]+[a-e]?(?:-\\d)?\"*'*\\s?(?:: ?MATH)? ?\\)))"
+    f"(?:\\(\\s?[IV]+[a-e]?(?:-\\d)?\"*'*\\s?(?:: ?MATH)? ?\\))|"
+    f"(?:\\(\\s*\\S(?:\\s?[.])?\\s*\\)))"
 )
 
 #   (d(iv))
@@ -72,13 +79,14 @@ parenID = f"(?:{parenID}|\\({atomicID}[. -]?{parenID}\\))"
 # Not: IV, IV.2
 theoremNumber = (
     f"(?:REF(?:\\s?[.]?{parenID}|[.][a-z]\\b)?|{parenID}+|"
-    f"{numAlpha}(?:[.]{numAlpha}|[.]?{parenID}|[.][a-z]\\b)*)"
+    f"{numAlpha}(?:[.]{numAlpha}|[.]?{parenID}|[.][a-z]\\b)*|"
+    "[?][?]+|\\[\\s*[?]+\\s*\\])"
 )
 
 # Prop, Th., Theorem, Formula, ...
 # But not "in fact"
 theorem_word = (
-    r"(?:(?i:(?:\b(?:Props?|Prps?|prps?|Thms?|Cor|Th|Lem|Rem|Eqn?s?|Defs?|Ex|Alg|Fig|Tab)(?:\.(?:'s)?|\b))"
+    r"(?:(?i:(?:\b(?:Props?|Prps?|prps?|Thms?|Cor|Th|Lem|Rem|Eqn?s?|Defs?|Ex|Alg|Figs?|Tab)(?:\.(?:'s)?|\b))"
     r"|"
     r"(?:\b(?:Propositions?|Theorems?|Corollar(?:y|ies)|Lemm(?:a|as|e|ata)|"
     r"Remarks?|Equations?|Diagrams?|Claims?|Statements?|Axioms?|Conditions?|"
@@ -86,7 +94,7 @@ theorem_word = (
     r"Steps?|Hypothes[ie]s|Observations?|Conditions?|Items?|"
     r"Figures?|Tables?|Examples?|Diagrams?|Property|Properties|Assertions?|"
     r"Algorithms?|Inequalit(?:y|ies)|Assumptions?|Problems?|Exercises?|"
-    r"Methods?|Parts?|Rules?|Ad)\b))|Facts?\b|(?<![Ii]n )fact)"
+    r"Methods?|Parts?|Rules?|Ad)\b))|Results?\b|Facts?\b|(?<![Ii]n )fact)"
 )
 
 # A set of words that probably are words, and not someone's name.
@@ -169,8 +177,8 @@ def ner(proof: str, debug: bool = False, aggressive: bool = True):
     # I've also seen Poincar'e and Maz'ya
     potential_name = (
         "(?:\\bJr[.](?:'s)?)|(?:\\bJnr[.](?:'s)?)|"  # 0803/0803.3805
-        "(?:(?<!['`])(?:\\w'\\w|\\w)+[sz]'(?!s))|"
-        "(?:(?:\\w'\\w|\\w)+\\w(?:'s\\b|'h\\b|'e|'ya\\b)?)|"
+        f"(?:(?<!['`])(?:{nameChar}'{nameChar}|{nameChar})+[sz]'(?!s))|"
+        f"(?:(?:{nameChar}'{nameChar}|{nameChar})+{nameChar}(?:'s\\b|'h\\b|'e|'ya\\b)?)|"
         "(?:\\bKy Fan\\b)"  # 1911/1911.08637
     )
 
@@ -427,6 +435,14 @@ def cleanup(
 ):
     """Simplify proof outputs."""
     if debug:
+        print("0000", proof)
+
+    # Remove (!) because it screws up the sentizer
+
+    # Simplify repeated !!! to !
+    proof = re.sub("!(\\s*!)+", "!", proof)
+
+    if debug:
         print("0999", proof)
     if aggressive:
         # Normalize Abbreviations
@@ -670,15 +686,16 @@ def cleanup(
             proof,
         )
 
-        # Part 3 of the theorem -> REF of the theorem -> REF
-        proof = re.sub(f"REF of the {theorem_word}", "REF", proof)
-
         if debug:
             print(1100, proof)
 
+        # REF(1,2) => REF
+        proof = re.sub("REF\\s*\\([0-9,]+\\)", "REF", proof)
+
+        # (1,2) => MATH
         proof = re.sub(
             r"\(\s*([-0-9]+|[a-zA-Z])(\s*,\s*([0-9.,'-]+|[a-zA-Z])\s*)+\)",
-            "MATH",
+            " MATH ",
             proof,
         )
 
@@ -752,6 +769,15 @@ def cleanup(
     proof = re.sub(
         "(^|[.;:] )\\b(?i:case)\\s+MATH(([-, ]|and|or)*MATH)*[:.]",
         "\\1CASE:",
+        proof,
+    )
+
+    # (CASE MATH) -> CASE:
+    # ( CASE MATH, MATH) -> CASE:
+    # ( CASE MATH is MATH) -> CASE:
+    proof = re.sub(
+        "(^|[.;:] )\\(\\s*(?i:cases?)(?:\\s*:)?\\s+MATH(?:\\s*(?:[,]|is|or|and)\\s*MATH)*\\s*\\) (?=[A-Z])",
+        "\\1CASE: ",
         proof,
     )
 
@@ -850,7 +876,7 @@ def cleanup(
 
     # e.g., Section 4 or Appendix B2
     section_word = (
-        r"(?:(?i:(?:\b(?:Sect?s?|Apps?|Chs?|Chapts?|Vols?)(?:\b|\.))"
+        r"(?:(?i:(?:\b(?:Sect?s?|Apps?|Chs?|Chapt?s?|Vols?)(?:\b|\.))"
         r"|"
         r"(?:\b(?:Sections?|Appendi(?:x|ces)|Chapters?|Parts?|Steps?)\b)))"
     )
@@ -877,7 +903,8 @@ def cleanup(
         print(9600, proof)
 
     page = "\\b([Pp][PpGg]?\\.?|[Pp]ages?\\b)"
-    num_or_range = "\\d+(\\s*[-–—]\\s*\\d+)?"
+    # also allow "p. ???"
+    num_or_range = "[?]+|\\d+(\\s*[-–—]\\s*\\d+)?"
 
     proof = re.sub(
         f"\\bCITE(\\s|[,])+({page}\\s*{num_or_range})", r"CITE", proof
@@ -1079,6 +1106,14 @@ def cleanup(
     if debug:
         print(9890, proof)
 
+    # Part 3 of the theorem -> REF of the theorem -> REF
+    #  Moved this later than it used to be, to give more
+    #  symbolic names a chance to convert to REF first.
+    proof = re.sub(f"REF of the {theorem_word}", "REF", proof)
+
+    if debug:
+        print(9892, proof)
+
     # (i) We have -> REF We have -> CASE: We have
     # (1) $\Rightarrow$ (2) => REF ARROW REF => MATH
     # BUT NOT:  T's Theorem CITE implies -> REF CITE implies -> CASE: implies
@@ -1249,6 +1284,11 @@ def skip_this_proof(proof: str) -> bool:
     for s in forbidden_strings:
         if s in proof:
             return True
+    # 0309/math0309463 has a proof that is just "!!!"
+    # 0309/math0309463 has a proof that is just "??"
+    if re.match(r"\s*[!?]+(\s*[!?])*\s*", proof):
+        return True
+
     return False
 
 

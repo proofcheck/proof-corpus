@@ -109,7 +109,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--files", "-f", nargs="*", type=argparse.FileType("r"),
-                        help="txt file to read sents from")
+                        help="tsv file to read sents from")
 
     parser.add_argument("--cores", "-p", type=int, default=4,
                         help="number of cores")

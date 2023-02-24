@@ -13,7 +13,7 @@ from sent_tools import *
 
 """
 Input :
-    --files : tagged sentences (in tagged_sents/, output of tagger.py)
+    --file : tagged sentences (in tagged_sents/, output of tagger.py)
     --word_file : txt file containing word list to make bins (eg. optimal_tagger_extra/word_bin_list.txt)
         or 
     --word : the word itself as a string (eg. Note)

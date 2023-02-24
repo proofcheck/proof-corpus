@@ -151,15 +151,15 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--tagger", "-ta", nargs="*",
-                            help=".pk files to read tagger")
+                            help="pk files to read tagger")
 
     parser.add_argument("--test", "-te",type=argparse.FileType('r'),
-                            help=".txt file to read testing set")
+                            help="txt file to read testing set from")
     
     parser.add_argument("--extension", "-e",
                             help="file extension for output")
     
-    parser.add_argument("--cores", "-p", type=int, default=5,
+    parser.add_argument("--cores", "-p", type=int, default=4,
                             help="cores")
 
     parser.add_argument("--wsj_test", "-wt", action='store_true',
