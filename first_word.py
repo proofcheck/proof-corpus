@@ -119,7 +119,7 @@ if __name__ == '__main__':
                             help="txt file to read proof from")
 
     parser.add_argument("--list", "-l", nargs='*',
-                            help="list of txt files to read proof from")
+                            help="list of tsv files to read proof from")
     
     parser.add_argument("--output", "-o", type=argparse.FileType('w'),
                             help="txt file to write results to")

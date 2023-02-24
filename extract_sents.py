@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-"""Creates word bins for optimal tagger experiment. (Extracts sentences and tags that begin with words in word_file from tagged sentences.)""" 
+"""Creates word bins for optimal tagger experiment. 
+    Specifically, it extracts sentences that begin with words in word_file from tagged sentences.""" 
 
 import argparse
 import nicer
@@ -11,21 +12,29 @@ from load_tagged_sent import load_one_sent_tags
 from sent_tools import *
 
 """
-Input:
-    -f : tagged sentences (in tagged_sents/, output of tagger.py)
-    -wf or -w : txt file containing word list to make bins or word
+Input :
+    --file : tagged sentences (in tagged_sents/, output of tagger.py)
+    --word_file : txt file containing word list to make bins (eg. optimal_tagger_extra/word_bin_list.txt)
+        or 
+    --word : the word itself as a string (eg. Note)
+    (other arguments)
 
-Output:
+    Note : The word must be capitalized for both --word and in --word_list
+           If this script is being run in order to make training/testing sets using make_test_train.py, 
+           add the -u flag as make_test_train.py uses unique sentences (sentences in word_bins/unique) by default.
+
+Output :
+    txt files of sentences starting with specified word (in word_bins/ or word_bins/unique/)
+
     Output is saved in word_bins/ or word_bins/unique/ depending on whether the -u flag is used.
-    The file name is automatically formatted to be the word (by which we're creating the word bin)
-
+    The file name is automatically formatted to be the word (by which we're creating the word bin).
         file_name = "word_bins/" + word + args.extension + ".txt"
         file_name_unique = "word_bins/unique/" + word + args.extension + ".txt"
 """
 
 """
-Typical usage:
-    nohup python3 extract_sents.py -f tagged_sents/tagged_sentences_6_13.txt -w Enumerate -c 20 -u
+Typical usage :
+    nohup python3 extract_sents.py -f tagged_sents/tagged_sentences_6_13.txt -w Enumerate -p 20 -u
 """
 
 def check_first_word(sent, word):
@@ -52,15 +61,20 @@ def make_bins(args):
         lines = fd.readlines()
 
     for word in word_list:
-        print(word)
-        file_name = "word_bins/" + word + args.extension + ".txt"
+        if args.output:
+            file_name = args.output
+        else:
+            file_name = "word_bins/" + word + args.extension + ".txt"
         
         # Only keep unique sentences
         if args.unique:
-            file_name_unique = "word_bins/unique/" + word + args.extension + ".txt"
+            if args.unique_output:
+                file_name_unique = args.unique_output
+
+            else:
+                file_name_unique = "word_bins/unique/" + word + args.extension + ".txt"
             unique_sents = set()
-            unique_output = open(file_name_unique, "w")
-          
+
         with open(file_name, "w") as output:  
             with Pool(processes=args.cores) as p:          
                 for ind, line in enumerate(p.starmap(
@@ -78,9 +92,10 @@ def make_bins(args):
                             sent = line.split("\t")[1]
                             output.write(sent)
                             if args.unique:
-                                if sent not in unique_sents:
-                                    unique_sents.add(sent)
-                                    unique_output.write(sent) 
+                                with open(unique_output, "w"):
+                                    if sent not in unique_sents:
+                                        unique_sents.add(sent)
+                                        unique_output.write(sent) 
                             
                 if args.unique:
                     unique_output.close()
@@ -95,10 +110,13 @@ if __name__ == '__main__':
     parser.add_argument("--file", "-f", 
                             help="txt file to read tags from")
     
-    parser.add_argument("--output", "-o", type=argparse.FileType('w'),
-                            help="txt file to write results to")
+    parser.add_argument("--output", "-o",
+                            help="txt file to write sentences to")
 
-    parser.add_argument( "--cores", "-c",
+    parser.add_argument("--unique_output", "-uo",
+                            help="txt file to write unique sentences to")
+
+    parser.add_argument( "--cores", "-p",
                             help="number of cores to use", type=int, default=4)
     
     parser.add_argument("--word", "-w", 

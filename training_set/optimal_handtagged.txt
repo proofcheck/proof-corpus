@@ -1,0 +1,225 @@
+Define_VB MATH_NNP and_CC for_IN each_DT MATH_NNP ,_, let_VB MATH_NNP CASE_NNP :_: There_EX is_VBZ exactly_RB one_CD plaquette_NN MATH_NNP which_WDT is_VBZ not_RB in_IN MATH_NNP ._.
+Define_VB a_DT complex_JJ MATH_NNP on_IN MATH_NNP to_TO be_VB the_DT functorial_JJ image_NN of_IN MATH_NNP by_IN the_DT map_NN MATH_NNP ._.
+Define_VB MATH_NNP to_TO be_VB the_DT unique_JJ permutation_NN such_JJ that_IN MATH_NNP ._.
+Define_VB MATH_NNP and_CC write_VB MATH_NNP for_IN the_DT density_NN of_IN MATH_NNP in_IN MATH_NNP ._.
+Define_VB the_DT tail_NN empirical_JJ measure_NN as_IN a_DT random_JJ element_NN of_IN MATH_NNP by_IN MATH_NNP ._.
+See_VB CITE_NNP for_IN this_DT point_NN ._.
+See_VB REF_NNP and_CC the_DT discussion_NN in_IN REF_NNP ,_, or_CC CITE_NNP ,_, REF_NNP ._.
+See_VB CITE_NNP ._.
+See_VB Appendix_NN for_IN proof_NN ._.
+See_VB REF_NNP for_IN typical_JJ examples_NNS ._.
+Use_VB this_DT in_IN following_VBG the_DT lines_NNS of_IN the_DT proof_NN of_IN REF_NNP :_: Let_VB MATH_NNP be_VB given_VBN ._.
+Use_VB REF_NNP ,_, with_IN invariants_NNS MATH_NNP and_CC module_NN CASE_NNP :_: MATH_NNP ._.
+Use_VB REF_NNP to_TO find_VB prolongations_NNS MATH_NNP of_IN MATH_NNP very_RB dense_JJ in_IN MATH_NNP ,_, and_CC MATH_NNP of_IN MATH_NNP very_RB dense_JJ in_IN MATH_NNP ._.
+Use_VB inverse_NNP NAME_NNP transform_NNP and_CC REF_NNP to_TO conclude_VB that_IN MATH_NNP ._.
+Use_VB the_DT identity_NN MATH_NNP where_WRB MATH_NNP is_VBZ a_DT MATH_NNP diagonal_JJ matrix_NN with_IN entries_NNS MATH_NNP ,_, and_CC MATH_NNP ._.
+Recalling_VBG REF_NNP ,_, MATH_NNP is_VBZ the_DT same_JJ up_IN to_TO MATH_NNP factors_NNS as_IN the_DT measure_NN MATH_NNP induced_VBN on_IN the_DT local_JJ neighborhood_NN by_IN taking_VBG boundary_NN conditions_NNS given_VBN by_IN MATH_NNP (_( on_IN the_DT edges_NNS cut_VBN by_IN the_DT dashed_JJ line_NN in_IN REF_NNP ,_, without_IN regard_NN to_TO the_DT structure_NN of_IN MATH_NNP )_) ._.
+Recalling_VBG the_DT definition_NN of_IN MATH_NNP ,_, we_PRP have_VBP MATH_NNP uniformly_RB on_IN MATH_NNP ,_, so_IN that_IN by_IN REF_NNP ,_, MATH_NNP ._.
+Recalling_VBG that_IN MATH_NNP by_IN NAME_NNP theory_NN ,_, then_RB using_VBG integration_NN by_IN parts_NNS we_PRP can_MD define_VB and_CC conclude_VB with_IN MATH_NNP fixed_VBN that_IN MATH_NNP is_VBZ a_DT weak_JJ solution_NN over_IN MATH_NNP to_IN the_DT equation_NN MATH_NNP where_WRB by_IN REF_NNP for_IN MATH_NNP and_CC MATH_NNP we_PRP define_VBP MATH_NNP ;_: observe_NN that_IN we_PRP use_VBP the_DT notation_NN for_IN derivatives_NNS discussed_VBN in_IN the_DT ninth_JJ item_NN of_IN REF_NNP ._.
+Recalling_VBG that_IN MATH_NNP ,_, it_PRP is_VBZ not_RB difficult_JJ to_TO check_VB that_IN MATH_NNP defines_VBZ the_DT required_JJ automorphism_NN of_IN MATH_NNP ._.
+Recalling_VBG that_IN the_DT matrices_NNS MATH_NNP of_IN each_DT Digraph_NNP IFS_NNP associated_VBN to_IN the_DT intersection_NN MATH_NNP are_VBP principal_JJ submatrices_NNS of_IN MATH_NNP ,_, then_RB REF_NNP implies_VBZ that_IN MATH_NNP ._.
+Add_VB the_DT edge-bundle_NN to_IN MATH_NNP ._.
+Add_VB this_DT to_IN REF_NNP to_TO obtain_VB the_DT claim_NN of_IN the_DT proposition_NN ._.
+Add_VB all_PDT the_DT estimates_NNS ,_, we_PRP conclude_VBP that_IN MATH_NNP ._.
+Add_VB a_DT curve_NN MATH_NNP connecting_VBG MATH_NNP to_IN MATH_NNP and_CC a_DT curve_NN MATH_NNP connecting_VBG MATH_NNP to_TO MATH_NNP ._.
+Add_VB and_CC subtract_VB MATH_NNP and_CC MATH_NNP ._.
+Extend_VB MATH_NNP to_IN the_DT fraction_NN field_NN MATH_NNP ._.
+Extend_VB any_DT function_NN in_IN MATH_NNP by_IN giving_VBG it_PRP the_DT value_NN MATH_NNP on_IN MATH_NNP ._.
+Extend_VB MATH_NNP off_RP MATH_NNP as_IN 0_CD and_CC keep_VB calling_VBG this_DT extension_NN by_IN MATH_NNP ._.
+Extend_VB MATH_NNP to_IN a_DT basis_NN by_IN choosing_VBG arrows_NNS into_IN each_DT vertex_NN -_: this_DT is_VBZ MATH_NNP ._.
+Extend_VB MATH_NNP to_TO be_VB a_DT MATH_NNP function_NN on_IN MATH_NNP ._.
+Observe_VB that_IN if_IN a_DT constraint_NN MATH_NNP or_CC MATH_NNP is_VBZ not_RB satisfied_VBN ,_, then_RB at_RB most_RBS one_CD variable_NN has_VBZ the_DT value_NN 1_CD ._.
+Observe_VB that_IN by_IN REF_NNP we_PRP have_VBP MATH_NNP and_CC that_DT MATH_NNP ._.
+Observe_VB that_IN if_IN MATH_NNP ,_, then_RB the_DT right_JJ hand_NN side_NN of_IN REF_NNP is_VBZ bounded_VBN from_IN above_RB by_IN a_DT constant_NN multiple_NN of_IN MATH_NNP ,_, while_CC MATH_NNP is_VBZ bounded_VBN from_IN below_RB by_IN a_DT positive_JJ constant_NN ._.
+Observe_VB that_IN MATH_NNP is_VBZ a_DT tensor_NN product_NN of_IN two_CD chain_NN complexes_NNS ,_, and_CC thus_RB a_DT chain_NN complex_NN in_IN its_PRP$ own_JJ right_NN ._.
+Observe_VB that_IN MATH_NNP is_VBZ even_JJ ,_, since_IN MATH_NNP ._.
+Substitute_VB the_DT identity_NN MATH_NNP into_IN REF_NNP and_CC also_RB use_VB that_IN MATH_NNP and_CC MATH_NNP both_DT of_IN which_WDT follow_VB from_IN the_DT fact_NN that_IN MATH_NNP ._.
+Substitute_VB these_DT gradient_NN and_CC derivatives_NNS back_RB to_IN the_DT above_JJ two_CD inequalities_NNS ,_, and_CC then_RB sum_VB the_DT above_JJ two_CD inequalities_NNS together_IN we_PRP get_VBP :_: MATH_NNP where_WRB in_IN the_DT last_JJ inequality_NN we_PRP use_VBP the_DT fact_NN that_IN MATH_NNP ,_, for_IN any_DT MATH_NNP ._.
+Substitute_VB REF_NNP back_RB into_IN REF_NNP ,_, we_PRP get_VBP :_: MATH_NNP ._.
+Substitute_VB the_DT right-hand_JJ side_NN in_IN REF_NNP and_CC get_VB that_IN the_DT double_JJ sum_NN over_IN MATH_NNP ,_, MATH_NNP is_VBZ the_DT complete_JJ NAME_NNP MATH_NNP as_IN in_IN REF_NNP ._.
+Substitute_VB the_DT above_JJ equations_NNS into_IN the_DT formula_NN MATH_NNP ,_, and_CC we_PRP obtain_VBP MATH_NNP ._.
+Using_VBG the_DT Fast_NNP NAME_NNP transform_NNP ,_, this_DT can_MD be_VB solved_VBN in_IN MATH_NNP time_NN ,_, see_VB ,_, REF_NNP ._.
+Using_VBG the_DT first_JJ part_NN of_IN REF_NNP ,_, with_IN MATH_NNP replaced_VBN by_IN MATH_NNP and_CC MATH_NNP almost_RB surely_RB in_IN MATH_NNP for_IN all_DT MATH_NNP from_IN REF_NNP ._.
+Using_VBG REF_NNP and_CC the_DT expression_NN from_IN the_DT proof_NN of_IN REF_NNP ,_, MATH_NNP ._.
+Using_VBG REF_NNP ,_, we_PRP get_VBP that_IN MATH_NNP is_VBZ a_DT corepresentation_NN of_IN MATH_NNP on_IN MATH_NNP ._.
+Using_VBG the_DT fact_NN that_IN MATH_NNP is_VBZ a_DT probability_NN distribution_NN ,_, we_PRP get_VBP :_: MATH_NNP ._.
+Notice_VB that_IN the_DT minimality_NN implies_VBZ that_IN MATH_NNP ._.
+Notice_VB that_IN ,_, under_IN the_DT assumptions_NNS MATH_NNP and_CC MATH_NNP ,_, MATH_NNP iff_IN MATH_NNP ._.
+Notice_VB that_IN the_DT integration_NN of_IN MATH_NNP defines_VBZ a_DT representation_NN MATH_NNP where_WRB MATH_NNP is_VBZ a_DT tubular_JJ neighborhood_NN of_IN MATH_NNP (_( MATH_NNP neighborhood_NN of_IN course_NN )_) ._.
+Notice_VB that_IN MATH_NNP ,_, otherwise_RB MATH_NNP would_MD not_RB be_VB length_NN minimizing_JJ ._.
+Notice_VB that_IN elements_NNS of_IN graph_NN MATH_NNP could_MD be_VB attributed_VBN by_IN empty_JJ sets_NNS ._.
+Replace_VB MATH_NNP in_IN REF_NNP with_IN MATH_NNP and_CC we_PRP see_VBP that_IN the_DT right_JJ hand_NN side_NN is_VBZ bounded_VBN in_IN MATH_NNP ._.
+Replace_VB MATH_NNP by_IN the_DT infinite_JJ subsequence_NN MATH_NNP and_CC do_VB this_DT process_NN for_IN the_DT second_JJ minimal_JJ MATH_NNP such_JJ that_IN MATH_NNP ,_, and_CC so_RB on_RB ._.
+Replace_VB the_DT indices_NNS MATH_NNP in_IN the_DT proof_NN of_IN REF_NNP ._.
+Replace_VB MATH_NNP by_IN one_CD new_JJ color_NN MATH_NNP and_CC set_VB the_DT multiplicity_NN of_IN MATH_NNP to_TO MATH_NNP ._.
+Replace_VB the_DT MATH_NNP 's_NNPS in_IN the_DT exponents_NNS by_IN MATH_NNP 's_NNPS ,_, we_PRP can_MD see_VB from_IN REF_NNP that_IN the_DT expected_VBN contribution_NN from_IN points_NNS with_IN MATH_NNP is_VBZ MATH_NNP and_CC the_DT desired_VBN result_NN follows_VBZ ._.
+Assume_VB that_IN there_EX is_VBZ a_DT set_NN MATH_NNP with_IN size_NN MATH_NNP that_IN dominates_VBZ at_RB least_RBS MATH_NNP nodes_NNS ._.
+Assume_VB towards_IN a_DT contradiction_NN that_IN MATH_NNP is_VBZ MATH_NNP weak_JJ ._.
+Assume_VB in_IN addition_NN that_IN MATH_NNP satisfies_VBZ MATH_NNP ._.
+Assume_VB MATH_NNP has_VBZ at_RB least_RBS one_CD real_JJ ramification_NN point_NN ._.
+Assume_VB ,_, for_IN the_DT moment_NN ,_, that_IN MATH_NNP is_VBZ compact_JJ ,_, so_IN that_DT MATH_NNP ._.
+Combining_VBG this_DT with_IN REF_NNP ,_, we_PRP infer_VBP from_IN REF_NNP of_IN REF_NNP that_IN MATH_NNP ._.
+Combining_VBG these_DT embeddings_NNS (_( with_IN MATH_NNP )_) yields_VBZ the_DT embedding_NN REF_NNP and_CC hence_RB proves_VBZ the_DT proposition_NN ._.
+Combining_VBG the_DT two_CD steps_NNS above_RB we_PRP obtain_VBP REF_NNP ._.
+Combining_VBG the_DT above_NN with_IN a_DT union_NN bound_NN ,_, it_PRP follows_VBZ that_IN REF_NNP has_VBZ absolute_JJ value_NN more_JJR than_IN MATH_NNP with_IN probability_NN at_RB most_RBS MATH_NNP ._.
+Combining_VBG the_DT arguments_NNS above_RB leads_VBZ to_IN the_DT conclusion_NN ._.
+Writing_VBG MATH_NNP with_IN MATH_NNP ,_, we_PRP have_VBP MATH_NNP where_WRB MATH_NNP is_VBZ the_DT one-dimensional_JJ discrepancy_NN of_IN MATH_NNP at_IN stage_NN MATH_NNP ._.
+Writing_VBG MATH_NNP as_IN a_DT direct_JJ limit_NN ,_, we_PRP may_MD assume_VB that_IN MATH_NNP is_VBZ a_DT number_NN field_NN and_CC that_IN MATH_NNP is_VBZ a_DT central_JJ simple_JJ algebra_NN over_IN MATH_NNP ._.
+Writing_VBG MATH_NNP ,_, we_PRP put_VBP MATH_NNP ._.
+Writing_VBG MATH_NNP and_CC using_VBG the_DT chain_NN rule_NN ,_, one_PRP finds_VBZ MATH_NNP whenever_WRB MATH_NNP is_VBZ defined_VBN at_IN MATH_NNP ._.
+Writing_VBG MATH_NNP we_PRP can_MD thus_RB change_VB the_DT sign_NN of_IN all_DT quadratic_JJ terms_NNS in_IN the_DT interaction_NN and_CC ,_, at_IN the_DT same_JJ time_NN ,_, express_VB all_DT operators_NNS by_IN means_NNS of_IN real-valued_JJ matrices_NNS ._.
+Fix_VB MATH_NNP ,_, and_CC let_VB MATH_NNP be_VB a_DT sequence_NN of_IN probability_NN measures_NNS satisfying_VBG REF_NNP ._.
+Fix_VB any_DT such_JJ MATH_NNP and_CC real-analytic_JJ function_NN MATH_NNP vanishing_VBG along_IN MATH_NNP near_IN MATH_NNP ,_, and_CC denote_VB by_IN MATH_NNP a_DT defining_VBG function_NN of_IN MATH_NNP near_IN MATH_NNP ._.
+Fix_VB all_PDT the_DT data_NNS involved_JJ in_IN the_DT relevant_NN previously_RB defined_VBN structures_NNS ,_, namely_RB :_: the_DT definition_NN of_IN MATH_NNP uses_VBZ some_DT MATH_NNP ;_: the_DT BV_NNP operator_NN uses_VBZ MATH_NNP ,_, where_WRB we_PRP take_VBP both_DT asymptotics_NNS MATH_NNP to_TO be_VB the_DT same_JJ for_IN simplicity_NN ;_: finally_RB ,_, MATH_NNP uses_VBZ MATH_NNP ._.
+Fix_VB MATH_NNP in_IN MATH_NNP such_JJ that_IN MATH_NNP is_VBZ minimal_JJ ._.
+Fix_VB any_DT allocation_NN MATH_NNP and_CC MATH_NNP that_WDT minimizes_VBZ MATH_NNP ._.
+Take_VB MATH_NNP ,_, where_WRB MATH_NNP is_VBZ an_DT open_JJ subset_NN and_CC MATH_NNP is_VBZ a_DT holomorphic_JJ coordinate_NN function_NN on_IN MATH_NNP ;_: define_VB MATH_NNP ._.
+Take_VB a_DT presentation_NN MATH_NNP ,_, and_CC let_VB MATH_NNP be_VB the_DT pull-back_NN ._.
+Take_VB a_DT finitely_RB generated_VBN ideal_JJ MATH_NNP of_IN MATH_NNP such_JJ that_IN MATH_NNP ._.
+Take_VB a_DT segment_NN MATH_NNP ._.
+Take_VB primitive_JJ roots_NNS of_IN unity_NN of_IN orders_NNS MATH_NNP and_CC MATH_NNP ,_, say_VB ,_, MATH_NNP and_CC MATH_NNP ._.
+Pick_VB such_JJ MATH_NNP for_IN which_WDT MATH_NNP is_VBZ maximum_JJ ,_, and_CC then_RB pick_VB such_JJ MATH_NNP for_IN which_WDT MATH_NNP is_VBZ minimal_JJ ,_, and_CC let_VB MATH_NNP and_CC MATH_NNP ._.
+Pick_VB MATH_NNP bases_NNS for_IN MATH_NNP and_CC MATH_NNP ,_, say_VB ,_, MATH_NNP and_CC MATH_NNP ._.
+Pick_VB any_DT positive_JJ integer_NN MATH_NNP with_IN MATH_NNP ._.
+Pick_VB a_DT planar_JJ diagram_NN MATH_NNP with_IN two_CD inputs_NNS and_CC tangle_NN diagrams_NNS MATH_NNP and_CC MATH_NNP such_JJ that_IN MATH_NNP and_CC MATH_NNP ,_, where_WRB MATH_NNP and_CC MATH_NNP describe_VBP MATH_NNP ._.
+Pick_VB any_DT MATH_NNP ,_, and_CC lift_VB it_PRP to_IN MATH_NNP ._.
+Put_VB MATH_NNP to_TO get_VB :_: MATH_NNP ._.
+Put_VB MATH_NNP and_CC consider_VB the_DT coverings_NNS MATH_NNP ._.
+Put_VB MATH_NNP and_CC let_VB MATH_NNP be_VB the_DT natural_JJ extension_NN of_IN MATH_NNP ._.
+Put_VB MATH_NNP ,_, MATH_NNP ,_, and_CC denote_VB the_DT corresponding_VBG values_NNS of_IN MATH_NNP and_CC MATH_NNP by_IN MATH_NNP ._.
+Put_VB together_RB we_PRP have_VBP MATH_NNP ._.
+Compute_VB the_DT determinant_NN of_IN the_DT MATH_NNP matrix_NN from_IN MATH_NNP to_TO MATH_NNP ._.
+Compute_VB MATH_NNP and_CC use_VB REF_NNP to_TO construct_VB a_DT NAME_NNP MATH_NNP decomposition_NN MATH_NNP of_IN MATH_NNP ._.
+Compute_VB in_IN the_DT sense_NN of_IN form_NN on_IN MATH_NNP for_IN MATH_NNP with_IN MATH_NNP such_JJ that_IN MATH_NNP is_VBZ invertible_JJ :_: MATH_NNP ._.
+Compute_VB the_DT right-hand_JJ side_NN of_IN REF_NNP by_IN plugging_VBG in_IN REF_NNP and_CC the_DT NAME_NNP expansion_NN of_IN MATH_NNP :_: MATH_NNP which_WDT proves_VBZ the_DT claim_NN ._.
+Compute_VB MATH_NNP where_WRB constants_NNS MATH_NNP and_CC MATH_NNP are_VBP defined_VBN in_IN REF_NNP ._.
+Applying_VBG MATH_NNP to_IN MATH_NNP results_VBZ in_IN a_DT triangle_NN MATH_NNP by_IN adjointness_NN ._.
+Applying_VBG the_DT compactness_NN REF_NNP we_PRP get_VBP that_IN MATH_NNP is_VBZ smoothly_RB close_JJ to_IN MATH_NNP in_IN MATH_NNP ._.
+Applying_VBG this_DT to_IN MATH_NNP ,_, we_PRP obtain_VBP MATH_NNP (_( since_IN MATH_NNP in_IN MATH_NNP )_) ._.
+Applying_VBG REF_NNP ,_, it_PRP follows_VBZ that_IN for_IN all_DT MATH_NNP ,_, we_PRP have_VBP MATH_NNP ,_, and_CC hence_RB MATH_NNP since_IN MATH_NNP and_CC they_PRP are_VBP finite_JJ groups_NNS of_IN the_DT same_JJ size_NN ._.
+Applying_VBG REF_NNP to_IN any_DT row_NN in_IN the_DT matrix_NN MATH_NNP ,_, yields_VBZ REF_NNP MATH_NNP ._.
+Arguing_VBG as_IN before_RB ,_, it_PRP is_VBZ easy_JJ to_TO show_VB that_IN MATH_NNP and_CC we_PRP can_MD choose_VB MATH_NNP ._.
+Arguing_VBG by_IN contradiction_NN ,_, suppose_VB that_IN MATH_NNP for_IN some_DT prime_JJ MATH_NNP and_CC some_DT MATH_NNP ._.
+Arguing_VBG similarly_RB as_IN before_RB ,_, it_PRP follows_VBZ (_( since_IN MATH_NNP )_) MATH_NNP ._.
+Arguing_VBG as_IN in_IN the_DT proof_NN of_IN REF_NNP ,_, we_PRP find_VBP that_IN the_DT norm_NN of_IN the_DT contact_NN points_NNS MATH_NNP or_CC MATH_NNP is_VBZ bounded_VBN independently_RB of_IN MATH_NNP ._.
+Arguing_VBG the_DT same_JJ way_NN ,_, we_PRP get_VBP that_IN MATH_NNP for_IN all_DT MATH_NNP ._.
+Label_VB the_DT above_JJ quantity_NN MATH_NNP ._.
+Label_VB the_DT vertices_NNS of_IN MATH_NNP so_IN that_IN MATH_NNP ._.
+Label_VB the_DT exceptional_JJ divisors_NNS MATH_NNP in_IN such_JJ a_DT way_NN that_IN MATH_NNP ,_, that_RB is_RB ,_, MATH_NNP ._.
+Label_VB the_DT vertices_NNS adjacent_JJ to_IN MATH_NNP such_JJ that_IN MATH_NNP is_VBZ the_DT celibate_JJ vertex_NN in_IN each_DT edge_NN and_CC MATH_NNP is_VBZ the_DT father_NN of_IN MATH_NNP ._.
+Label_VB the_DT edges_NNS from_IN MATH_NNP so_IN that_IN at_RB least_RBS one_CD is_VBZ labeled_VBN MATH_NNP and_CC at_RB least_RBS one_CD is_VBZ labeled_VBN MATH_NNP ._.
+Write_VB MATH_NNP ,_, where_WRB MATH_NNP is_VBZ a_DT character_NN of_IN MATH_NNP or_CC zero_CD ,_, and_CC MATH_NNP ._.
+Write_VB MATH_NNP ,_, where_WRB MATH_NNP ,_, so_IN that_IN MATH_NNP is_VBZ invertible_JJ modulo_IN MATH_NNP ._.
+Write_VB MATH_NNP ,_, and_CC define_VB and_CC order_VB MATH_NNP as_IN in_IN the_DT proof_NN of_IN REF_NNP ,_, so_IN that_IN MATH_NNP (_( or_CC MATH_NNP ,_, if_IN MATH_NNP )_) ._.
+Write_VB MATH_NNP and_CC MATH_NNP for_IN two_CD types_NNS MATH_NNP ._.
+Write_VB MATH_NNP and_CC MATH_NNP ,_, let_VB MATH_NNP and_CC MATH_NNP be_VB the_DT corresponding_JJ data_NNS for_IN MATH_NNP ,_, and_CC write_VB MATH_NNP ,_, MATH_NNP and_CC MATH_NNP ._.
+Construct_VB MATH_NNP from_IN MATH_NNP by_IN deleting_VBG all_DT subtrees_NNS that_WDT do_VBP not_RB contain_VB a_DT node_NN from_IN MATH_NNP ._.
+Construct_VB MATH_NNP from_IN MATH_NNP by_IN letting_VBG MATH_NNP be_VB an_DT enumeration_NN and_CC for_IN each_DT MATH_NNP let_VB MATH_NNP be_VB the_DT Boolean_JJ subalgebra_NN generated_VBN by_IN MATH_NNP ._.
+Construct_VB inductively_RB a_DT perfect_JJ tree_NN MATH_NNP and_CC an_DT increasing_JJ sequence_NN MATH_NNP such_JJ that_IN for_IN every_DT MATH_NNP :_: CASE_NNP :_: MATH_NNP ,_, CASE_NNP :_: for_IN each_DT colouring_NN MATH_NNP there_EX is_VBZ MATH_NNP such_JJ that_IN MATH_NNP ._.
+Construct_VB a_DT new_JJ interpretation_NN MATH_NNP by_IN adding_VBG to_IN MATH_NNP the_DT interpretation_NN MATH_NNP ,_, for_IN all_DT nodes_NNS MATH_NNP of_IN depth_NN MATH_NNP in_IN MATH_NNP (_( where_WRB MATH_NNP and_CC MATH_NNP only_RB share_VBP MATH_NNP )_) ._.
+Construct_VB MATH_NNP the_DT set_NN of_IN vectors_NNS MATH_NNP in_IN MATH_NNP such_JJ that_IN MATH_NNP augmented_VBN with_IN MATH_NNP 's_NNPS in_IN the_DT MATH_NNP dimensions_NNS yields_VBZ a_DT vector_NN in_IN MATH_NNP ._.
+Recall_VB further_RB that_IN ,_, by_IN REF_NNP ,_, the_DT maximal_JJ compact_JJ normal_JJ semisimple_JJ subgroup_NN of_IN MATH_NNP is_VBZ trivial_JJ ._.
+Recall_VB that_IN this_DT is_VBZ a_DT statement_NN about_IN large_JJ MATH_NNP behavior_NN ,_, and_CC holds_VBZ even_RB if_IN MATH_NNP has_VBZ poles_NNS in_IN the_DT upper_JJ half_JJ plane_NN ,_, since_IN it_PRP has_VBZ at_RB most_RBS finitely_RB many_JJ ._.
+Recall_VB that_IN MATH_NNP and_CC MATH_NNP are_VBP respectively_RB the_DT posets_NNS of_IN the_DT join-irreducible_JJ elements_NNS of_IN MATH_NNP and_CC MATH_NNP ._.
+Recall_VB that_IN for_IN any_DT simplicial_JJ category_NN MATH_NNP containing_VBG a_DT pair_NN of_IN objects_NNS MATH_NNP and_CC MATH_NNP ,_, there_EX is_VBZ a_DT natural_JJ isomorphism_NN of_IN simplicial_JJ sets_NNS MATH_NNP where_WRB MATH_NNP is_VBZ the_DT cosimplicial_JJ object_NN of_IN MATH_NNP introduced_VBN in_IN REF_NNP ._.
+Recall_VB that_IN NAME_NNP functions_NNS are_VBP analytic_JJ functions_NNS in_IN their_PRP$ index_NN ._.
+Having_VBG a_DT unique_JJ expansion_NN of_IN the_DT form_NN MATH_NNP with_IN MATH_NNP for_IN every_DT MATH_NNP in_IN MATH_NNP is_VBZ equivalent_JJ to_IN saying_VBG that_IN the_DT linear_JJ map_NN MATH_NNP is_VBZ an_DT isomorphism_NN ._.
+Having_VBG MATH_NNP also_RB implies_VBZ that_IN MATH_NNP ._.
+Having_VBG REF_NNP in_IN mind_NN the_DT triple_NN MATH_NNP is_VBZ either_CC an_DT ``_" equilateral_JJ triple_NN ''_" or_CC an_DT ``_" isosceles_JJ triple_NN ''_" ,_, and_CC the_DT same_JJ holds_VBZ for_IN MATH_NNP ._.
+Having_VBG done_VBN so_RB ,_, there_EX may_MD be_VB terms_NNS MATH_NNP and_CC MATH_NNP ;_: replace_VB these_DT with_IN MATH_NNP and_CC MATH_NNP ,_, respectively_RB ._.
+Having_VBG such_JJ MATH_NNP ,_, we_PRP cover_VBP the_DT suffixes_NNS of_IN length_NN MATH_NNP with_IN two_CD (_( potentially_RB overlapping_VBG )_) paths_NNS of_IN length_NN exactly_RB MATH_NNP ._.
+Compare_VB with_IN REF_NNP ,_, we_PRP see_VBP that_IN MATH_NNP is_VBZ a_DT MATH_NNP torsion_NN in_IN MATH_NNP ._.
+Compare_VB for_IN example_NN with_IN the_DT arguments_NNS in_IN REF_NNP from_IN CITE_NNP that_IN deal_VBP explicitly_RB with_IN a_DT RH_NNP problem_NN containing_VBG a_DT varying_VBG shrinking_VBG contour_NN ._.
+Compare_VB the_DT trick_NN at_IN the_DT beginning_NN of_IN the_DT proof_NN of_IN CITE_NNP ._.
+Compare_VB CITE_NNP and_CC CITE_NNP for_IN the_DT second_JJ part_NN of_IN REF_NNP ._.
+Compare_VB the_DT MATH_NNP dimension_NN of_IN the_DT two_CD isomorphic_JJ spaces_NNS MATH_NNP and_CC MATH_NNP ._.
+Suppose_VB MATH_NNP is_VBZ the_DT first_JJ element_NN that_WDT is_VBZ contained_VBN in_IN MATH_NNP so_IN that_IN there_EX is_VBZ no_DT box_NN in_IN the_DT diagram_NN to_IN the_DT east_JJ of_IN MATH_NNP ._.
+Suppose_VB that_IN MATH_NNP is_VBZ a_DT net_NN in_IN MATH_NNP with_IN weak_JJ *_SYM limit_NN MATH_NNP in_IN MATH_NNP ._.
+Suppose_VB that_IN MATH_NNP and_CC MATH_NNP are_VBP direct_JJ systems_NNS and_CC for_IN each_DT MATH_NNP there_EX exists_VBZ a_DT pure_JJ epimorphism_NN MATH_NNP and_CC suppose_VB MATH_NNP and_CC MATH_NNP ,_, the_DT directed_JJ colimits_NNS of_IN these_DT systems_NNS are_VBP such_JJ that_IN MATH_NNPS commute_VBP for_IN all_DT MATH_NNP ._.
+Suppose_VB MATH_NNP holds_VBZ for_IN the_DT initial_JJ setting_NN ._.
+Suppose_VB that_IN MATH_NNP is_VBZ finitely_RB generated_VBN and_CC MATH_NNP semistandard_JJ ._.
+Combine_VB the_DT above_JJ two_CD equations_NNS ._.
+Combine_VB these_DT two_CD inequalities_NNS with_IN REF_NNP ._.
+Combine_VB this_DT result_NN with_IN the_DT above_JJ result_NN from_IN REF_NNP ._.
+Combine_VB with_IN REF_NNP to_TO get_VB the_DT upper_JJ bound_NN MATH_NNP ._.
+Combine_VB REF_NNP with_IN REF_NNP ._.
+Set_VB MATH_NNP and_CC write_VB MATH_NNP for_IN suitable_JJ MATH_NNP ._.
+Set_VB MATH_NNP and_CC note_VB the_DT identity_NN MATH_NNP ._.
+Set_VB MATH_NNP ,_, and_CC notice_VB that_WDT MATH_NNP ,_, since_IN MATH_NNP restricts_VBZ to_IN a_DT locally_RB free_JJ module_NN over_IN MATH_NNP ,_, the_DT largest_JJS essentially_RB smooth_JJ open_JJ MATH_NNP subscheme_NN of_IN MATH_NNP ,_, which_WDT is_VBZ connected_JJ ._.
+Set_VB MATH_NNP ,_, with_IN algebra_NN structure_NN determined_VBN by_IN MATH_NNP for_IN any_DT MATH_NNP ,_, MATH_NNP ,_, MATH_NNP ,_, MATH_NNP ,_, MATH_NNP ,_, MATH_NNP ._.
+Set_VB MATH_NNP ,_, and_CC construct_VB the_DT tower_NN MATH_NNP as_IN above_RB ._.
+Choosing_VBG MATH_NNP in_IN REF_NNP ,_, noticing_VBG MATH_NNP and_CC noting_VBG REF_NNP ,_, we_PRP have_VBP MATH_NNP ._.
+Choosing_VBG MATH_NNP as_IN before_RB ,_, and_CC combining_VBG the_DT resulting_JJ bound_NN with_IN REF_NNP ,_, the_DT lemma_NN follows_VBZ ._.
+Choosing_VBG MATH_NNP ,_, we_PRP can_MD bound_VB the_DT right_JJ side_NN above_RB by_IN MATH_NNP ._.
+Choosing_VBG MATH_NNP in_IN REF_NNP and_CC comparing_VBG this_DT with_IN the_DT desired_VBN final_JJ state_NN at_IN time_NN MATH_NNP (_( given_VBN by_IN REF_NNP ,_, with_IN MATH_NNP instead_RB of_IN MATH_NNP )_) ,_, we_PRP see_VBP that_IN MATH_NNP ._.
+Choosing_VBG MATH_NNP sufficiently_RB large_JJ ,_, we_PRP can_MD ensure_VB MATH_NNP ._.
+Apply_VB REF_NNP to_IN MATH_NNP ,_, followed_VBN by_IN REF_NNP ,_, to_TO write_VB MATH_NNP ._.
+Apply_VB REF_NNP to_IN the_DT MATH_NNP monoidal_JJ category_NN MATH_NNP ._.
+Apply_VB the_DT definitions_NNS ;_: MATH_NNP since_IN MATH_NNP is_VBZ final_JJ and_CC has_VBZ norm_NN 1_CD ._.
+Apply_VB REF_NNP to_TO find_VB a_DT ball_NN MATH_NNP such_JJ that_IN if_IN MATH_NNP ,_, then_RB MATH_NNP agrees_VBZ on_IN MATH_NNP with_IN the_DT restriction_NN of_IN an_DT element_NN MATH_NNP with_IN MATH_NNP ._.
+Apply_VB REF_NNP to_TO obtain_VB a_DT measure_NN of_IN maximal_JJ entropy_NN of_IN MATH_NNP that_WDT assigns_VBZ measure_NN one_CD to_IN MATH_NNP ._.
+Let_VB MATH_NNP be_VB a_DT cardinal_NN that_IN is_VBZ strictly_RB greater_JJR than_IN the_DT cardinality_NN of_IN MATH_NNP ._.
+Let_VB MATH_NNP denote_VB a_DT lift_NN of_IN MATH_NNP intersecting_VBG MATH_NNP in_IN a_DT point_NN MATH_NNP ._.
+Let_VB MATH_NNP be_VB the_DT sequence_NN of_IN blocks_NNS in_IN the_DT order_NN they_PRP appear_VBP in_IN path_NN MATH_NNP ._.
+Let_VB MATH_NNP consist_VB of_IN sets_NNS MATH_NNP and_CC the_DT corresponding_JJ outputs_NNS are_VBP MATH_NNP ._.
+Let_VB MATH_NNP be_VB any_DT pairwise_RB disjoint_JJ set_NN in_IN MATH_NNP containing_VBG MATH_NNP ._.
+Enumerate_VB the_DT neighbouring_JJ sites_NNS of_IN MATH_NNP with_IN earlier_JJR arrival_NN times_NNS than_IN MATH_NNP as_IN MATH_NNP ._.
+Enumerate_VB all_DT factors_NNS of_IN MATH_NNP as_IN MATH_NNP ._.
+Enumerate_VB MATH_NNP as_IN MATH_NNP ,_, and_CC ,_, using_VBG bounded_JJ MATH_NNP comprehension_NN ,_, define_VB a_DT function_NN MATH_NNP by_IN letting_VBG MATH_NNP be_VB least_JJS such_JJ that_IN MATH_NNP admits_VBZ MATH_NNP branching_VBG MATH_NNP convergence_NN for_IN MATH_NNP ._.
+Enumerate_VB the_DT faces_NNS of_IN MATH_NNP not_RB in_IN MATH_NNP :_: MATH_NNP where_WRB MATH_NNP ._.
+Enumerate_VB a_DT countable_JJ dense_JJ subset_NN of_IN MATH_NNP as_IN MATH_NNP ,_, for_IN MATH_NNP ,_, and_CC fix_VB a_DT countable_JJ dense_JJ MATH_NNP ._.
+Introduce_VB MATH_NNP a_DT sub-approximation_NN of_IN the_DT positive_JJ part_NN MATH_NNP ._.
+Introduce_VB the_DT MATH_NNP linear_JJ operator_NN MATH_NNP by_IN MATH_NNP ._.
+Introduce_VB a_DT new_JJ basis_NN for_IN MATH_NNP as_IN follows_VBZ :_: MATH_NNP ._.
+Introduce_VB a_DT new_JJ point_NN MATH_NNP ._.
+Introduce_VB also_RB MATH_NNP and_CC then_RB MATH_NNP and_CC MATH_NNP ._.
+Remember_VB that_IN we_PRP have_VBP reduced_VBN the_DT theorem_NN to_IN REF_NNP of_IN a_DT fibration_NN MATH_NNP and_CC a_DT section_NN MATH_NNP such_JJ that_IN MATH_NNP ._.
+Remember_VB that_IN a_DT phase_NN is_VBZ of_IN length_NN MATH_NNP ._.
+Remember_VB the_DT definition_NN of_IN MATH_NNP ._.
+Remember_VB now_RB in_IN the_DT above_NN chain_NN of_IN inequalities_NNS leading_VBG to_IN REF_NNP ,_, we_PRP have_VBP already_RB proved_VBN that_IN MATH_NNP and_CC that_IN we_PRP used_VBD the_DT fact_NN that_IN MATH_NNP ._.
+Remember_VB that_IN MATH_NNP was_VBD chosen_VBN as_IN an_DT arbitrary_JJ pre-image_NN of_IN MATH_NNP by_IN the_DT homomorphism_NN MATH_NNP ._.
+Denote_VB by_IN MATH_NNP the_DT corresponding_JJ normal_JJ state_NN ._.
+Denote_VB by_IN MATH_NNP and_CC MATH_NNP the_DT LR-drawings_NNP of_IN MATH_NNP and_CC MATH_NNP in_IN MATH_NNP ,_, respectively_RB ._.
+Denote_VB the_DT inertia_NN group_NN of_IN MATH_NNP at_IN MATH_NNP by_IN MATH_NNP ._.
+Denote_VB by_IN MATH_NNP the_DT involution_NN MATH_NNP and_CC consider_VB the_DT NAME_NNP transform_NNP MATH_NNP ._.
+Denote_VB by_IN MATH_NNP the_DT K-functional_NNP defined_VBN in_IN REF_NNP but_CC with_IN respect_NN to_IN the_DT weight_NN function_NN MATH_NNP ._.
+Say_VB a_DT macrocell_NN is_VBZ good_JJ if_IN it_PRP is_VBZ not_RB adjacent_JJ to_IN the_DT boundary_NN of_IN the_DT wall_NN ._.
+Say_VB two_CD rays_NNS are_VBP neighbours_JJ if_IN they_PRP bound_VBP a_DT sector_NN of_IN angle_NN less_JJR than_IN MATH_NNP with_IN no_DT other_JJ ray_JJ inside_IN it_PRP ._.
+Say_VB MATH_NNP is_VBZ any_DT point_NN in_IN MATH_NNP ,_, so_RB we_PRP must_MD have_VB that_DT MATH_NNP is_VBZ in_IN the_DT support_NN of_IN MATH_NNP and_CC MATH_NNP is_VBZ in_IN the_DT support_NN of_IN MATH_NNP ._.
+Say_VB that_IN by_IN time_NN MATH_NNP ,_, MATH_NNP vertices_NNS in_IN MATH_NNP are_VBP internal_JJ that_IN were_VBD external_JJ at_IN MATH_NNP and_CC MATH_NNP vertices_NNS in_IN MATH_NNP are_VBP internal_JJ that_IN were_VBD external_JJ at_IN MATH_NNP ._.
+Say_VB that_IN MATH_NNP corresponds_VBZ to_IN MATH_NNP ._.
+Fixing_VBG any_DT point_NN MATH_NNP and_CC removing_VBG MATH_NNP of_IN the_DT blocks_NNS in_IN the_DT almost_RB parallel_JJ class_NN that_WDT does_VBZ not_RB contain_VB MATH_NNP constructs_VBZ a_DT MATH_NNP of_IN size_NN MATH_NNP that_WDT still_RB satisfies_VBZ REF_NNP ._.
+Fixing_VBG a_DT MATH_NNP and_CC applying_VBG REF_NNP ,_, we_PRP then_RB have_VBP MATH_NNP for_IN all_DT MATH_NNP ._.
+Fixing_VBG MATH_NNP ,_, define_VB events_NNS MATH_NNP ._.
+Fixing_VBG MATH_NNP ,_, one_PRP can_MD rank_VB all_PDT the_DT non-negative_JJ numbers_NNS MATH_NNP in_IN order_NN of_IN size_NN :_: MATH_NNP ,_, where_WRB MATH_NNP is_VBZ the_DT number_NN of_IN all_DT possible_JJ MATH_NNP ._.
+Fixing_VBG MATH_NNP ,_, summing_VBG the_DT right_JJ hand_NN side_NN over_IN all_DT MATH_NNP of_IN size_NN MATH_NNP ,_, and_CC applying_VBG REF_NNP gives_VBZ that_IN MATH_NNP proving_VBG the_DT lemma_NN ._.
+Assuming_VBG that_IN all_DT group_NN elements_NNS are_VBP represented_VBN as_IN NAME_NNP ,_, the_DT overall_JJ construction_NN runs_VBZ in_IN polynomial_JJ time_NN ._.
+Assuming_VBG REF_NNP ,_, we_PRP have_VBP seen_VBN that_IN MATH_NNP ._.
+Assuming_VBG the_DT graphs_NNS are_VBP not_RB cycles_NNS ,_, we_PRP subdivide_VBP every_DT edge_NN in_IN the_DT input_NN graphs_NNS MATH_NNP and_CC MATH_NNP ._.
+Assuming_VBG the_DT distribution_NN MATH_NNP ,_, these_DT entries_NNS are_VBP uniformly_JJ and_CC independently_RB distributed_VBN in_IN MATH_NNP and_CC the_DT probability_NN that_IN MATH_NNP is_VBZ trivial_JJ is_VBZ therefore_RB equal_JJ to_IN MATH_NNP ._.
+Assuming_VBG this_DT ,_, we_PRP need_VBP to_TO prove_VB that_IN there_EX is_VBZ a_DT unique_JJ morphism_NN of_IN pseudo_JJ D-posets_NNP MATH_NNP such_JJ that_IN MATH_NNP is_VBZ a_DT coequalizer_NN in_IN MATH_NNP and_CC MATH_NNP ,_, MATH_NNP ._.
+Start_VB with_IN the_DT new_JJ norm_NN ._.
+Start_VB with_IN MATH_NNP ,_, and_CC suppose_VB we_PRP have_VBP defined_VBN MATH_NNP for_IN some_DT MATH_NNP ._.
+Start_VB with_IN MATH_NNP ,_, observe_VB that_IN initially_RB MATH_NNP since_IN MATH_NNP and_CC MATH_NNP ._.
+Start_VB with_IN MATH_NNP and_CC extend_VB arbitrarily_RB to_IN a_DT map_NN MATH_NNP ._.
+Start_VB with_IN the_DT REF_NNP ,_, thus_RB take_VB MATH_NNP of_IN norm_NN MATH_NNP and_CC find_VB ,_, by_IN the_DT version_NN of_IN NAME_NNP representation_NNP Theorem_NNP in_IN CITE_NNP ,_, an_DT NAME_NNP space_NN MATH_NNP with_IN a_DT normal_JJ representation_NN of_IN MATH_NNP ,_, MATH_NNP bimodular_JJ completely_RB (_( strictly_RB )_) contractive_JJ such_JJ that_IN MATH_NNP ._.
+Multiply_VB both_DT sides_NNS by_IN MATH_NNP :_: MATH_NNP ,_, exactly_RB a_DT representation_NN of_IN MATH_NNP as_IN a_DT MATH_NNP linear_JJ combination_NN of_IN MATH_NNP ._.
+Multiply_VB REF_NNP by_IN MATH_NNP and_CC integrate_VB in_IN MATH_NNP ._.
+Multiply_VB the_DT equation_NN in_IN REF_NNP against_IN MATH_NNP and_CC integrate_VB in_IN MATH_NNP ,_, we_PRP get_VBP MATH_NNP ._.
+Multiply_VB both_DT sides_NNS by_IN the_DT suitable_JJ martingale_NN we_PRP see_VBP MATH_NNP ._.
+Multiply_VB by_IN MATH_NNP and_CC get_VB (_( after_IN same_JJ considerations_NNS as_IN in_IN the_DT proof_NN of_IN REF_NNP )_) that_IN MATH_NNP is_VBZ an_DT integral_NN over_IN MATH_NNP ._.
+Choose_VB MATH_NNP to_TO be_VB a_DT left_JJ transitive_JJ point_NN and_CC pick_VB a_DT doubly_RB transitive_JJ point_NN MATH_NNP with_IN MATH_NNP ._.
+Choose_VB a_DT clopen_JJ set_NN MATH_NNP and_CC a_DT clopen_JJ set_NN MATH_NNP ._.
+Choose_VB a_DT geometric_JJ symplectic_JJ CASE_NNP :_: MATH_NNP for_IN MATH_NNP ._.
+Choose_VB MATH_NNP a_DT nonzero_JJ coherent_NN subsheaf_NN of_IN MATH_NNP (_( on_IN MATH_NNP )_) ._.
+Choose_VB a_DT family_NN MATH_NNP as_IN in_IN the_DT main_JJ technical_JJ REF_NNP which_WDT satisfies_VBZ MATH_NNP if_IN MATH_NNP and_CC MATH_NNP when_WRB MATH_NNP ._.
+Consider_VB MATH_NNP where_WRB MATH_NNP and_CC the_DT equality_NN is_VBZ due_RB to_IN MATH_NNP ._.
+Consider_VB now_RB some_DT path_NN MATH_NNP ,_, and_CC let_VB MATH_NNP ,_, MATH_NNP be_VB its_PRP$ two_CD endpoints_NNS ._.
+Consider_VB a_DT policy_NN MATH_NNP defined_VBN by_IN a_DT softmax_NN over_IN a_DT set_NN of_IN logits_NNS MATH_NNP :_: MATH_NNP ._.
+Consider_VB the_DT axis-parallel_JJ rectangle_NN MATH_NNP circumscribed_VBN about_IN MATH_NNP ._.
+Consider_VB a_DT bump_NN function_NN MATH_NNP which_WDT is_VBZ MATH_NNP for_IN MATH_NNP ,_, MATH_NNP for_IN MATH_NNP ,_, and_CC decreasing_VBG on_IN the_DT interval_NN MATH_NNP ._.
+Decompose_VB MATH_NNP where_WRB MATH_NNPS are_VBP nonnegative_JJ ,_, MATH_NNP and_CC MATH_NNP ,_, MATH_NNP ,_, and_CC MATH_NNP is_VBZ supported_VBN on_IN MATH_NNP ._.
+Decompose_VB MATH_NNP into_IN a_DT MATH_NNP gon_NN consisting_VBG of_IN MATH_NNP inner_JJ edges_NNS ,_, MATH_NNP boundary_JJ edges_NNS ,_, one_CD inner_JJ vertex_NN MATH_NNP and_CC MATH_NNP boundary_JJ vertices_NNS MATH_NNP ,_, MATH_NNP ,_, as_IN shown_VBN in_IN REF_NNP MATH_NNP and_CC MATH_NNP ._.
+Decompose_VB MATH_NNP where_WRB the_DT MATH_NNP are_VBP generators_NNS of_IN MATH_NNP ._.
+Decompose_VB MATH_NNP into_IN the_DT two_CD parts_NNS :_: MATH_NNP where_WRB MATH_NNP and_CC MATH_NNP ._.
+Decompose_VB the_DT generators_NNS as_IN MATH_NNP where_WRB MATH_NNP and_CC MATH_NNP are_VBP self-adjoint_JJ ,_, and_CC pick_VB two_CD generators_NNS MATH_NNP and_CC MATH_NNP which_WDT do_VBP not_RB commute_VB ._.

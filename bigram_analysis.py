@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Makes bigrams from sent file, dumps them, and writes the bigrams that pass the metrics (frequency, MI, chi-squared) with their scores."""
+"""Makes bigrams from preprocessed sent file, dumps them, and writes the bigrams that pass the metrics (frequency, MI, chi-squared) with their scores."""
 
 import os
 os.environ['OPENBLAS_NUM_THREADS'] = '1'
@@ -20,33 +20,33 @@ from ngrams import return_ngrams
 from sent_tools import *
 
 """
-Inputs:
-    -f : preprocessed (punctuation removed, sents separated by \n) files (in preprocessed_sents/) to make bigrams from (unnecessary if using dumped bigrams)
-    -bf : file to dump/load bigrams (in bigrams/)
+Inputs :
+    --files : preprocessed (punctuation removed, sents separated by \n) files (in preprocessed_sents/) to make bigrams from (unnecessary if using dumped bigrams)
+    --bigram_file : file to dump/load bigrams (in bigrams/)
+    (other arguments)
 
-Output:
-    -o : text file formatted as follows:
-            w1 w2\tfrequency\tMI\tchi-squared
-        if (w1 w2) pass the threshold.
-        (in bigram_analysis/)
+Output :
+    --output : txt file of results, formatted as follows:
+                    w1 w2\tfrequency\tMI\tchi-squared
+                if (w1 w2) pass the threshold.
+                (in bigram_analysis/)
 """
 
 """
-Typical usage:
+Typical usage :
     python3 bigram_analysis.py -f merged_sents/*.txt -bf bigrams/merged_7_14.pk -o bigram_analysis/bigram_analysis_merged_7_14.txt -F 500
 
-Use dumped bigrams:
+Use dumped bigrams :
     python3 bigram_analysis.py -bf bigrams/sent00/bigrams_sent00.pk -o bigram_analysis/sent00/bigram_analysis_sent00_all.txt
 
-Don't filter (return results for all bigrams):
+Don't filter (return results for all bigrams) :
     python3 bigram_analysis.py -bf bigrams/sent00/bigrams_sent00.pk -o bigram_analysis/sent00/bigram_analysis_sent00_all.txt -A
-
 """
 
-BIGRAM_PATH = "bigrams/"
-ANALYSIS_PATH = "bigram_analysis/"
+FRENCH_BIGRAM_PATH = "french/bigrams/"
+FRENCH_ANALYSIS_PATH = "french/bigram_analysis/"
 
-def save_bigrams_sents(files, output, n=2):
+def save_bigrams_sents(files, output):
     sentences = []
     for fd in files:
         for line in fd.readlines():
@@ -178,7 +178,7 @@ def make_unigrams_from_bigrams_sents(sents):
 
 def main(args):
     if args.files:
-        bigrams_sents = save_bigrams_sents(args.files, args.bigram_file, args.n)
+        bigrams_sents = save_bigrams_sents(args.files, args.bigram_file)
         print("done dumping", flush=True)
         gc.collect()
 
@@ -286,10 +286,10 @@ if __name__ == "__main__":
     parser.add_argument("--bigram_file", "-bf",
                         help="pk file to read/write bigrams")
     
-    parser.add_argument("--n", "-n", type=int, default=2,
-                        help="value of n for bigrams")
+    # parser.add_argument("--n", "-n", type=int, default=2,
+    #                     help="value of n for bigrams")
 
-    # parser.add_argument("--cores", "-c", type=int, default=4,
+    # parser.add_argument("--cores", "-p", type=int, default=4,
     #                     help="number of cores")
 
     parser.add_argument("--output", "-o", default=sys.stdout, type=argparse.FileType("w"),

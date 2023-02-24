@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Do main experiment on dumped taggers and return accuracy, # of mislabelled tags etc. (Refer to main_experiment.py for more)"""
+"""Does main experiment on dumped taggers and return accuracy, # of mislabelled tags etc. (Refer to main_experiment.py for more)"""
 
 import argparse
 import nicer
@@ -15,26 +15,29 @@ from load_tagged_sent import load_tag_lines
 from main_experiment import save_results, get_one_trial_results, get_first_n_confusion, get_confusion_results
 
 """
-Input:
+Input :
     --tagger : dumped taggers (in tagger/, dumped using main_experiment.py)
     --test : testing set (in testing_set/, made using make_test_train.py)
     --tag_n : tags only first n words in each sentence (defaults to None, which tags all words)
+    (other arguments)
 
-Output:
+Output :
+    txt file of results
+
     Output is written in experiments/, and the output is automatically formatted to be experiment_(conditions eg. 5sents_5iters).txt
-    By adding -e, extensions can be added to this filename before the .txt
     
-    output_test = "experiments/experiment_" + conditions + args.extension + ".txt"
+    By adding -e, extensions can be added to this filename before the .txt
+        output_test = "experiments/experiment_" + conditions + args.extension + ".txt"
 
     The output is formatted as in main_experiment.py
 """
 
 """
-Typical usage:
-    nohup python3 dumped_main_experiment.py -ta tagger/7_5/*.pk -te testing_set/refer_handtagged.txt -e refer -c 25 -tn 3
+Typical usage :
+    nohup python3 dumped_main_experiment.py -ta tagger/7_5/*.pk -te testing_set/refer_handtagged.txt -e refer -p 25 -tn 3
 
-Test on WSJ_TEST (output is in separate file):
-    nohup python3 dumped_main_experiment.py -ta tagger/7_5/*.pk -te testing_set/refer_handtagged.txt -e refer -c 25 -wt -tn 3
+Test on WSJ_TEST (output is in separate file) :
+    nohup python3 dumped_main_experiment.py -ta tagger/7_5/*.pk -te testing_set/refer_handtagged.txt -e refer -p 25 -wt -tn 3
 """
 
 def do_dumped_experiments(args):
@@ -112,7 +115,7 @@ def do_dumped_experiments(args):
             o.write(output_string)
 
 def do_dumped_trial(tagger_file, testing, wsj_test=False, print_mislabels=False, tag_n=3):
-    """Do experiment for one tagger"""
+    # Do experiment for one tagger
     with open(tagger_file, "rb") as resource:
         trained_tagger = pickle.load(resource)
 
@@ -148,21 +151,21 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--tagger", "-ta", nargs="*",
-                            help="txt files to read tagger")
+                            help="pk files to read tagger")
 
     parser.add_argument("--test", "-te",type=argparse.FileType('r'),
-                            help="txt file to read testing set")
+                            help="txt file to read testing set from")
     
     parser.add_argument("--extension", "-e",
                             help="file extension for output")
     
-    parser.add_argument("--cores", "-c", type=int, default=5,
+    parser.add_argument("--cores", "-p", type=int, default=4,
                             help="cores")
 
     parser.add_argument("--wsj_test", "-wt", action='store_true',
                             help="test on WSJ?")
 
-    parser.add_argument("--print_mislabels", "-p", action='store_true',
+    parser.add_argument("--print_mislabels", "-m", action='store_true',
                             help="output non-VB tags?")
 
     parser.add_argument("--tag_n", "-tn", type=int, default=None,

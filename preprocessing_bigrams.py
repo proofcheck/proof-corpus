@@ -11,9 +11,20 @@ from itertools import repeat
 from sent_tools import *
 
 """
-Typical usage:
-    nohup python3 preprocessing_bigrams.py -f ../../stone/proof-corpus/sent*.tsv -c 25 -e
+Input :
+    --files : tsv files of sentences
+    (other arguments)
 
+Output :
+    txt files of preprocessed sentences (in preprocessed_sents/)
+
+    File name is automatically formatted using input file name.
+        fname = PATH + fd.name.split("/")[-1].split(".")[0] + "_" + args.extension + ".txt"
+"""
+
+"""
+Typical usage :
+    nohup python3 preprocessing_bigrams.py -f ../../stone/proof-corpus/sent*.tsv -p 25 -e
 """
 
 PATH = "preprocessed_sents/"
@@ -98,9 +109,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--files", "-f", nargs="*", type=argparse.FileType("r"),
-                        help="txt file to read sents from")
+                        help="tsv file to read sents from")
 
-    parser.add_argument("--cores", "-c", type=int, default=4,
+    parser.add_argument("--cores", "-p", type=int, default=4,
                         help="number of cores")
 
     parser.add_argument("--extension", "-e",

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Writes/counts ngrams in sentences. (Mostly used to import functions for bigram_analysis.)"""
+"""Counts ngrams in sentences and writes the frequency if > 10. (Mostly used to import functions for bigram_analysis.)"""
 
 import os
 os.environ["OPENBLAS_NUM_THREADS"] = "1"
@@ -9,15 +9,30 @@ import argparse
 import nicer
 import gc
 
-from nltk.util import ngrams
+# Don't use nltk's ngrams (memory intensive)
+# from nltk.util import ngrams
 from nltk.probability import FreqDist
 
 from sent_tools import *
 
 """
-Typical usage:
-    nohup python3 ngrams.py -f ../../stone/proof-corpus/sent**.tsv -e 6_22 --start 1 --stop 15
+Input :
+    --files : tsv files of sentences to make ngrams from
+    (other arguments)
 
+Output :
+    txt file of ngrams with their counts if count > 10 (in ngrams/)
+
+    File name is automatically formatted to be ngrams/(n)grams.txt
+        output = "ngrams/" + str(n) + "grams_" + extension + ".txt"
+
+How to look at output :
+    count\tngram
+"""
+
+"""
+Typical usage :
+    nohup python3 ngrams.py -f ../../stone/proof-corpus/sent**.tsv -e 6_22 --start 1 --stop 15
 """
 
 def my_ngrams(sent, n):
@@ -90,7 +105,7 @@ def main(args):
         for line in fd.readlines():
             sentences.extend([process_for_grams(line)])
 
-        # print("done", fd)
+        print("done", fd)
         fd.close()
 
     for n in range(args.start, args.stop + 1):
@@ -109,23 +124,17 @@ if __name__ == "__main__":
     nicer.make_nice()
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        "--files",
-        "-f",
-        nargs="*",
-        type=argparse.FileType("r"),
-        help="txt file to read proof from",
-    )
+    parser.add_argument("--files", "-f", nargs="*",type=argparse.FileType("r"),
+                            help="txt file to read proof from")
 
-    parser.add_argument(
-        "--start", type=int, nargs="?", default=2, help="min number of ngrams"
-    )
+    parser.add_argument("--start", type=int, nargs="?", default=2, 
+                            help="min number of ngrams")
 
-    parser.add_argument(
-        "--stop", type=int, nargs="?", default=2, help="max number of ngrams"
-    )
+    parser.add_argument("--stop", type=int, nargs="?", default=2,
+                            help="max number of ngrams")
 
-    parser.add_argument("--extension", "-e", help="extension for file name")
+    parser.add_argument("--extension", "-e", 
+                            help="extension for file name")
 
     args = parser.parse_args()
 

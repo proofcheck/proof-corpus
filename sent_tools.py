@@ -52,8 +52,8 @@ def split_sentences_ids(lines):
     for line in lines:
         sent_id, sent = split_sentence_id(line)
         ids += sent_id
-        sents += sent
-
+        sents += [sent]
+    
     return ids, sents
 
 def tokenize(sent):
@@ -64,7 +64,7 @@ def tokenize_sentences(sents):
     tokenized_sents = [tokenize(sent) for sent in sents]
     return tokenized_sents
 
-def split_sentence_id_tokenized(line):
+def split_sentence_id_tokenize(line):
     sent_id, sent = split_sentence_id(line)
     tokenized = tokenize(sent)
     return sent_id, tokenized
@@ -76,7 +76,7 @@ def read_one(f):
     ids, sents = split_sentences_ids(lines)
     return ids, sents
 
-def read_one_tokenized(fn):
+def read_one_tokenize(f):
     # Input: file of sentences/proofs
     # Returns list of ids and tokenized sentences
     ids, sents = read_one(fn)

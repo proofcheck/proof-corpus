@@ -3,6 +3,8 @@
 """Main experiment script for finding the optimal tagger that tags imperative verbs accurately."""
 
 import argparse
+import os
+os.environ['OPENBLAS_NUM_THREADS'] = '1'
 
 import nicer
 from multiprocessing import Pool
@@ -16,23 +18,26 @@ from tagger import untag_sent_to_tokens
 from load_tagged_sent import load_tag_lines
 
 """
-Input:
+Input :
     --training_set : training set (txt file in training_set/)
     --testing_set : testing set (txt file in testing_set/)
+    (other arguments)
 
     Both training and testing sets are "correctly" tagged.
     They can be outputs of make_test_train.py but note that make_test_train only "corrects" the first word, according to the word list.
 
-Output:
-    Results are written in experiments/.
-        The file name is formatted automatically depending on the parameters
-            output_test = "experiments/experiment_" + str(num_train_sent) + "sents_" + str(nr_iter) + "iters_" + extension + ".txt"
-    
+Output :
+    txt file of results (in experiments/)
+    (depending on flags used) pickled taggers (in tagger/)
+
+    The file name is formatted automatically depending on the parameters
+        output_test = "experiments/experiment_" + str(num_train_sent) + "sents_" + str(nr_iter) + "iters_" + extension + ".txt"
+
     If the -d flag is added, the taggers are dumped for future use (use dumped_main_experiment.py)
         The file name is formatted automatically (similar to the results, but with the trial ID added at the end)
             output_dump = "tagger/" + str(num_train_sent) + "sents_" + str(nr_iter) + "iters_" + extension + "_" + str(trial_id) + ".pk"
 
-How to read results:
+How to read results :
     (Differs slightly depending on when the experiment was done)
     If there are 4 numbers : accuracy
                             \t# of VBs mislabeled as NNP
@@ -53,9 +58,8 @@ How to read results:
 """
 
 """
-Typical usage:
-    nohup python3 main_experiment.py -tr training_set/optimal_handtagged.txt -te testing_set/optimal_handtagged3.txt -e optimal3 -c 25 -nt 50 -tnl 2 -inl 5 -wt -d -dr 
-
+Typical usage :
+    nohup python3 main_experiment.py -tr training_set/optimal_handtagged.txt -te testing_set/optimal_handtagged3.txt -e optimal3 -p 25 -nt 50 -tnl 2 -inl 5 -wt -d -dr 
 """
 
 def save_results(results, output):
@@ -69,7 +73,7 @@ def save_results(results, output):
         o.write(result_string)
 
 def get_first_n_confusion(testing, tagger, n=3):
-    """Compare tag of first n words only."""
+    # Compare tag of first n words only
     golden_tags = []
     trained_tags = []
 
@@ -86,7 +90,7 @@ def get_first_n_confusion(testing, tagger, n=3):
     return confusion
 
 def get_first_three_confusion(testing, tagger):
-    """Compare tag of first three words only."""
+    # Compare tag of first three words only.
     return get_first_n_confusion(testing, tagger, 3)
 
 def get_one_trial_results(testing, tagger, trial_id, dump_file=None, tag_n=3):
@@ -246,10 +250,13 @@ def do_one_trial(training, nr_iter, testing, trial_id=None, wsj_test=False, prin
 
 def get_confusion_results(confusion, mislabel_pair):
     try:
-        return confusion[mislabel_pair]
+        if confusion[mislabel_pair] is None:
+            return 0
+        else:
+            return confusion[mislabel_pair]
 
     except KeyError:
-        return None
+        return 0
 
 def main(args):
     do_experiments(args)
@@ -267,7 +274,7 @@ if __name__ == '__main__':
     parser.add_argument("--extension", "-e",
                             help="file extension")
     
-    parser.add_argument("--cores", "-c", type=int, default=5,
+    parser.add_argument("--cores", "-p", type=int, default=5,
                             help="cores")
 
     parser.add_argument("--num_trials", "-nt", type=int, default=10,
@@ -282,7 +289,7 @@ if __name__ == '__main__':
     parser.add_argument("--wsj_test", "-wt", action='store_true',
                             help="test on WSJ?")
 
-    parser.add_argument("--print_mislabels", "-p", action='store_true',
+    parser.add_argument("--print_mislabels", "-m", action='store_true',
                             help="output non-VB tags?")
 
     parser.add_argument("--dump", "-d", action='store_true',

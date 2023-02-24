@@ -1,0 +1,556 @@
+Refer_VB to_IN REF_NNP ._.
+Refer_VB to_IN the_DT commutative_JJ diagram_NN below_IN ._.
+Refer_VB to_IN REF_NNP as_IN we_PRP discuss_VB MATH_NNP ._.
+Refer_VB to_IN REF_NNP and_CC CITE_NNP for_IN a_DT construction_NN of_IN canonical_JJ NAME_NNP resolutions_NNS available_JJ on_IN any_DT site_NN and_CC compare_VB CITE_NNP for_IN the_DT existence_NN of_IN bifiltered_JJ resolutions_NNS ._.
+Refer_VB to_IN REF_NNP for_IN the_DT steps_NNS of_IN the_DT computation_NN ._.
+Refer_VB to_IN CITE_NNP for_IN a_DT discussion_NN of_IN tight_JJ contact_NN structures_NNS on_IN solid_JJ tori_NN ._.
+Refer_VB again_RB to_IN REF_NNP ,_, where_WRB MATH_NNP is_VBZ the_DT vertex_NN MATH_NNP ._.
+Refer_VB to_IN the_DT proof_NN of_IN CITE_NNP ._.
+Refer_VB to_IN REF_NNP below_IN ._.
+Refer_VB to_IN MATH_NNP as_IN the_DT set_NN of_IN regular_JJ angles_NNS ._.
+Refer_VB to_IN REF_NNP for_IN illustration_NN ._.
+Refer_VB to_IN the_DT proof_NN of_IN REF_NNP ._.
+Refer_VB to_IN REF_NNP ,_, where_WRB the_DT subchain_NN MATH_NNP is_VBZ shown_VBN dashed_JJ ._.
+Refer_VB again_RB to_IN the_DT base_NN in_IN MATH_NNP with_IN the_DT vectors_NNS MATH_NNP chosen_NN as_IN in_IN the_DT proof_NN of_IN REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN an_DT illustration_NN ._.
+Refer_VB back_RB to_IN REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN the_DT geometry_NN of_IN this_DT REF_NNP Begin_NNP by_IN removing_VBG from_IN the_DT equilateral_JJ triangle_NN MATH_NNP the_DT (_( open_JJ )_) central_JJ hole_NN MATH_NNP ,_, the_DT three_CD (_( closed_VBD )_) triangles_NNS of_IN side_NN MATH_NNP that_IN are_VBP the_DT images_NNS of_IN the_DT three_CD MATH_NNP (_( MATH_NNP )_) ,_, and_CC three_CD smaller_JJR triangles_NNS of_IN side_NN MATH_NNP that_IN are_VBP the_DT images_NNS of_IN MATH_NNP ._.
+Refer_VB REF_NNP of_IN REF_NNP ._.
+Refer_VB to_IN the_DT sum_NN over_IN interval_JJ MATH_NNP as_IN MATH_NNP ,_, and_CC set_VBD MATH_NNP ._.
+Refer_VB to_IN REF_NNP below_IN :_: MATH_NNP ._.
+Refer_VB to_IN the_DT REFbelow_NNP :_: MATH_NNP ._.
+Refer_VB to_IN REFs_NNP REF_NNP ._.
+Refer_VB to_IN the_DT schematic_JJ REF_NNP below_IN ._.
+Refer_VB below_IN to_IN a_DT typical_JJ REF_NNP of_IN two_CD successive_JJ rows_NNS in_IN MATH_NNP ,_, where_WRB MATH_NNP is_VBZ the_DT cell_NN at_IN the_DT end_NN of_IN row_NN MATH_NNP ,_, MATH_NNP is_VBZ the_DT cell_NN at_IN the_DT end_NN of_IN row_NN MATH_NNP ,_, and_CC MATH_NNP labels_VBZ the_DT cell_NN at_IN the_DT top_NN of_IN column_NN MATH_NNP in_IN MATH_NNP ._.
+Refer_VB to_IN REF_NNP for_IN a_DT description_NN of_IN the_DT facets_NNS of_IN MATH_NNP in_IN terms_NNS of_IN those_DT of_IN MATH_NNP ._.
+Refer_VB to_IN the_DT beginning_NN of_IN the_DT proof_NN of_IN REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN the_DT definition_NN of_IN the_DT function_NN MATH_NNP ._.
+Refer_VB to_IN the_DT setup_NN above_IN ._.
+Refer_VB to_IN NAME_NNP 1.8_CD of_IN CITE_NNP ._.
+Refer_VB to_IN CITE_NNP and_CC CITE_NNP ._.
+Refer_VB to_IN the_DT proof_NN of_IN REF_NNP for_IN a_DT similar_JJ argument_NN ._.
+Refer_VB to_IN the_DT REFs_NNP at_IN the_DT end_NN of_IN this_DT paper_NN for_IN this_DT example_NN ._.
+Refer_VB to_IN the_DT number_NN MATH_NNP of_IN vector_NN fields_NNS as_IN the_DT orbit_NN dimension_NN ._.
+Refer_VB to_IN the_DT map_NN MATH_NNP (_( which_WDT we_PRP will_MD take_VB to_TO be_VB defined_VBN in_IN some_DT open_JJ set_NN on_IN which_WDT it_PRP is_VBZ an_DT embedding_VBG )_) as_IN a_DT distinguished_JJ chart_NN and_CC its_PRP$ image_NN as_IN a_DT distinguished_JJ set_NN ._.
+Refer_VB to_IN CITE_NNP for_IN the_DT choice_NN of_IN path_NN from_IN MATH_NNP to_IN MATH_NNP ,_, that_DT is_VBZ for_IN the_DT definition_NN of_IN the_DT angles_NNS MATH_NNP ._.
+Refer_VB to_IN the_DT argument_NN given_VBN under_IN REF_NNP in_IN the_DT proof_NN of_IN REF_NNP ._.
+Refer_VB to_IN CITE_NNP for_IN a_DT full_JJ description_NN of_IN the_DT construction_NN ._.
+Refer_VB to_IN REF_NNP for_IN the_DT classification_NN of_IN non-null_JJ homologous_JJ OPT_NNP –_NNP knots_NNS in_IN lens_JJ spaces_NNS ._.
+Refer_VB to_IN CITE_NNP ,_, REF_NNP ._.
+Refer_VB to_IN the_DT sub-layout_JJ including_VBG MATH_NNP ,_, MATH_NNP ,_, and_CC MATH_NNP as_IN layer_NN MATH_NNP ._.
+Refer_VB REF_NNP for_IN a_DT ``_'' picture_NN proof_NN ''_'' when_WRB MATH_NNP ._.
+Refer_VB REF_NNP for_IN an_DT explanation_NN based_VBN on_IN REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN the_DT appearance_NN of_IN the_DT graphs_NNS ._.
+Refer_VB to_IN the_DT proof_NN of_IN Lemma_NNP MATH_NNP in_IN CITE_NNP ._.
+Refer_VB to_IN CITE_NNP ,_, CITE_NNP for_IN statements_NNS that_WDT apply_VB to_IN our_PRP$ REF_NNP directly_RB ._.
+Refer_VB to_IN the_DT Appendix_NNP ._.
+Refer_VB to_IN the_DT diagram_NN MATH_NNP ._.
+Refer_VB to_IN Proof_NN of_IN REF_NNP for_IN the_DT definitions_NNS of_IN MATH_NNP and_CC define_VB the_DT sets_NNS :_: MATH_NNP ._.
+Refer_VB to_IN the_DT character_NN formula_NN given_VBN at_IN the_DT beginning_NN of_IN the_DT Proof_NNP of_IN REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN expression_NN for_IN MATH_NNP ._.
+Refer_VB now_RB to_IN REF_NNP ._.
+Refer_VB to_IN REF_NNP a._NN If_IN MATH_NNP is_VBZ a_DT query_NN edge_NN ,_, then_RB by_IN the_DT argument_NN above_IN we_PRP have_VBP that_IN MATH_NNP contains_VBZ a_DT MATH_NNP spanner_NN MATH_NNP path_NN MATH_NNP ._.
+Refer_VB to_IN REF_NNP b._NN Due_NNP to_IN the_DT criteria_NN for_IN selecting_VBG MATH_NNP ,_, we_PRP have_VBP MATH_NNP ._.
+Refer_VB to_IN a_DT maximal_JJ subsequence_NN consisting_VBG entirely_RB of_IN either_CC MATH_NNP s_VBP or_CC MATH_NNP s_VBP as_IN a_DT run_NN ._.
+Refer_VB to_IN the_DT extension_NN by_IN MATH_NNP ._.
+Refer_VB to_IN the_DT extension_NN of_IN MATH_NNP to_IN MATH_NNP as_IN MATH_NNP ._.
+Refer_VB to_IN the_DT extension_NN again_RB by_IN MATH_NNP ._.
+Refer_VB to_IN and_CC REF_NNP ._.
+Refer_VB to_IN CITE_NNP for_IN the_DT full_JJ proof_NN ._.
+Refer_VB to_IN the_DT proof_NN of_IN NAME_NNP in_IN CITE_NNP for_IN details_NNS ._.
+Refer_VB to_IN proofs_NNS of_IN REF_NNP ._.
+Refer_VB to_IN REF_NNP ,_, MATH_NNP is_VBZ also_RB a_DT base_NN non-edge_NN for_IN Simple_NNP 1-dof_CD NAME-I_NNP graph_NN MATH_NNP ._.
+Refer_VB to_IN the_DT notation_NN from_IN REF_NNP ._.
+Refer_VB to_IN REF_NNP ;_: in_IN the_DT REFreplace_NNP MATH_NNP by_IN MATH_NNP ._.
+Refer_VB to_IN REF_NNP for_IN the_DT original_JJ discussion_NN of_IN the_DT NAME_NNP space_NN 's_POS construction_NN ._.
+Refer_VB to_IN the_DT notation_NN in_IN REF_NNP ,_, where_WRB the_DT pipe_NN 's_POS section_NN is_VBZ given_VBN by_IN MATH_NNP where_WRB MATH_NNP ._.
+Refer_VB to_IN the_DT diagram_NN in_IN MATH_NNP above_IN that_DT describes_VBZ the_DT first_JJ few_JJ steps_NNS of_IN the_DT construction_NN of_IN MATH_NNP ._.
+Refer_VB to_IN two_CD particles_NNS forming_VBG a_DT pair_NN as_IN ``_`` partners_NNS ''_'' ._.
+Refer_VB to_IN the_DT cases_NNS of_IN REF_NNP ._.
+Refer_VB to_IN ,_, for_IN example_NN ,_, CITE_NNP for_IN details_NNS ._.
+Refer_VB to_IN REF_NNP for_IN the_DT detail_NN ._.
+Refer_VB to_IN REF_NNP for_IN an_DT example_NN ._.
+Refer_VB first_RB to_IN equality_NN REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN a_DT depiction_NN of_IN the_DT following_JJ arguments_NNS ._.
+Refer_VB to_IN the_DT papers_NNS CITE_NNP and_CC CITE_NNP ._.
+Refer_VB to_IN the_DT previous_JJ computation_NN ,_, in_IN particular_JJ REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN details_NNS ._.
+Refer_VB to_IN the_DT remark_NN after_IN CITE_NNP ._.
+Refer_VB to_IN the_DT description_NN of_IN the_DT action_NN of_IN the_DT local_JJ group_NN in_IN REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN an_DT outline_NN of_IN the_DT proof_NN ._.
+Refer_VB to_IN REF_NNP Let_NNP MATH_NNP be_VB a_DT real_JJ number_NN and_CC let_VB MATH_NNP be_VB a_DT positive_JJ integer_NN ._.
+Refer_VB to_IN REF_NNP for_IN a_DT full_JJ discussion_NN and_CC a_DT proof_NN of_IN this_DT proposition_NN ._.
+Refer_VB to_IN REF_NNP for_IN a_DT proof_NN ._.
+Refer_VB to_IN REF_NNP to_IN understand_VB the_DT various_JJ claims_NNS ._.
+Refer_VB to_IN REF_NNP to_IN see_VB how_WRB these_DT sets_NNS are_VBP laid_VBN out_RP ._.
+Refer_VB to_IN REF_NNP in_IN the_DT analysis_NN of_IN Perturbed-Greedy_NNP for_IN the_DT proof_NN of_IN a_DT more_RBR general_JJ version_NN of_IN this_DT statement_NN ._.
+Refer_VB to_IN REF_NNP together_RB with_IN REF_NNP and_CC note_NN that_IN the_DT following_JJ relation_NN holds_VBZ between_IN the_DT principal_JJ parameters_NNS MATH_NNP and_CC MATH_NNP of_IN tetrahedra_NN MATH_NNP and_CC MATH_NNP ,_, respectively_RB :_: MATH_NNP ._.
+Refer_VB to_IN REF_NNP for_IN the_DT constant_JJ MATH_NNP ._.
+Refer_VB by_IN MATH_NNP to_IN the_DT set_NN of_IN formulas_NNS in_IN the_DT range_NN of_IN MATH_NNP ,_, closed_VBD under_IN taking_VBG subformulas_NNS ._.
+Refer_VB to_IN the_DT exposition_NN in_IN CITE_NNP for_IN unexplained_JJ terminology_NN ._.
+Refer_VB to_IN the_DT numerous_JJ discussions_NNS in_IN the_DT literature_NN ._.
+Refer_VB REF_NNP ._.
+Refer_VB to_IN REF_NNP b._NN Then_RB MATH_NNP ,_, otherwise_RB MATH_NNP could_MD not_RB be_VB in_IN MATH_NNP ._.
+Refer_VB to_IN CITE_NNP to_TO see_VB the_DT details_NNS and_CC to_TO get_VB that_IN the_DT order_NN is_VBZ MATH_NNP (_( a_DT direct_JJ argument_NN as_IN in_IN the_DT proof_NN of_IN the_DT next_JJ lemma_NN can_MD be_VB also_RB employed_VBN )_) ._.
+Refer_VB REF_NNP for_IN an_DT outline_NN of_IN the_DT proof_NN ._.
+Refer_VB Figures_NNS REF_NNP and_CC REF_NNP ._.
+Refer_VB to_IN states_NNS in_IN MATH_NNP as_IN the_DT middle_JJ states_NNS ._.
+Refer_VB to_IN Result_NN REF_NNP for_IN a_DT definition_NN of_IN the_DT sets_NNS MATH_NNP ,_, which_WDT are_VBP just_RB closed_VBN sectors_NNS in_IN MATH_NNP ._.
+Refer_VB to_IN REF_NNP for_IN the_DT notation_NN used_VBD in_IN what_WP follows_VBZ ._.
+Refer_VB to_IN REF_NNP for_IN a_DT detailed_JJ proof_NN ._.
+Refer_VB to_IN REF_NNP for_IN Proof_NNP ._.
+Refer_VB now_RB to_IN REF_NNP from_IN REF_NNP ._.
+Refer_VB to_IN the_DT first_JJ sentence_NN of_IN REF_NNP ._.
+Refer_VB now_RB to_IN the_DT definition_NN of_IN MATH_NNP given_VBN just_RB after_IN REF_NNP ._.
+Refer_VB to_IN CITE_NNP for_IN details_NNS ._.
+Refer_VB to_IN the_DT first_JJ possible_JJ result_NN as_IN MATH_NNP ,_, the_DT second_JJ possible_JJ result_NN as_IN MATH_NNP ,_, and_CC the_DT third_JJ possible_JJ result_NN as_IN MATH_NNP ._.
+Refer_VB to_IN these_DT results_NNS as_IN MATH_NNP ._.
+Refer_VB to_IN the_DT definition_NN of_IN MATH_NNP we_PRP know_VBP that_IN MATH_NNP in_IN the_DT support_NN of_IN MATH_NNP ._.
+Refer_VB REF_NNP for_IN a_DT rigorous_JJ proof_NN ._.
+Refer_VB to_IN Proposition_NN CITE_NNP for_IN proof_NN ._.
+Refer_VB to_IN REF_NNP REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN a_DT concrete_JJ example_NN ._.
+Refer_VB to_IN REF_NNP for_IN the_DT coloration_NN of_IN the_DT individual_JJ graphs_NNS MATH_NNP ,_, MATH_NNP ,_, and_CC MATH_NNP in_IN REF_NNP ,_, and_CC to_TO REF_NNP for_IN the_DT corresponding_JJ subgraphs_NNS MATH_NNP for_IN MATH_NNP ._.
+Refer_VB to_IN CITE_NNP ._.
+Refer_VB to_IN CITE_NNP for_IN more_JJR details_NNS ._.
+Refer_VB to_IN the_DT MATH_NNP case_NN of_IN REF_NNP ,_, and_CC apply_VB REF_NNP ,_, respectively_RB ._.
+Refer_VB REF_NNP for_IN the_DT steps_NNS involved_VBN in_IN deriving_VBG the_DT fluid_JJ limit_NN ._.
+Refer_VB to_IN Notation_NN REF_NNP for_IN the_DT definition_NN of_IN MATH_NNP ._.
+Refer_VB to_IN REF_NNP for_IN an_DT illustration_NN of_IN this_DT claim_NN ._.
+Refer_VB to_IN the_DT two-dimensional_JJ projections_NNS of_IN REF_NNP ._.
+Refer_VB to_IN CITE_NNP and_CC use_VB the_DT fact_NN that_IN MATH_NNP is_VBZ the_DT stratum_NN of_IN MATH_NNP corresponding_VBG to_IN the_DT full_JJ MATH_NNP diagram_NN ,_, regarded_VBD as_IN a_DT subdiagram_NN of_IN itself_PRP ._.
+Refer_VB to_IN the_DT non-zero_JJ elements_NNS in_IN MATH_NNP as_IN MATH_NNP 's_POS ._.
+Refer_VB to_IN the_DT Transfer_NNP Algorithm_NNP ,_, and_CC note_NN that_IN the_DT NAME_NNP relation_NN MATH_NNP implies_VBZ MATH_NNP ._.
+Refer_VB to_IN REF_NNP of_IN REF_NNP for_IN the_DT labeling_NN of_IN vertices_NNS ._.
+Refer_VB to_IN REF_NNP for_IN the_DT labeling_NN of_IN vertices_NNS ._.
+Refer_VB to_IN REF_NNP for_IN the_DT construction_NN of_IN MATH_NNP on_IN MATH_NNP ._.
+Refer_VB to_IN the_DT following_VBG REFfor_NNP the_DT proof_NN ._.
+Refer_VB to_IN REF_NNP ,_, MATH_NNP and_CC MATH_NNP ,_, where_WRB MATH_NNP and_CC MATH_NNP ._.
+Refer_VB to_IN REF_NNP for_IN a_DT schematic_JJ ._.
+Refer_VB to_IN REF_NNP ._.
+Refer_VB to_IN the_DT extremal_JJ elements_NNS at_IN the_DT edge_NN of_IN the_DT MATH_NNP pattern_NN as_IN the_DT ``_`` boundary_NN ,_, ''_'' and_CC the_DT elements_NNS to_TO be_VB transposed_VBN as_IN the_DT ``_`` interior_NN ._. ''_''
+Refer_VB to_IN REF_NNP (_( which_WDT is_VBZ drawn_VBN in_IN a_DT different_JJ affine_NN patch_NN )_) ._.
+Refer_VB to_IN REF_NNP for_IN further_JJ details_NNS ._.
+Refer_VB to_IN proof_NN REF_NNP of_IN REF_NNP ._.
+Refer_VB to_IN equation_NN MATH_NNP for_IN an_DT expansion_NN of_IN MATH_NNP for_IN each_DT MATH_NNP ,_, for_IN a_DT given_VBN MATH_NNP :_: MATH_NNP ._.
+Refer_VB to_IN CITE_NNP for_IN a_DT characterization_NN to_IN identify_VB whether_IN a_DT point_NN MATH_NNP generates_VBZ a_DT bisector_NN event_NN for_IN some_DT angle_JJ MATH_NNP ._.
+Refer_VB to_IN CITE_NNP or_CC CITE_NNP ._.
+Refer_VB to_IN REF_NNP for_IN an_DT example_NN of_IN such_JJ construction_NN given_VBN a_DT formula_NN MATH_NNP ._.
+Refer_VB to_IN the_DT definition_NN of_IN MATH_NNP for_IN the_DT entities_NNS MATH_NNP ._.
+Refer_VB to_IN Table_NN REF_NNP ,_, Table_NNP REF_NNP ._.
+Refer_VB to_IN the_DT definition_NN of_IN MATH_NNP and_CC to_IN REF_NNP ._.
+Refer_VB to_IN the_DT corresponding_JJ matrix_NN as_IN MATH_NNP ._.
+Refer_VB to_IN REF_NNP b._NN Furthermore_NNP ,_, trapezoids_NNS with_IN vertices_NNS MATH_NNP ,_, for_IN all_DT MATH_NNP ,_, are_VBP congruent_NN ._.
+Refer_VB again_RB to_IN REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN what_WP follows_VBZ ._.
+Refer_VB to_IN REF_NNP a_DT ._.
+Refer_VB to_IN REF_NNP b_NN ._.
+Refer_VB Appendix_NN ._.
+Refer_VB to_IN the_DT sole_JJ face_NN of_IN MATH_NNP that_DT is_VBZ not_RB contained_VBN in_IN the_DT disk_NN bounded_VBD by_IN MATH_NNP as_IN the_DT outside_JJ face_NN of_IN MATH_NNP ._.
+Refer_VB to_IN the_DT definitions_NNS and_CC results_NNS of_IN REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN the_DT estimates_NNS for_IN all_DT derivatives_NNS in_IN the_DT Cylindrical_NNP REF_NNP REF_NNP can_MD be_VB rewritten_VBN as_IN MATH_NNP with_IN MATH_NNP and_CC MATH_NNP ._.
+Refer_VB to_IN REF_NNP in_IN CITE_NNP ._.
+Refer_VB to_IN REF_NNP throughout_IN the_DT proof_NN ._.
+Refer_VB to_IN the_DT definition_NN of_IN MATH_NNP in_IN REF_NNP ._.
+Refer_VB to_IN an_DT edge_NN a_DT type_NN MATH_NNP ,_, type_NN MATH_NNP ,_, type_NN MATH_NNP ,_, or_CC type_NN MATH_NNP ,_, if_IN its_PRP$ weight_NN belongs_NNS to_IN the_DT interval_NN MATH_NNP ,_, MATH_NNP ,_, MATH_NNP ,_, or_CC MATH_NNP ,_, respectively_RB ._.
+Refer_VB to_IN REF_NNP ,_, the_DT calculation_NN of_IN type-3_JJ terms_NNS ._.
+Refer_VB to_IN the_DT definitions_NNS of_IN the_DT sets_NNS MATH_NNP and_CC MATH_NNP and_CC the_DT probabilities_NNS MATH_NNP and_CC MATH_NNP in_IN REF_NNP in_IN which_WDT the_DT random_JJ variables_NNS MATH_NNP ._.
+Refer_VB to_IN the_DT encoding_VBG step_NN in_IN REF_NNP ._.
+Refer_VB to_IN REF_NNP to_IN REF_NNP ._.
+Refer_VB back_RB to_IN REF_NNP on_IN page_NN REF_NNP for_IN the_DT definition_NN of_IN MATH_NNP ._.
+Refer_VB now_RB to_IN REF_NNP ,_, taking_VBG MATH_NNP ._.
+Refer_VB ,_, for_IN example_NN ,_, to_IN REF_NNP ,_, and_CC 4.6.7_CD of_IN CITE_NNP ._.
+Refer_VB to_IN REF_NNP ,_, which_WDT shows_VBZ a_DT copy_NN of_IN MATH_NNP on_IN the_DT left_NN ,_, immersed_VBD into_IN MATH_NNP ._.
+Refer_VB to_IN REF_NNP for_IN a_DT diagram_NN of_IN the_DT maps_NNS constructed_VBN in_IN this_DT proof_NN ._.
+Refer_VB CITE_NNP for_IN more_JJR details_NNS about_IN the_DT convergence_NN of_IN EM_NNP algorithm_NN ._.
+Refer_VB to_IN CITE_NNP for_IN the_DT detailed_JJ proof_NN and_CC use_VB REF_NNP above_IN in_IN place_NN of_IN REF_NNP ._.
+Refer_VB to_IN the_DT following_JJ diagram_NN :_: For_IN any_DT MATH_NNP ,_, let_VB MATH_NNP be_VB the_DT normalized_JJ quasiconformal_JJ homeomorphism_NN solving_VBG REF_NNP MATH_NNP with_IN the_DT NAME_NNP coefficient_NN MATH_NNP ._.
+Refer_VB to_IN REF_NNP for_IN an_DT example_NN of_IN this_DT construction_NN ._.
+Refer_VB to_IN the_DT REF_NNP below_RB ._.
+Refer_VB to_IN the_DT diagram_NN below_RB ._.
+Refer_VB to_IN REF_NNP below_RB ._.
+Refer_VB to_IN MATH_NNP in_IN the_DT first_JJ coordinate_NN ,_, or_CC MATH_NNP in_IN the_DT second_JJ coordinate_NN ,_, as_IN a_DT safe_JJ coordinate_NN ;_: note_NN that_IN MATH_NNP can_MD be_VB viewed_VBN as_IN taking_NN cost_NN MATH_NNP if_IN at_RB least_RBS one_CD coordinate_NN is_VBZ safe_JJ ,_, and_CC otherwise_RB 2_CD times_NNS the_DT number_NN of_IN non-safe_JJ integral_JJ coordinates_NNS ._.
+Refer_VB to_IN the_DT poof_NN of_IN REF_NNP where_WRB the_DT counterpart_NN here_RB means_VBZ that_IN the_DT lowest_JJS degree_NN in_IN REF_NNP is_VBZ the_DT highest_JJS degree_NN in_IN this_DT lemma_NN ._.
+Refer_VB to_IN REF_NNP for_IN the_DT ASS_NNP for_IN MATH_NNP in_IN the_DT range_NN of_IN our_PRP$ discussion_NN ._.
+Refer_VB to_IN REF_NNP for_IN a_DT schematic_JJ graph_NN of_IN these_DT NAME_NNP ._.
+Refer_VB to_IN CITE_NNP for_IN a_DT proof_NN of_IN assertion_NN REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN the_DT notations_NNS ._.
+Refer_VB to_IN REF_NNP for_IN an_DT illustration_NN of_IN the_DT geometry_NN of_IN the_DT path_NN through_IN the_DT gadget_NN ._.
+Refer_VB to_IN REF_NNP for_IN geometric_JJ intuition_NN in_IN this_DT proof_NN ._.
+Refer_VB to_IN REF_NNP c._VB The_DT REF_NNP will_MD be_VB discussed_VBN later_RB (_( special_JJ situation_NN )_) ._.
+Refer_VB to_IN REF_NNP b._NN Let_NNP MATH_NNP be_VB the_DT angle_NN formed_VBD by_IN MATH_NNP with_IN the_DT upper_JJ ray_NN of_IN MATH_NNP ._.
+Refer_VB to_IN REF_NNP b._NN Let_NNP MATH_NNP be_VB the_DT intersection_NN point_NN between_IN the_DT lower_JJR ray_NN bounding_VBG the_DT upper_JJ MATH_NNP cone_NN of_IN MATH_NNP and_CC the_DT circumference_NN of_IN MATH_NNP ._.
+Refer_VB to_IN REF_NNP for_IN the_DT double_JJ multiplicity_NN case_NN (_( MATH_NNP with_IN MATH_NNP )_) ,_, and_CC see_VB REF_NNP for_IN MATH_NNP ._.
+Refer_VB to_IN Table_NN REF_NNP ._.
+Refer_VB to_IN the_DT notation_NN of_IN REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN a_DT schematic_JJ diagram_NN ._.
+Refer_VB to_IN REF_NNP ,_, right_NN ._.
+Refer_VB to_IN (_( CITE_NNP ,_, REF_NNP )_) ._.
+Refer_VB to_IN REF_NNP for_IN an_DT illustration_NN of_IN this_DT construction_NN ._.
+Refer_VB to_IN these_DT edges_NNS as_IN special_JJ ._.
+Refer_VB to_IN REF_NNP for_IN an_DT illustration_NN of_IN the_DT construction_NN of_IN MATH_NNP ,_, MATH_NNP ,_, MATH_NNP ,_, and_CC MATH_NNP ._.
+Refer_VB to_IN REF_NNP and_CC to_IN REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN a_DT possible_JJ ordering_NN of_IN the_DT edges_NNS around_IN MATH_NNP in_IN a_DT SEFE_NNP ._.
+Refer_VB to_IN REF_NNP for_IN an_DT illustration_NN of_IN the_DT construction_NN of_IN the_DT rotation_NN scheme_NN of_IN MATH_NNP ._.
+Refer_VB to_IN REF_NNP ;_: we_PRP assume_VBP MATH_NNP is_VBZ a_DT monoid_JJ action_NN and_CC want_VBP to_IN show_NN that_IN MATH_NNP is_VBZ too_RB ._.
+Refer_VB to_IN the_DT proof_NN of_IN Lemma_NNP CITE_NNP ._.
+Refer_VB to_IN the_DT types_NNS listed_VBN in_IN REF_NNP ._.
+Refer_VB to_IN the_DT types_NNS of_IN tetrahedra_NN in_IN REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN an_DT example_NN of_IN such_JJ construction_NN ,_, given_VBN a_DT formula_NN MATH_NNP ._.
+Refer_VB to_IN REF_NNP for_IN an_DT example_NN of_IN such_JJ construction_NN ._.
+Refer_VB to_IN proof_NN of_IN REF_NNP for_IN the_DT components_NNS of_IN MATH_NNP ._.
+Refer_VB to_IN the_DT diagram_NN MATH_NNP and_CC MATH_NNP of_IN REF_NNP ._.
+Refer_VB to_IN the_DT diagram_NN MATH_NNP of_IN REF_NNP ._.
+Refer_VB to_IN NAME_NNP by_IN NAME/NAME_NNP ._.
+Refer_VB to_IN Theorem_NN MATH_NNP of_IN CITE_NNP ._.
+Refer_VB to_IN MATH_NNP of_IN REF_NNP ._.
+Refer_VB to_IN REF_NNP and_CC note_NN that_WDT for_IN MATH_NNP small_JJ ,_, MATH_NNP ._.
+Refer_VB to_IN a_DT gadget_NN as_IN passive_JJ if_IN no_DT arcs_NN in_IN it_PRP are_VBP contained_VBN in_IN MATH_NNP ,_, and_CC active_JJ otherwise_RB ;_: further_JJ ,_, for_IN a_DT Choice_NNP gadget_NN ,_, say_VB that_IN it_PRP selects_VBZ arc_IN MATH_NNP of_IN the_DT MATH'th_NNP output_NN arc_NN is_VBZ contained_VBN in_IN MATH_NNP ._.
+Refer_VB to_IN REF_NNP ,_, where_WRB other_JJ chords_NNS are_VBP not_RB depicted_VBN ._.
+Refer_VB to_IN the_DT theorem_NN in_IN REF_NNP ._.
+Refer_VB to_IN REF_NNP ,_, for_IN an_DT illustration_NN of_IN the_DT coupling_VBG argument_NN ._.
+Refer_VB to_IN the_DT MATH_NNP tuple_NN corresponding_VBG to_IN the_DT first_JJ MATH_NNP directions_NNS in_IN MATH_NNP by_IN MATH_NNP ._.
+Refer_VB to_IN the_DT definition_NN of_IN MATH_NNP and_CC MATH_NNP and_CC let_VB their_PRP$ ambient_NN spaces_NNS be_VB MATH_NNP and_CC MATH_NNP ._.
+Refer_VB to_IN the_DT matrix_NN MATH_NNP in_IN REF_NNP ._.
+Refer_VB to_IN the_DT diagrams_NNS in_IN REF_NNP ._.
+Refer_VB to_IN the_DT MATH_NNP bit_NN of_IN MATH_NNP ,_, MATH_NNP and_CC MATH_NNP as_IN MATH_NNP ,_, MATH_NNP and_CC MATH_NNP respectively_RB and_CC recall_VB again_RB that_IN MATH_NNP and_CC MATH_NNP ._.
+Refer_VB to_IN a_DT shortest_NN path_NN with_IN an_DT origin_NN at_IN an_DT initial_JJ state_NN and_CC that_DT includes_VBZ the_DT initial_JJ state_NN 's_POS weight_NN as_IN an_DT I-shortest-path_NNP ._.
+Refer_VB to_IN the_DT technical_JJ report_NN CITE_NNP ._.
+Refer_VB to_IN the_DT diagrams_NNS of_IN REF_NNP to_TO get_VB the_DT weights_NNS MATH_NNP as_IN follows_VBZ ._.
+Refer_VB to_IN CITE_NNP for_IN complete_JJ details_NNS ._.
+Refer_VB to_IN REF_NNP completes_VBZ the_DT proof_NN of_IN the_DT first_JJ part_NN of_IN the_DT lemma_NN ._.
+Refer_VB to_IN such_PDT a_DT pair_NN MATH_NNP as_IN a_DT dangerous_JJ pair_NN ._.
+Refer_VB to_IN REF_NNP a._NN Also_RB recall_VB our_PRP$ general_JJ assumptions_NNS that_IN in_IN a_DT canonical_JJ MATH_NNP configuration_NN MATH_NNP ,_, and_CC the_DT bisector_NN of_IN MATH_NNP aligns_NNS with_IN ,_, or_CC lies_VBZ below_IN ,_, the_DT bisector_NN of_IN MATH_NNP ._.
+Refer_VB to_IN REF_NNP b._JJ Arguments_NNP similar_JJ to_IN the_DT ones_NNS used_VBD in_IN the_DT proof_NN of_IN REF_NNP show_VBP that_IN MATH_NNP ._.
+Refer_VB to_IN REF_NNP during_IN this_DT proof_NN ._.
+Refer_VB to_IN REF_NNP on_IN the_DT right_NN ._.
+Refer_VB to_IN the_DT definition_NN following_VBG REF_NNP ._.
+Refer_VB to_IN REF_NNP a_DT for_IN illustration_NN ._.
+Refer_VB to_IN the_DT positive_JJ reaction_NN constant_NN from_IN MATH_NNP to_IN MATH_NNP by_IN MATH_NNP and_CC to_IN the_DT negative_JJ reaction_NN constant_JJ by_IN MATH_NNP ._.
+Refer_VB to_IN REF_NNP for_IN the_DT details_NNS of_IN this_DT result_NN ._.
+Refer_VB to_IN the_DT proof_NN of_IN REF_NNP for_IN the_DT definitions_NNS of_IN MATH_NNP and_CC MATH_NNP ,_, as_RB well_RB as_IN their_PRP$ empirical_JJ counterparts_NNS MATH_NNP and_CC MATH_NNP ._.
+Refer_VB to_IN REF_NNP for_IN notation_NN of_IN vertices_NNS and_CC weights_NNS of_IN the_DT star/triangle_NN ._.
+Refer_VB to_IN these_DT MATH_NNP steps_NNS as_IN a_DT phase_NN ._.
+Refer_VB to_IN REF_NNP for_IN an_DT illustration_NN of_IN the_DT chain_NN strategy_NN ._.
+Refer_VB to_IN REF_NNP for_IN the_DT construction_NN of_IN MATH_NNP ._.
+Refer_VB to_IN Appendix_NN ._.
+Refer_VB to_IN REF_NNP and_CC observe_VB that_IN MATH_NNP sends_VBZ MATH_NNP units_NNS of_IN charge_NN through_IN MATH_NNP and_CC at_IN most_JJS MATH_NNP units_NNS of_IN charge_NN through_IN MATH_NNP ,_, and_CC MATH_NNP ._.
+Refer_VB to_IN REF_NNP and_CC consider_VB the_DT face_NN MATH_NNP ._.
+Refer_VB to_IN the_DT parameters_NNS MATH_NNP ,_, MATH_NNP ,_, and_CC MATH_NNP in_IN the_DT statement_NN of_IN REF_NNP ._.
+Refer_VB to_IN CITE_NNP for_IN the_DT detailed_JJ proof_NN ._.
+Refer_VB to_IN REF_NNP for_IN a_DT sketch_NN of_IN MATH_NNP ._.
+Refer_VB to_IN these_DT groups_NNS as_IN MATH_NNP ,_, for_IN MATH_NNP ,_, and_CC label_VB the_DT gadgets_NNS within_IN group_NN MATH_NNP as_IN MATH_NNP ._.
+Refer_VB to_IN Figures_NNS REF_NNP and_CC REF_NNP for_IN the_DT construction_NN of_IN MATH_NNP ,_, for_IN MATH_NNP ._.
+Refer_VB to_IN the_DT last_JJ statement_NN of_IN REF_NNP and_CC see_VB REF_NNP ._.
+Refer_VB to_IN Example_NN REF_NNP ._.
+Refer_VB to_IN these_DT as_IN REF_NNP or_CC REF_NNP respectively_RB ._.
+Refer_VB to_IN the_DT notation_NN MATH_NNP from_IN REF_NNP ._.
+Refer_VB to_IN REF_NNP as_IN needed_VBN ._.
+Refer_VB to_IN REF_NNP for_IN notation_NN ._.
+Refer_VB to_IN REF_NNP and_CC REF_NNP of_IN REF_NNP of_IN CITE_NNP ._.
+Refer_VB to_IN discussions_NNS in_IN REF_NNP ._.
+Refer_VB to_IN CITE_NNP for_IN NAME_NNP dual_JJ ._.
+Refer_VB to_IN the_DT tower_NN of_IN length_NN MATH_NNP defined_VBD this_DT way_NN as_IN MATH_NNP ._.
+Refer_VB to_IN Figs_NNS REF_NNP and_CC REF_NNP for_IN an_DT example_NN of_IN the_DT construction_NN ._.
+Refer_VB to_IN Theorem_NN REF_NNP and_CC references_NNS therein_RB ._.
+Refer_VB to_IN the_DT latter_JJ part_NN of_IN this_DT proof_NN ._.
+Refer_VB to_IN the_DT proof_NN of_IN REF_NNP by_IN NAME_NNP ._.
+Refer_VB to_IN REF_NNP for_IN an_DT example_NN of_IN such_PDT a_DT MATH_NNP ._.
+Refer_VB to_IN the_DT proof_NN in_IN CITE_NNP ._.
+Refer_VB to_IN REF_NNP for_IN an_DT illustration_NN of_IN the_DT construction_NN ._.
+Refer_VB to_IN REF_NNP for_IN an_DT exemplified_JJ illustration_NN of_IN the_DT described_JJ construction_NN ._.
+Refer_VB to_IN REF_NNP ,_, the_DT last_JJ paragraph_NN of_IN REF_NNP and_CC the_DT last_JJ line_NN of_IN REF_NNP ._.
+Refer_VB to_IN this_DT tower_NN as_IN MATH_NNP ._.
+Refer_VB to_IN Table_NN 1_CD ._.
+Refer_VB to_IN the_DT definition_NN of_IN MATH_NNP in_IN REF_NNP ,_, and_CC the_DT choices_NNS of_IN MATH_NNP in_IN REF_NNP and_CC MATH_NNP in_IN REF_NNP ,_, we_PRP have_VBP MATH_NNP where_WRB the_DT matrices_NNS MATH_NNP are_VBP defining_VBG the_DT elements_NNS in_IN MATH_NNP (_( REF_NNP )_) ._.
+Refer_VB to_IN the_DT unitary_JJ generic_JJ dual_NN of_IN the_DT general_JJ linear_JJ groups_NNS in_IN CITE_NNP for_IN the_DT archimedean_JJ REF_NNP and_CC CITE_NNP for_IN the_DT non-archimedean_JJ REF_NNP any_DT generic_JJ member_NN MATH_NNP in_IN MATH_NNP isomorphic_JJ to_IN the_DT irreducible_JJ generic_JJ unitary_JJ induced_JJ representation_NN MATH_NNP where_WRB MATH_NNP and_CC all_DT MATH_NNP and_CC MATH_NNP are_VBP unitary_JJ generic_NNS and_CC tempered_VBD ._.
+Refer_VB to_IN the_DT Subsection_NNP REF_NNP ._.
+Refer_VB to_IN the_DT nodes_NNS of_IN MATH_NNP as_IN uncovered_JJ nodes_NNS ._.
+Refer_VB to_IN the_DT following_VBG table_NN for_IN details_NNS ._.
+Refer_VB to_IN the_DT proof_NN in_IN the_DT appendix_NN ._.
+Refer_VB to_IN the_DT appendix_NN for_IN the_DT proof_NN ._.
+Refer_VB to_IN the_DT appendix_NN ._.
+Refer_VB to_IN REF_NNP and_CC compare_VB copy_NN MATH_NNP to_IN copy_VB MATH_NNP as_IN MATH_NNP ._.
+Refer_VB to_IN REF_NNP for_IN an_DT illustration_NN of_IN these_DT steps_NNS ._.
+Refer_VB to_IN REF_NNP for_IN details_NNS ;_: this_DT is_VBZ a_DT NAME_NNP –_WDT NAME-type_JJ integral_JJ equation_NN ._.
+Refer_VB to_IN the_DT image_NN of_IN these_DT arcs_NNS in_IN MATH_NNP as_IN MATH_NNP ._.
+Refer_VB to_IN REF_NNP for_IN an_DT illustration_NN of_IN the_DT gadget_NN MATH_NNP ._.
+Refer_VB to_IN REF_NNP below_IN that_DT constructs_VBZ a_DT set_NN of_IN bit_NN flip_JJ locations_NNS ._.
+Refer_VB to_IN REF_NNP and_CC its_PRP$ caption_NN for_IN the_DT intuition_NN of_IN the_DT proof_NN ._.
+Refer_VB to_IN REF_NNP for_IN the_DT details_NNS on_IN how_WRB to_TO create_VB a_DT perfect_JJ matching_NN in_IN MATH_NNP from_IN one_CD in_IN MATH_NNP ._.
+Refer_VB to_IN the_DT note_NN after_IN the_DT proof_NN of_IN REF_NNP for_IN the_DT definition_NN ._.
+Refer_VB to_IN REF_NNP for_IN this_DT construction_NN in_IN REF_NNP of_IN MATH_NNP ._.
+Refer_VB to_IN REF_NNP et_FW seq_NN at_IN REF_NNP ,_, we_PRP have_VBP MATH_NNP ._.
+Refer_VB to_IN REF_NNP ,_, if_IN MATH_NNP is_VBZ a_DT Gaussian_JJ random_JJ variable_JJ MATH_NNP ,_, MATH_NNP then_RB MATH_NNP ._.
+Refer_VB to_IN REF_NNP ,_, MATH_NNP admits_VBZ a_DT density_NN MATH_NNP ._.
+Refer_VB to_IN the_DT assembly_NN configuration_NN in_IN REF_NNP ,_, where_WRB each_DT bunch_NN is_VBZ a_DT singleton_NN sphere_NN ._.
+Refer_VB to_IN the_DT equivalent_JJ assumption_NN on_IN visiting_VBG the_DT MATH_NNP vertices_NNS as_IN REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN the_DT REF_NNP for_IN the_DT REF_NNP ._.
+Refer_VB to_IN REF_NNP –_NNP REF_NNP ._.
+Refer_VB to_IN REF_NNP ,_, left_VBD ._.
+Refer_VB to_IN REF_NNP for_IN a_DT schematic_JJ view_NN of_IN the_DT definitions_NNS in_IN this_DT proof_NN ._.
+Refer_VB to_IN CITE_NNP for_IN a_DT general_JJ formula_NN for_IN the_DT steady-state_JJ sinusoidal_JJ response_NN of_IN a_DT linear_NN time-invariant_JJ system_NN ._.
+Refer_VB to_IN the_DT discrete_JJ –_NNP time_NN swapping_VBG lemma_NN in_IN CITE_NNP ._.
+Refer_VB to_IN REF_NNP but_CC note_NN that_IN loops_NNS are_VBP omitted_VBN ._.
+Refer_VB again_RB to_IN REF_NNP ;_: In_IN the_DT top_JJ picture_NN ,_, we_PRP see_VBP that_IN after_IN intersecting_VBG MATH_NNP ,_, a_DT track_NN will_MD always_RB either_RB intersect_JJ MATH_NNP or_CC MATH_NNP or_CC leave_VB the_DT labyrinth_NN ._.
+Refer_VB to_IN REF_NNP b._NN By_IN definition_NN MATH_NNP is_VBZ empty_JJ of_IN vertices_NNS ,_, therefore_RB both_DT MATH_NNP and_CC MATH_NNP lie_VBP outside_IN of_IN MATH_NNP ._.
+Refer_VB to_IN REF_NNP c._NN Similarly_NNP ,_, let_VB MATH_NNP be_VB the_DT lower_JJR right_NN corner_NN of_IN MATH_NNP and_CC let_VB MATH_NNP be_VB the_DT intersection_NN between_IN the_DT horizontal_JJ through_IN MATH_NNP and_CC the_DT circle_NN with_IN center_NN MATH_NNP and_CC radius_VB MATH_NNP ._.
+Refer_VB to_IN the_DT two_CD components_NNS on_IN the_DT right_NN as_IN the_DT covariance_NN of_IN expectations_NNS and_CC the_DT expectation_NN of_IN covariance_NN ,_, respectively_RB ._.
+Refer_VB to_IN the_DT first_JJ term_NN on_IN the_DT right-hand_JJ side_NN of_IN REF_NNP as_IN the_DT covariance_NN of_IN expectations_NNS ,_, and_CC the_DT second_JJ the_DT expectation_NN of_IN covariance_NN ._.
+Refer_VB to_IN REF_NNP to_TO review_VB the_DT definition_NN and_CC see_VB why_WRB we_PRP need_VBP to_TO make_VB this_DT distinction_NN ._.
+Refer_VB again_RB to_IN REF_NNP ._.
+Refer_VB to_IN the_DT the_DT supplementary_JJ material_NN for_IN the_DT proof_NN ._.
+Refer_VB to_IN REF_NNP for_IN proof_NN details_NNS ._.
+Refer_VB to_IN Table_NN REF_NNP for_IN shape_NN meanings_NNS ._.
+Refer_VB to_IN REF_NNP for_IN an_DT illustration_NN of_IN the_DT polygonalization_NN of_IN a_DT 4-by-5_JJ subgrid_NN ,_, and_CC its_PRP$ extension_NN to_IN a_DT polygonalization_NN to_IN the_DT full_JJ grid_NN MATH_NNP ._.
+Refer_VB to_IN REF_NNP a_DT ,_, which_WDT shows_VBZ the_DT cuts_NNS around_IN the_DT middle_NN of_IN MATH_NNP and_CC MATH_NNP as_IN dashed_JJ lines_NNS ._.
+Refer_VB to_IN REF_NNP for_IN a_DT full_JJ list_NN of_IN grouping_VBG 216_CD configurations_NNS in_IN 38_CD classes_NNS ._.
+Refer_VB to_IN REF_NNP for_IN particular_JJ realization_NN of_IN this_DT configuration_NN ._.
+Refer_VB to_IN Figures_NNS REF_NNP and_CC REF_NNP for_IN a_DT pictorial_JJ depiction_NN and_CC see_VB CITE_NNP for_IN a_DT detailed_JJ proof_NN ._.
+Refer_VB to_IN REF_NNP ,_, middle_JJ ._.
+Refer_VB again_RB to_IN REF_NNP for_IN an_DT illustration_NN ._.
+Refer_VB to_IN REF_NNP for_IN a_DT depiction_NN of_IN these_DT tiles_NNS types_NNS and_CC the_DT tile_NN locations_NNS where_WRB they_PRP bind_VBP in_IN a_DT subconfiguration_NN ._.
+Refer_VB to_IN REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN the_DT tree_NN MATH_NNP for_IN Example_NNP REF_NNP ._.
+Refer_VB back_RB to_IN REF_NNP for_IN a_DT similar_JJ construction_NN ._.
+Refer_VB to_IN the_DT commutative_JJ REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN labels_NNS ._.
+Refer_VB to_IN reference_NN CITE_NNP ._.
+Refer_VB to_IN reference_NN CITE_NNP ,_, CITE_NNP ._.
+Refer_VB to_IN references_NNS CITE_NNP ._.
+Refer_VB to_IN REF_NNP for_IN an_DT illustration_NN of_IN the_DT MATH_NNP path_NN when_WRB MATH_NNP and_CC all_PDT the_DT notations_NNS for_IN the_DT involved_JJ angles_NNS ._.
+Refer_VB to_IN CITE_NNP for_IN the_DT exact_JJ definition_NN of_IN a_DT fundamental_JJ matrix_NN ._.
+Refer_VB to_IN the_DT electronic_JJ appendix_NN for_IN the_DT proof_NN ._.
+Refer_VB to_IN CITE_NNP for_IN more_JJR details_NNS ,_, where_WRB these_DT objects_NNS are_VBP used_VBN to_IN prove_VB a_DT corresponding_JJ lower_JJR bound_NN on_IN the_DT number_NN of_IN perfect_JJ matchings_NNS ._.
+Refer_VB to_IN REF_NNP as_RB well_RB as_IN the_DT above_IN discussion_NN ._.
+Refer_VB to_IN REF_NNP and_CC substitute_VB this_DT in_IN the_DT constraint_NN MATH_NNP ,_, we_PRP obtain_VBP MATH_NNP where_WRB MATH_NNP is_VBZ the_DT inverse_JJ function_NN of_IN MATH_NNP ._.
+Refer_VB to_IN REF_NNP for_IN more_JJR details_NNS ._.
+Refer_VB to_IN REF_NNP for_IN possible_JJ polygons_NNS ._.
+Refer_VB to_IN one_CD of_IN the_DT models_NNS from_IN CITE_NNP (_( obtained_VBD by_IN means_NNS of_IN ``_`` short_JJ ''_'' finite_JJ support_NN iterations_NNS of_IN c.c.c._NN forcing_VBG notions_NNS )_) ,_, that_IN satisfy_JJ MATH_NNP together_RB with_IN the_DT existence_NN of_IN union_NN ultrafilters_NNS ._.
+Refer_VB to_IN CITE_NNP REF_NNP for_IN a_DT proof_NN ._.
+Refer_VB to_IN REF_NNP for_IN an_DT example_NN of_IN this_DT process_NN ._.
+Refer_VB to_IN REF_NNP B_NNP for_IN a_DT visual_JJ example_NN ._.
+Refer_VB to_IN REF_NNP as_IN our_PRP$ notations_NNS ._.
+Refer_VB to_IN REF_NNP ,_, especially_RB REF_NNP ,_, for_IN a_DT review_NN of_IN the_DT terminology_NN (_( such_JJ as_IN MATH_NNP theories_NNS and_CC the_DT Basic_NNP Axioms_NNP )_) ._.
+Refer_VB to_IN the_DT first_JJ MATH_NNP boys_NNS as_IN the_DT filter_NN boys_NNS and_CC leave_VBP them_PRP unmatched_JJ ._.
+Refer_VB to_IN the_DT MATH_NNP least_JJS preferred_JJ girls_NNS in_IN MATH_NNP as_IN the_DT target_NN girls_NNS ._.
+Refer_VB to_IN CITE_NNP for_IN a_DT short_JJ proof_NN ._.
+Refer_VB to_IN Notation_NN REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN the_DT meaning_NN of_IN the_DT term_NN MATH_NNP ._.
+Refer_VB to_IN Notations_NNS REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN the_DT construction_NN of_IN unit-speed_JJ parameterizations_NNS for_IN MATH_NNP ._.
+Refer_VB to_IN REF_NNP for_IN the_DT proof_NN ._.
+Refer_VB to_IN REF_NNP of_IN the_DT appendix_NN ._.
+Refer_VB to_IN REF_NNP where_WRB MATH_NNP ._.
+Refer_VB to_IN REF_NNP for_IN an_DT illustration_NN (_( a_DT full_JJ example_NN is_VBZ shown_VBN in_IN REFs_NNP REF_NNP )_) ._.
+Refer_VB back_RB to_IN the_DT end_NN of_IN REF_NNP for_IN an_DT outline_NN of_IN the_DT general_JJ method_NN for_IN determining_VBG centralizer_NN orders_NNS for_IN non-semisimple_JJ classes_NNS ._.
+Refer_VB to_IN REF_NNP as_RB well_RB as_IN REF_NNP ._.
+Refer_VB to_IN the_DT blocks_NNS of_IN MATH_NNP ,_, divide_NN MATH_NNP into_IN blocks_NNS MATH_NNP ,_, one_CD obtains_VBZ that_IN MATH_NNP is_VBZ controllable_JJ if_IN and_CC only_RB if_IN MATH_NNP is_VBZ controllable_JJ ,_, which_WDT holds_VBZ if_IN and_CC only_RB if_IN MATH_NNP are_VBP controllable_JJ ._.
+Refer_VB to_IN the_DT proof_NN of_IN REF_NNP ,_, if_IN MATH_NNP and_CC MATH_NNP ,_, MATH_NNP and_CC it_PRP holds_VBZ that_IN MATH_NNP ._.
+Refer_VB for_IN example_NN ,_, to_IN CITE_NNP ._.
+Refer_VB to_IN CITE_NNP for_IN a_DT proof_NN of_IN REF_NNP ._.
+Refer_VB to_IN the_DT set-up_JJ in_IN REF_NNP ._.
+Refer_VB again_RB to_IN REF_NNP to_TO get_VB MATH_NNP ._.
+Refer_VB to_IN the_DT following_JJ REF_NNP :_: If_IN MATH_NNP ,_, then_RB MATH_NNP is_VBZ also_RB to_IN the_DT north_NN of_IN MATH_NNP since_IN the_DT MATH_NNP row_NN contains_VBZ MATH_NNP boxes_NNS from_IN MATH_NNP to_IN MATH_NNP ._.
+Refer_VB to_IN the_DT following_JJ REF_NNP :_: CASE_NNP :_: Identify_NNP MATH_NNP with_IN MATH_NNP and_CC MATH_NNP with_IN MATH_NNP ._.
+Refer_VB to_IN the_DT following_JJ REF_NNP :_: Hence_NNP MATH_NNP is_VBZ fully_RB switched_VBN and_CC MATH_NNP ._.
+Refer_VB to_IN the_DT following_JJ REF_NNP :_: Suppose_NNP that_IN MATH_NNP for_IN some_DT MATH_NNP ._.
+Refer_VB to_IN Table_NN REF_NNP for_IN the_DT number_NN of_IN orderly-generated_JJ ,_, rectangular_JJ orthogonal_JJ MATH_NNP matrices_NNS with_IN MATH_NNP roots_NNS of_IN unity_NN (_( where_WRB MATH_NNP )_) surviving_VBG the_DT second_JJ column_NN pruning_VBG strategy_NN ._.
+Refer_VB for_IN instance_NN to_IN the_DT leader_NN algorithm_NN in_IN REF_NNP ._.
+Refer_VB to_IN CITE_NNP and_CC CITE_NNP which_WDT cover_NN REF_NNP that_IN MATH_NNP is_VBZ the_DT identity_NN and_CC MATH_NNP in_IN MATH_NNP ._.
+Refer_VB to_IN REF_NNP for_IN the_DT coprime_NN labeling_NN of_IN this_DT REF_NNP Note_NNP the_DT labeling_NN of_IN MATH_NNP is_VBZ identical_JJ to_IN the_DT previous_JJ REF_NNP In_IN addition_NN to_IN edges_NNS connecting_VBG consecutive_JJ labels_NNS or_CC labels_NNS adjacent_JJ to_IN MATH_NNP ,_, we_PRP observe_VBP that_IN MATH_NNP and_CC MATH_NNP are_VBP coprime_JJ based_VBN on_IN our_PRP$ assumption_NN that_IN MATH_NNP ._.
+Refer_VB to_IN CITE_NNP and_CC CITE_NNP for_IN more_JJR details_NNS ._.
+Refer_VB to_IN REF_NNP for_IN the_DT semantics_NNS of_IN MATH_NNP ._.
+Refer_VB to_IN the_DT supplementary_JJ material_NN CITE_NNP ._.
+Refer_VB to_IN REF_NNP for_IN an_DT example_NN of_IN how_WRB to_TO compose_VB drawings_NNS MATH_NNP ,_, with_IN MATH_NNP ,_, in_IN REF_NNP and_CC to_TO REF_NNP for_IN an_DT example_NN of_IN how_WRB to_TO compose_VB drawings_NNS MATH_NNP and_CC MATH_NNP in_IN REF_NNP ._.
+Refer_VB to_IN REF_NNP (_( D1_NNP MATH_NNP )_) ._.
+Refer_VB to_IN REF_NNP (_( H1_NNP MATH_NNP )_) ._.
+Refer_VB to_IN REF_NNP for_IN an_DT example_NN where_WRB MATH_NNP is_VBZ an_DT H1_NNP drawing_NN and_CC MATH_NNP is_VBZ a_DT D1_NNP MATH_NNP drawing_NN ._.
+Refer_VB to_IN CITE_NNP ,_, CITE_NNP and_CC CITE_NNP for_IN details_NNS ._.
+Refer_VB CITE_NNP ._.
+Refer_VB the_DT three-edge_JJ sheets_NNS which_WDT contain_VBP edge_NN 14_CD shown_VBN in_IN Table_NNP REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN an_DT illustration_NN of_IN the_DT strategy_NN of_IN the_DT proof_NN ._.
+Refer_VB to_IN REF_NNP for_IN an_DT example_NN of_IN the_DT reduction_NN ._.
+Refer_VB to_IN CITE_NNP for_IN details_NNS showing_VBG injectivity_NN and_CC surjectivity_NN ._.
+Refer_VB to_IN CITE_NNP for_IN this_DT lemma_NN ._.
+Refer_VB to_IN REF_NNP ,_, for_IN more_JJR ._.
+Refer_VB to_IN CITE_NNP for_IN a_DT proof_NN of_IN the_DT first_JJ point_NN ._.
+Refer_VB to_IN Appendix_NNP for_IN the_DT proof_NN ._.
+Refer_VB REF_NNP in_IN the_DT Supplementary_JJ Information_NN ._.
+Refer_VB to_IN proof_NN of_IN REF_NNP ._.
+Refer_VB to_IN CITE_NNP for_IN details_NNS of_IN the_DT associated_VBN graded_JJ algebra_NN ._.
+Refer_VB Appendix_NN ,_, REF_NNP ._.
+Refer_VB also_RB to_IN REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN a_DT sketch_NN of_IN the_DT situation_NN in_IN the_DT graph_NN ._.
+Refer_VB to_IN the_DT Appendix_NNP for_IN the_DT proof_NN ._.
+Refer_VB to_IN REF_NNP of_IN the_DT Appendix_NNP ._.
+Refer_VB to_IN REF_NNP ,_, computing_VBG a_DT weight_NN value_NN MATH_NNP requires_VBZ determining_VBG if_IN MATH_NNP is_VBZ a_DT valid_JJ path_NN ._.
+Refer_VB to_IN REF_NNP for_IN a_DT graphical_JJ representation_NN :_: MATH_NNP is_VBZ the_DT largest_JJS position_NN shared_VBD by_IN MATH_NNP and_CC MATH_NNP ._.
+Refer_VB to_IN the_DT close_JJ function_NN ,_, coded_VBD in_IN REF_NNP ._.
+Refer_VB to_IN the_DT proof_NN of_IN REF_NNP which_WDT is_VBZ the_DT same_JJ in_IN the_DT general_JJ REF_NNP
+Refer_VB to_IN the_DT values_NNS of_IN MATH_NNP as_IN shared_VBN values_NNS ,_, and_CC other_JJ values_NNS of_IN MATH_NNP and_CC MATH_NNP as_IN non-shared_JJ values_NNS ._.
+Refer_VB to_IN CITE_NNP for_IN an_DT elegant_JJ proof_NN of_IN this_DT fact_NN avoiding_VBG the_DT NAME_NNP Identity_NNP ._.
+Refer_VB to_IN REF_NNP in_IN the_DT appendix_NN ._.
+Refer_VB to_IN CITE_NNP ,_, section_NN MATH_NNP ,_, for_IN a_DT proof_NN of_IN this_DT result_NN ._.
+Refer_VB to_IN REF_NNP for_IN a_DT depiction_NN of_IN this_DT REF_NNP In_IN any_DT REF_NNP the_DT replacement_NN of_IN the_DT old_JJ vertex_NN MATH_NNP with_IN the_DT new_JJ MATH_NNP forces_NNS MATH_NNP out_IN of_IN Configuration_NNP MATH_NNP F_NNP ,_, and_CC we_PRP can_MD apply_VB REF_NNP to_TO find_VB a_DT MATH_NNP linkage_NN ._.
+Refer_VB to_IN each_DT iteration_NN of_IN NAME_NNP as_IN a_DT phase_NN ._.
+Refer_VB to_IN CITE_NNP for_IN the_DT technical_JJ details_NNS ._.
+Refer_VB to_IN CITE_NNP for_IN REF_NNP ,_, to_IN CITE_NNP and_CC CITE_NNP for_IN REF_NNP ,_, and_CC (_( for_IN instance_NN )_) to_IN CITE_NNP for_IN REF_NNP ._.
+Refer_VB to_IN CITE_NNP REF_NNP for_IN the_DT proof_NN ._.
+Refer_VB CITE_NNP for_IN detail_NN ._.
+Refer_VB to_IN REF_NNP throughout_IN ._.
+Refer_VB to_IN CITE_NNP and_CC CITE_NNP ,_, when_WRB MATH_NNP (_( that_DT is_VBZ ,_, MATH_NNP )_) we_PRP have_VB MATH_NNP ._.
+Refer_VB to_IN CITE_NNP ,_, for_IN the_DT integral_JJ in_IN REF_NNP we_PRP have_VBP MATH_NNP ._.
+Refer_VB to_IN CITE_NNP for_IN a_DT proof_NN of_IN the_DT first_JJ claim_NN ,_, and_CC refer_VB to_IN the_DT supplementary_JJ material_NN CITE_NNP for_IN a_DT proof_NN of_IN the_DT second_JJ claim_NN ._.
+Refer_VB to_IN the_DT triangles_NNS in_IN chain_NN MATH_NNP as_IN MATH_NNP and_CC to_IN the_DT terminal_NN vertices_NNS as_IN MATH_NNP ._.
+Refer_VB to_IN the_DT expressions_NNS for_IN the_DT symplectic_JJ slice_NN momentum_NN map_NN MATH_NNP for_IN MATH_NNP and_CC MATH_NNP in_IN CITE_NNP ._.
+Refer_VB to_IN the_DT expression_NN for_IN the_DT pseudo-true_JJ parameter_NN under_IN least_JJS squares_NNS estimation_NN of_IN the_DT BLIN_NNP model_NN ,_, MATH_NNP ,_, in_IN REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN an_DT illustration_NN concering_VBG the_DT graph_NN of_IN REF_NNP ._.
+Refer_VB to_IN the_DT proof_NN presented_VBD in_IN REF_NNP ._.
+Refer_VB A057500_NNP in_IN OEIS_NNP ,_, CITE_NNP for_IN details_NNS ._.
+Refer_VB to_IN Supplementary_NN Material_NN A_NNP ._.
+Refer_VB to_IN Supplementary_NN Material_NN B_NNP ._.
+Refer_VB to_IN the_DT textbook_NN by_IN CITE_NNP ._.
+Refer_VB to_IN our_PRP$ REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN a_DT visualization_NN of_IN the_DT NAME-characteristic_JJ problem_NN with_IN REF_NNP ._.
+Refer_VB to_IN a_DT triangle_JJ MATH_NNP with_IN all_DT edge_NN labels_VBZ identical_JJ as_IN a_DT single-label_JJ triangle_NN ._.
+Refer_VB to_IN the_DT proof_NN of_IN REF_NNP ,_, which_WDT is_VBZ the_DT quandle_JJ version_NN of_IN this_DT lemma_NN ._.
+Refer_VB to_IN REF_NNP for_IN concreteness_NN ._.
+Refer_VB to_IN REF_NNP while_IN reading_VBG the_DT proof_NN ._.
+Refer_VB to_IN REF_NNP for_IN a_DT graphical_JJ representation_NN of_IN MATH_NNP and_CC MATH_NNP ._.
+Refer_VB to_IN REF_NNP for_IN the_DT details_NNS ._.
+Refer_VB to_IN REF_NNP for_IN a_DT setup_NN of_IN the_DT proof_NN ._.
+Refer_VB to_IN NAME_NNP for_IN a_DT proof_NN of_IN the_DT first_JJ claim_NN ._.
+Refer_VB to_IN REF_NNP for_IN a_DT diagram_NN of_IN the_DT following_JJ argument_NN ._.
+Refer_VB to_IN CITE_NNP for_IN further_JJ details_NNS ._.
+Refer_VB to_IN CITE_NNP for_IN inequalities_NNS of_IN eigenvalue_NN of_IN matrix_JJ summation_NN and_CC product_NN ._.
+Refer_VB to_IN REU_NNP paper_NN and_CC the_DT distribution_NN of_IN statistics_NNS for_IN the_DT avoidance_NN class_NN based_VBN on_IN MATH_NNP ._.
+Refer_VB to_IN REF_NNP for_IN the_DT detailed_JJ proof_NN ._.
+Refer_VB to_IN REF_NNP for_IN the_DT below_NN ._.
+Refer_VB to_IN REF_NNP for_IN definitions_NNS partitioning_VBG MATH_NNP into_IN three_CD regions_NNS MATH_NNP ._.
+Refer_VB to_IN CITE_NNP for_IN the_DT fact_NN MATH_NNP is_VBZ a_DT special_JJ MATH_NNP ring_NN ._.
+Refer_VB to_IN Table_NN REF_NNP for_IN the_DT MATH_NNP values_NNS of_IN type_NN MATH_NNP signatures_NNS when_WRB MATH_NNP ._.
+Refer_VB to_IN such_JJ MATH_NNP as_IN MATH_NNP and_CC to_IN its_PRP$ corresponding_VBG variable_JJ as_IN MATH_NNP ._.
+Refer_VB to_IN the_DT right_JJ two_CD thirds_NNS of_IN REF_NNP for_IN a_DT simple_JJ (_( and_CC misleading_JJ )_) example_NN of_IN what_WP follows_VBZ ._.
+Refer_VB to_IN REF_NNP REF_NNP ,_, REF_NNP ,_, and_CC REF_NNP ._.
+Refer_VB to_IN REF_NNP REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN more_JJR details_NNS of_IN the_DT situation_NN when_WRB MATH_NNP occurs_VBZ ._.
+Refer_VB to_IN Proposition_NN MATH_NNP in_IN Chapter_NNP MATH_NNP on_IN Page_NNP MATH_NNP of_IN CITE_NNP ._.
+Refer_VB to_IN the_DT vertices_NNS inserted_VBD in_IN this_DT step_NN as_IN MATH_NNP ._.
+Refer_VB REF_NNP for_IN an_DT illustration_NN ._.
+Refer_VB to_IN REF_NNP for_IN a_DT schematic_JJ diagram_NN of_IN the_DT curve_NN MATH_NNP ,_, an_DT associated_VBN chord_NN ,_, and_CC a_DT tangent_JJ vector_NN ._.
+Refer_VB for_IN this_DT to_IN CITE_NNP ._.
+Refer_VB to_IN CITE_NNP for_IN the_DT decay_NN of_IN MATH_NNP ._.
+Refer_VB the_DT proof_NN of_IN CITE_NNP for_IN the_DT details_NNS ._.
+Refer_VB to_IN CITE_NNP and_CC references_NNS therein_VBP for_IN a_DT more_RBR comprehensive_JJ overview_NN of_IN finite-dimensional_JJ linear_JJ sieves_NNS ._.
+Refer_VB to_IN the_DT proof_NN for_IN inconsistency_NN of_IN MATH_NNP in_IN REF_NNP ._.
+Refer_VB to_IN CITE_NNP ,_, it_PRP is_VBZ well_RB known_VBN that_IN there_EX exists_VBZ a_DT constant_JJ MATH_NNP such_JJ that_IN the_DT following_JJ inequalities_NNS hold_VBP :_: MATH_NNP for_IN any_DT MATH_NNP and_CC MATH_NNP ._.
+Refer_VB to_IN REF_NNP for_IN an_DT illustration_NN of_IN some_DT of_IN the_DT sets_NNS that_WDT will_MD be_VB involved_VBN in_IN the_DT proof_NN in_IN the_DT REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN the_DT relevant_JJ differentials_NNS ._.
+Refer_VB to_IN REF_NNP for_IN a_DT precise_JJ statement_NN of_IN a_DT more_RBR general_JJ result_NN ._.
+Refer_VB to_IN another_DT fact_NN CITE_NNP that_IN MATH_NNP ._.
+Refer_VB the_DT pseudocode_NN given_VBN in_IN REF_NNP ._.
+Refer_VB to_IN REF_NNP which_WDT demonstrates_VBZ that_IN if_IN MATH_NNP and_CC MATH_NNP meet_VBP non-transversally_RB and_CC we_PRP arrive_VBP at_IN the_DT crossing_VBG with_IN the_DT outside_NN to_IN the_DT right_NN ,_, we_PRP will_MD also_RB leave_VB the_DT crossing_NN with_IN the_DT outside_NN to_IN the_DT right_NN (_( the_DT outside_NN would_MD also_RB be_VB to_IN the_DT left_NN of_IN the_DT path_NN during_IN the_DT crossing_NN ,_, which_WDT we_PRP allow_VBP )_) ._.
+Refer_VB to_IN REF_NNP for_IN a_DT visual_JJ presentation_NN of_IN MATH_NNP ._.
+Refer_VB back_RB to_IN REF_NNP ,_, where_WRB MATH_NNP is_VBZ the_DT segment_NN associated_VBN to_IN MATH_NNP with_IN endpoints_NNS MATH_NNP and_CC MATH_NNP ._.
+Refer_VB to_IN the_DT three_CD copies_NNS of_IN MATH_NNP as_IN MATH_NNP ,_, MATH_NNP ,_, and_CC MATH_NNP ;_: and_CC to_IN their_PRP$ vertices_NNS as_IN MATH_NNP ,_, MATH_NNP ,_, and_CC MATH_NNP and_CC cycle_NN as_IN MATH_NNP in_IN accordance_NN with_IN our_PRP$ labelling_VBG on_IN MATH_NNP ._.
+Refer_VB to_IN the_DT discussion_NN in_IN REF_NNP for_IN details_NNS ._.
+Refer_VB to_IN REF_NNP to_IN supplement_VB the_DT following_JJ proof_NN ._.
+Refer_VB to_IN CITE_NNP for_IN full_JJ proof_NN ._.
+Refer_VB to_IN the_DT proof_NN of_IN REF_NNP ,_, but_CC with_IN a_DT different_JJ MATH_NNP rather_RB than_IN MATH_NNP ._.
+Refer_VB to_IN these_DT as_IN AST_NNP components_NNS ._.
+Refer_VB to_IN REF_NNP by_IN case_NN argument_NN of_IN CITE_NNP ,_, to_TO give_VB an_DT exact_JJ list_NN ,_, MATH_NNP must_MD be_VB among_IN one_CD of_IN the_DT situations_NNS :_: MATH_NNP ,_, MATH_NNP ,_, MATH_NNP ,_, MATH_NNP ,_, MATH_NNP ,_, MATH_NNP ,_, MATH_NNP ,_, MATH_NNP ,_, MATH_NNP ._.
+Refer_VB to_IN NAME_NNP 's_POS proof_NN for_IN details_NNS ._.
+Refer_VB to_IN REF_NNP for_IN the_DT MATH_NNP page_NN of_IN MATH_NNP for_IN MATH_NNP and_CC MATH_NNP ._.
+Refer_VB to_IN REF_NNP for_IN the_DT additional_JJ details_NNS required_VBD for_IN the_DT proof_NN of_IN the_DT proposition_NN ,_, where_WRB the_DT additional_JJ details_NNS are_VBP the_DT included_JJ specifics_NNS of_IN the_DT closed_JJ testing_NN procedure_NN ._.
+Refer_VB to_IN REF_NNP for_IN a_DT simple_JJ proof_NN on_IN how_WRB we_PRP achieve_VBP this_DT for_IN another_DT constant_JJ MATH_NNP ,_, same_JJ MATH_NNP and_CC a_DT bigger_JJR alphabet_NN set_NN MATH_NNP ._.
+Refer_VB to_IN REF_NNP ,_, applying_VBG REF_NNP to_IN the_DT LPP_NNP process_NN MATH_NNP gives_VBZ MATH_NNP ._.
+Refer_VB to_IN the_DT introduction_NN for_IN another_DT instance_NN with_IN a_DT unique_JJ PAV_NNP committee_NN that_IN fails_VBZ laminar_JJ proportionality_NN ._.
+Refer_VB to_IN REF_NNP :_: robot_NN MATH_NNP moves_VBZ from_IN the_DT other_JJ robots_NNS up_IN to_IN a_DT distance_NN MATH_NNP ._.
+Refer_VB REF_NNP for_IN the_DT proof_NN of_IN 5.,6.,7_CD ._.
+Refer_VB to_IN REF_NNP on_IN how_WRB to_TO construct_VB a_DT kernel_NN in_IN a_DT cycle-free_JJ directed_VBN graph_NN ._.
+Refer_VB to_IN REF_NNP for_IN our_PRP$ notation_NN about_IN trivial_JJ extensions_NNS ._.
+Refer_VB to_IN REF_NNP for_IN a_DT detailed_JJ description_NN of_IN these_DT elementary_JJ operations_NNS ._.
+Refer_VB to_IN REF_NNP for_IN a_DT complete_JJ description_NN of_IN this_DT procedure_NN ._.
+Refer_VB to_IN an_DT arbitrary_JJ sequence_NN in_IN MATH_NNP by_IN MATH_NNP ,_, and_CC define_VB a_DT map_NN MATH_NNP such_JJ that_IN MATH_NNP equals_NNS MATH_NNP when_WRB MATH_NNP is_VBZ neither_DT MATH_NNP nor_CC MATH_NNP ._.
+Refer_VB REF_NNP for_IN the_DT patterns_NNS mentioned_VBD below_IN ._.
+Refer_VB to_IN REF_NNP for_IN the_DT labelling_NN of_IN the_DT edges_NNS ._.
+Refer_VB to_IN CITE_NNP Construction_NNP 1.2.8_CD for_IN more_JJR on_IN this_DT ._.
+Refer_VB to_IN REF_NNP ppendix_NN for_IN the_DT proof_NN ._.
+Refer_VB to_IN REF_NNP of_IN REF_NNP ._.
+Refer_VB to_IN CASE_NNP of_IN REF_NNP ._.
+Refer_VB to_IN REF_NNP ,_, and_CC REF_NNP ,_, with_IN the_DT positive_JJ integer_NN MATH_NNP ,_, the_DT (_( distinct_JJ )_) real_JJ numbers_NNS MATH_NNP ,_, MATH_NNP ,_, and_CC the_DT sets_NNS MATH_NNP ,_, MATH_NNP ._.
+Refer_VB to_IN the_DT first_JJ part_NN of_IN REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN an_DT overview_NN ._.
+Refer_VB to_IN CITE_NNP for_IN the_DT detailed_JJ proof_NN of_IN this_DT proposition_NN ._.
+Refer_VB to_IN the_DT appendices_NNS ._.
+Refer_VB to_IN the_DT description_NN of_IN the_DT zeros_NNP MATH_NNP of_IN MATH_NNP from_IN REF_NNP and_CC note_VB that_IN there_EX are_VBP no_DT other_JJ zeros_NNS of_IN MATH_NNP outside_IN of_IN MATH_NNP ._.
+Refer_VB to_IN REF_NNP for_IN the_DT following_NN ._.
+Refer_VB REF_NNP with_IN the_DT fact_NN that_IN MATH_NNP is_VBZ weak_JJ *_-NONE- compact_JJ ._.
+Refer_VB to_IN Appendix_NN REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN the_DT illustration_NN ._.
+Refer_VB to_IN the_DT pseudo-code_NN in_IN REF_NNP ._.
+Refer_VB to_IN the_DT proof_NN in_IN CITE_NNP we_PRP have_VBP :_: MATH_NNP ._.
+Refer_VB to_IN REF_NNP for_IN basic_JJ operations_NNS of_IN NAME_NNP constants_NNS ._.
+Refer_VB to_IN the_DT proof_NN of_IN REF_NNP for_IN notations_NNS ._.
+Refer_VB to_IN the_DT proofs_NNS of_IN REF_NNP ,_, where_WRB the_DT defining_NN equality_NN REF_NNP leads_VBZ to_IN MATH_NNP ._.
+Refer_VB to_IN the_DT bipartition_NN elements_NNS of_IN MATH_NNP with_IN MATH_NNP and_CC MATH_NNP ._.
+Refer_VB to_IN the_DT data_NNS from_IN REF_NNP ._.
+Refer_VB to_IN the_DT notation_NN leading_VBG up_IN to_IN REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN our_PRP$ conventions_NNS and_CC notation_NN on_IN basepoints_NNS and_CC centres_NNS ._.
+Refer_VB to_IN REF_NNP for_IN an_DT illustration_NN of_IN MATH_NNP ._.
+Refer_VB to_IN REF_NNP ,_, which_WDT depicts_NNS ,_, locally_RB ,_, the_DT situation_NN when_WRB we_PRP push_VBP MATH_NNP up_RP from_IN level_NN MATH_NNP to_IN level_NN MATH_NNP ._.
+Refer_VB to_IN Examples_NNS REF_NNP to_TO recall_VB the_DT algebra_NN and_CC measuring_VBG structure_NN of_IN MATH_NNP and_CC the_DT relations_NNS between_IN the_DT structure_NN morphisms_NNS and_CC MATH_NNP ._.
+Refer_VB to_IN REF_NNP for_IN both_DT of_IN these_DT ._.
+Refer_VB to_IN REF_NNP and_CC note_NN that_IN if_IN MATH_NNP or_CC MATH_NNP (_( in_IN which_WDT REF_NNP certainly_RB MATH_NNP )_) then_RB MATH_NNP by_IN REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN the_DT notation_NN ._.
+Refer_VB to_IN REF_NNP and_CC denote_VB by_IN MATH_NNP the_DT left-to-right_JJ order_NN of_IN the_DT points_NNS of_IN MATH_NNP along_IN MATH_NNP ;_: note_NN that_IN each_DT of_IN such_JJ points_NNS might_MD correspond_VB to_IN a_DT vertex_NN of_IN MATH_NNP or_CC to_IN a_DT crossing_NN point_NN of_IN an_DT edge_NN of_IN MATH_NNP with_IN MATH_NNP ._.
+Refer_VB to_IN the_DT Supplementary_NN Material_NN REF_NNP for_IN the_DT proof_NN ._.
+Refer_VB to_IN the_DT REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN illustrations_NNS ._.
+Refer_VB to_IN CITE_NNP for_IN the_DT derivation_NN ._.
+Refer_VB to_IN REF_NNP for_IN the_DT proof_NN of_IN this_DT proposition_NN ._.
+Refer_VB to_IN REF_NNP for_IN the_DT techniques_NNS needed_VBD ._.
+Refer_VB to_IN definition_NN of_IN the_DT matching_NN unifier_NN on_IN page_NN REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN an_DT illustration_NN of_IN this_DT setting_NN ._.
+Refer_VB to_IN its_PRP$ height_JJ function_NN by_IN MATH_NNP ._.
+Refer_VB to_IN REF_NNP in_IN the_DT supplementary_JJ material_NN for_IN more_JJR details_NNS ._.
+Refer_VB to_IN REF_NNP in_IN the_DT supplementary_JJ material_NN ._.
+Refer_VB to_IN REF_NNP for_IN an_DT illustration_NN of_IN the_DT proof_NN ._.
+Refer_VB to_IN the_DT new_JJ rounded_VBN values_NNS as_IN MATH_NNP ._.
+Refer_VB to_IN REF_NNP for_IN a_DT visual_JJ aid_NN ._.
+Refer_VB again_RB to_IN REF_NNP where_WRB the_DT green_JJ distribution_NN represents_VBZ MATH_NNP ,_, the_DT hypothesis_NN where_WRB the_DT failure_NN rate_NN of_IN the_DT treatment_NN group_NN is_VBZ higher_JJR than_IN that_DT of_IN the_DT control_NN group_NN ._.
+Refer_VB to_IN REF_NNP for_IN the_DT analysis_NN of_IN Step_NNP MATH_NNP ._.
+Refer_VB to_IN the_DT construction_NN of_IN the_DT proof_NN in_IN REF_NNP and_CC notice_VB that_IN MATH_NNP ,_, MATH_NNP for_IN any_DT MATH_NNP ,_, and_CC ,_, MATH_NNP ._.
+Refer_VB Appendix_NN MATH_NNP ._.
+Refer_VB to_IN REF_NNP for_IN a_DT visualization_NN of_IN this_DT construction_NN ._.
+Refer_VB to_IN the_DT four_CD cases_NNS in_IN the_DT proof_NN of_IN REF_NNP ,_, the_DT rest_NN of_IN the_DT proof_NN follows_VBZ ._.
+Refer_VB to_IN the_DT first_JJ and_CC the_DT last_JJ falls_VBZ as_IN outer_NN falls_NNS ,_, to_IN all_DT other_JJ falls_NNS as_IN inner_JJ falls_NNS ._.
+Refer_VB to_IN CITE_NNP ,_, or_CC CITE_NNP ._.
+Refer_VB to_IN CITE_NNP or_CC CITE_NNP for_IN more_JJR details_NNS of_IN the_DT existence_NN of_IN the_DT measurable_JJ selector_NN ._.
+Refer_VB to_IN point_NN MATH_NNP as_IN MATH_NNP and_CC the_DT maximum_JJ distance_NN as_IN MATH_NNP ;_: by_IN assumption_NN MATH_NNP is_VBZ at_RB least_JJS MATH_NNP ._.
+Refer_VB to_IN the_DT proof_NN of_IN REF_NNP for_IN the_DT selection_NN of_IN MATH_NNP ._.
+Refer_VB CITE_NNP for_IN the_DT complete_JJ proof_NN ._.
+Refer_VB to_IN REF_NNP as_IN spectral_JJ representation_NN of_IN MATH_NNP ._.
+Refer_VB to_IN REF_NNP (_( bottom_NN )_) ._.
+Refer_VB to_IN REF_NNP for_IN the_DT illustration_NN of_IN the_DT steps_NNS of_IN the_DT construction_NN ._.
+Refer_VB to_IN NAME_NNP et_FW al._NN CITE_NNP for_IN some_DT details_NNS on_IN how_WRB to_TO perform_VB operations_NNS on_IN the_DT convex_NN hull_NN MATH_NNP using_VBG compact_JJ interval_JJ trees_NNS ._.
+Refer_VB to_IN my_PRP$ earlier_RBR comment_NN ._.
+Refer_VB to_IN the_DT conductor_NN bounds_VBZ in_IN REF_NNP using_VBG MATH_NNP ._.
+Refer_VB to_IN CITE_NNP ,_, keeping_VBG in_IN mind_NN the_DT notational_JJ equivalence_NN established_VBD in_IN Table_NNP REF_NNP ._.
+Refer_VB to_IN REF_NNP ,_, MATH_NNP and_CC MATH_NNP have_VBP the_DT same_JJ magnitude_JJ relation_NN ,_, we_PRP have_VBP MATH_NNP ,_, then_RB MATH_NNP ._.
+Refer_VB back_RB to_IN the_DT definition_NN of_IN MATH_NNP given_VBN in_IN REF_NNP ._.
+Refer_VB to_IN a_DT cycle_NN as_IN unbalanced_JJ if_IN this_DT does_VBZ not_RB hold_VB ._.
+Refer_VB the_DT reader_NN to_IN CITE_NNP for_IN the_DT following_JJ discussions_NNS ._.
+Refer_VB to_IN REF_NNP for_IN an_DT upper_JJ bound_NN on_IN MATH_NNP ._.
+Refer_VB first_JJ part_NN of_IN the_DT proof_NN of_IN REF_NNP ._.
+Refer_VB REF_NNP for_IN proof_NN ._.
+Refer_VB for_IN a_DT substantial_JJ construction_NN to_IN CITE_NNP ._.
+Refer_VB to_IN REF_NNP :_: the_DT equation_NN for_IN MATH_NNP may_MD be_VB reformulated_VBN as_IN MATH_NNP accordingly_RB ,_, ellipticity_NN of_IN MATH_NNP would_MD force_VB ellipticity_NN upon_IN MATH_NNP and_CC thereby_RB contradict_JJ REF_NNP ._.
+Refer_VB back_RB to_IN the_DT example_NN described_VBD in_IN REF_NNP ._.
+Refer_VB back_RB to_IN the_DT example_NN depicted_VBD in_IN REF_NNP ._.
+Refer_VB to_IN REF_NNP ,_, we_PRP have_VBP :_: MATH_NNP ._.
+Refer_VB to_IN the_DT proof_NN of_IN transversality_NN for_IN the_DT notation_NN MATH_NNP and_CC MATH_NNP ._.
+Refer_VB to_IN the_DT notational_JJ conventions_NNS set_VBD up_RP in_IN paragraph_NN REF_NNP ._.
+Refer_VB to_IN REF_NNP for_IN a_DT sketch_NN of_IN the_DT situation_NN ._.
+Refer_VB to_IN REF_NNP as_IN MATH_NNP and_CC now_RB add_VB MATH_NNP to_IN MATH_NNP and_CC subtract_JJ MATH_NNP ._.

@@ -8,3 +8,4 @@ psutil
 spacy
 dill
 scipy
+ipykernel

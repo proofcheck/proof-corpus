@@ -19,7 +19,6 @@ import sys
 import langdetect
 import nicer
 
-
 def excerpt(text):
     # text = re.sub(r"[^ -~]", " ", text)
     text = re.sub(r"\s+", " ", text)

@@ -61,6 +61,11 @@ MATH_ENVS = {
     "equs",
     # tikz-cd package
     "tikzcd",
+    "cd",  # tikzcd alias in 1711/1711.04871
+    # tikz?
+    "tikzmath",  # 1711/1711.03061
+    "tikzequation",  # 1711/1711.03061
+    "tikzeq",  # 1709/1709.09519
     # mathtools package
     "refeq",
     # 1901/1901.07820
@@ -78,6 +83,29 @@ MATH_ENVS = {
     "IEEEeqnarrayboxm",
     # cases.sty
     "numcases",
+    # 0905/0905.4064/fulll.tex
+    "hs",
+    # 1112/1112.3060
+    "young",
+    "Young",  # youngtab package
+    # 1305/1305.1342
+    "ytableau",
+    # 1503/1503.07792
+    "llproof",
+    # 1802/1802.10511
+    "tikzccd",
+    # 1801/1801.08288
+    "talign",
+    # 1011/1011.6448
+    "sdp",
+    # 0908/0908.3994
+    "mymath",
+    # 1911/1911.09624
+    "theoremtable",
+    # 1911/1911.01788
+    "ctikzcd",
+    # 1812/1812.04698
+    "equationcd",
 }
 
 # Maps each LaTeX \ref-like command to its number of arguments
@@ -160,6 +188,16 @@ TEX_REFS = {
     "\\refeq": 1,
     # 2001/2001.02981
     "\\smartref": 1,
+    # 1406/1406.4015
+    "\\Ref": 1,
+    # 0703/math070392
+    "\\refsec": 1,
+    "\\reflem": 1,
+    "\\reffig": 1,
+    "\\refthm": 1,
+    "\\refalg": 1,
+    "\\refcor": 1,
+    "\\refprop": 1,
 }
 
 # Set of LaTeX \cite-like commands
@@ -285,6 +323,7 @@ TEX_CITES = {
     "\\autocite",
     # 2002/2002.09099
     "\\ocite",
+    "\\citen",  # 1103/1103.6148
 }
 
 
@@ -297,12 +336,16 @@ DELETE_ENVS = {
     "tabu",
     "tabular",
     "tabularx",
+    "array",
     # Other
     "diagram",
     "minipage",
     "prooftree",
     "tikzpicture",
+    "mathpar",
     "lpic",
+    "supertabular",
+    "xtabular",
     # 1509/1509.06811
     "tz",
     # 2004/2004.04514
@@ -318,6 +361,29 @@ DELETE_ENVS = {
     "diag",
     # 2001/2001.09161
     "quantikz",
+    # 0309/cs0309024/qMuGames.tex
+    "Reason",
+    # 1506/1506.08681
+    "ctikzpicture",
+    # 1506/1506.06197
+    "general-diagram",
+    "squisheddiagram",
+    # 1709/1709.09589 blkarray.sty
+    "blockarray",
+    # 0702/math0702892
+    "figtabular",
+    # 1601/1601.05372
+    "calign",
+    # 1611/1611.06276
+    "proofcase",
+    # 1805/1805.02859
+    "grammar",
+    # 1102/1102.2003
+    "pj",
+    # 0810/0810.0753
+    "prooftable",
+    # 1911/1911.09379
+    "defproblemx",
 }
 
 DELETE_UNINTERPRETED_ENVS = {
@@ -358,6 +424,10 @@ DELETE_UNINTERPRETED_ENVS = {
     "codi",
     # pstricks
     "psmatrix",
+    # gastex
+    "gpicture",
+    # 0711/0711.0572
+    "FigTab",
 }
 
 
@@ -570,6 +640,8 @@ IGNORED_INCLUDES = {
     "mathlig",  # 1908.03268
     "figbox",  # 0009/cs0009023
     "bcprules",  # 1110/1110.3470
+    "jmd",  # 1011/1011.0395
+    "theorems.sty",  # 1507/1507.01708 and others
 }
 
 
@@ -616,63 +688,64 @@ def decomment(tex_source: str) -> str:
 
 def fixup(filename: str, tex_source: str) -> str:
     """
-    Fixup annoyances in isolated .tex inputs.
+    Fixup annoyances (especially in isolated .tex inputs).
 
     I had been modifying the actual file in texes/*, but
     that's dangerous since there are copies of this
     directory floating around on different computers.
     """
+
     if "solpara-arxiv-2" in filename:
         tex_source = tex_source.replace(
             "\\providecommand{ }[1]{\\textcolor{blue}{#1}}", ""
         )
-    elif "Leb2Poi" in filename:
+    if "Leb2Poi" in filename:
         tex_source = tex_source.replace(
             "Moreover. the set", "Moreover, the set"
         )
-    elif "Journal_Hyp_2020January" in filename:
+    if "Journal_Hyp_2020January" in filename:
         tex_source = tex_source.replace(
             "same endpoints. and if", "same endpoints, and if"
         )
-    elif "pseudo." in filename:
+    if "pseudo." in filename:
         tex_source = re.sub(r"\{e\}\$.\s+for \$j", r"{e}$ for $j", tex_source)
-    elif "canonicaldomainDMT." in filename:
+    if "canonicaldomainDMT." in filename:
         tex_source = tex_source.replace(r"\alpha^\sigma$.", r"\alpha^\sigma$,")
-    elif "paper_beta_arxiv." in filename:
+    if "paper_beta_arxiv." in filename:
         tex_source = tex_source.replace("(???)", " REF ")
-    elif "abci." in filename:
+    if "abci." in filename:
         tex_source = tex_source.replace("Picture?????", "")
-    elif "monotone." in filename:
+    if "monotone." in filename:
         tex_source = tex_source.replace("see??.", ".")
-    elif "lipschitzfree." in filename:
+    if "lipschitzfree." in filename:
         tex_source = tex_source.replace("Proposition ???", "Proposition 42")
-    elif "shi-yang-eppo." in filename:
+    if "shi-yang-eppo." in filename:
         tex_source = tex_source.replace("(??)", "")
-    elif "46-100." in filename:
+    if "46-100." in filename:
         tex_source = tex_source.replace("？？？？？？？", "")
-    elif "CDS-SU2n." in filename:
+    if "CDS-SU2n." in filename:
         # Defines a 2-argument version of \fullref, which
         # we can't handle (because reference commands like
         # \fullref are considered immutable)
         tex_source = tex_source.replace("\\fullref", "\\myfullref")
         tex_source = tex_source.replace("\\pref", "\\mypref")
-    elif "modularDD." in filename:
+    if "modularDD." in filename:
         tex_source = tex_source.replace("\\NewCons{}{} ", "MATH ")
-    elif "Harriss_OSTWI." in filename:
+    if "Harriss_OSTWI." in filename:
         tex_source = tex_source.replace(
             "\\WARMprocessEPS{2to1_three_steps_window}{eps}{bb}", ""
         )
-    elif "mholy." in filename:
+    if "mholy." in filename:
         tex_source = re.sub(r"\\beqn((.|\n)*?)\\eeqn", "\\[A=A\\]", tex_source)
-    elif "MaxMin." in filename:
+    if "MaxMin." in filename:
         tex_source = re.sub(
             r"\\begeq((.|\n)*?)\\endeq", "\\[\\1\\]", tex_source
         )
-    elif "ch." in filename:
+    if "ch." in filename:
         tex_source = tex_source.replace("\\home ", "")
-    elif "AIJ-Crossover-v1-arxiv." in filename:
+    if "AIJ-Crossover-v1-arxiv." in filename:
         tex_source = tex_source.replace("{aligna}", "{align}")
-    elif "2003.12106/macros." in filename:
+    if "2003.12106/macros." in filename:
         tex_source = tex_source.replace(
             "\\NewDocumentCommand\n  {\\HasTypeInCtx}\n  { O{} m m }\n  ",
             "\\newcommand{\\HasTypeInCtx}[3][]",
@@ -681,18 +754,158 @@ def fixup(filename: str, tex_source: str) -> str:
             "\\NewDocumentCommand\n  {\\Constructible}\n  { O{} m m }\n  ",
             "\\newcommand{\\Constructible}[3][]",
         )
-    elif "2003.04180" in filename:
+    if "2003.04180" in filename:
         TEX_REFS["\\objectref"] = 5
-    elif "2003.02840/simple_spinors_null_vectors_and_o_n__arxiv_2" in filename:
+    if "2003.02840/simple_spinors_null_vectors_and_o_n__arxiv_2" in filename:
         # Hack to ignore the second argument of \opt{margin_notes}
         # but not every \opt
         tex_source = tex_source.replace("\\opt{margin_notes}", "\\psfig")
-    elif "2001/2001.02981/main." in filename:
+    if "2001/2001.02981/main." in filename:
         tex_source = tex_source.replace("\\usepackage{theorems}", "")
+    if "1308/1308.4171/CominiTitoloVillanueva-CR." in filename:
+        tex_source = tex_source.replace(
+            "\\usepackage[fancyproofs,noextended,squareitemtag]{theorems}", ""
+        )
+    if (
+        "thomp-genus0." in filename
+        or "hhn-swe-aug-12." in filename
+        or "somespectralpropertiesderivations." in filename
+        or "KT16." in filename
+        or "plan25_united." in filename
+        or "concatsakiris_arxiv-4oct19." in filename
+    ):
+        tex_source = tex_source.replace("'s's", "'s")
+    if "primeness." in filename:
+        tex_source = re.sub(
+            r"\$\$ \$\$\s+with(\n|.)*\\end{proof}",
+            r"\\end{proof}",
+            tex_source,
+        )
+        # and as long as we're here
+        tex_source = tex_source.replace("encoded in v.", "encoded in $v$.")
+        tex_source = tex_source.replace("vector w,", "vector $w$,")
+        tex_source = tex_source.replace(
+            "$\mathfrak{X}=\mathfrak{U}(Q_{-1}'\cap Q_0)$ x $\mathfrak{U}(Q_{0}'\cap P_0)$ x $\mathfrak{U}(P_{-1}'\cap P_0)$ x $\mathfrak{U}(Q_{-1}'\cap P_{-1})$",
+            " MATH ",
+        )
+    if "eqm7-x" in filename:
+        tex_source = tex_source.replace("Gel\\acc fand", "NAME")
+    if "GTasOS-Main-EPTCS" in filename:
+        tex_source = tex_source.replace("?!-determinism", "MATH-determinism")
+    if "g3arxiv." in filename:
+        tex_source = tex_source.replace("{footnotesize}", "{align}")
+    if "naaut70409sub." in filename:
+        tex_source = tex_source.replace("By applying ?", "By applying REF")
+    if "math0003081/paper." in filename:
+        regex = re.compile(
+            "following table:.*?\\\\smallskip.*?\\\\smallskip.*?\\\\smallskip",
+            re.DOTALL,
+        )
+        tex_source = re.sub(regex, "following table: MATH.", tex_source)
+    if "imperfect-best-response-journal4." in filename:
+        regex = re.compile("\\\\begin\{game\}.*?\\\\end\{game\}", re.DOTALL)
+        tex_source = re.sub(regex, "", tex_source)
+    if "selfish13." in filename:
+        regex = re.compile("\\\\begin\{game\}.*?\\\\end\{game\}", re.DOTALL)
+        tex_source = re.sub(regex, " MATH ", tex_source)
+    if "Maximizers_non_endpoint_Tomas_Stein_20190923." in filename:
+        tex_source = tex_source.replace("TAB", "align")
+    if "proetalecob-arxiv-06." in filename:
+        tex_source = tex_source.replace(" CHECK!!", "")
+    if "spanners-writeup." in filename:  # 0808/0808.1787
+        tex_source = re.sub("\\\\[saekdm]note\\b", "\\\\phantom", tex_source)
+    if "supp_for_review." in filename:
+        tex_source = tex_source.replace("TODO: Does not depend on $n$?!", "")
+        tex_source = re.sub("\\(TODO[^)]*\\)", "", tex_source)
+    if "arxiv-version." in filename:  # 1907/1907.11133
+        tex_source = re.sub("\\\\warning\\{", "\\\\phantom{", tex_source)
+    if "Intro." in filename:  # 0106/math0106063
+        tex_source = tex_source.replace(
+            r"\newcommand{\notwritten}{\emph{$\langle$not written yet\/$\rangle$}}",
+            r"\newcommand{\notewritten}{}",
+        )
+    if "ZeroOrderMonog_2010_09_12_port." in filename:  # 0708/0708.0780
+        tex_source = tex_source.replace(
+            r"\textbf{Part 3} ?? \textbf{FINISH} ??", ""
+        )
+    if "motif-sublinear." in filename:  # 1007/1007.2618
+        tex_source = tex_source.replace("???", "")
+    if "weisfeiler." in filename:  # 1203/1203.1960
+        tex_source = tex_source.replace("???", "")
+    if "A10." in filename:  # 1211/1211.3680
+        tex_source = tex_source.replace("???", "")
+    if "manuscript." in filename:  # 1706/1706.07575
+        tex_source = tex_source.replace(
+            "``???? ?0?? ??1? ???? ???0'' (``?'' is Alice's unknown bit)", ""
+        )
+        tex_source = tex_source.replace(
+            r"`\#\#\#\# d??? ?d?? \#\#\#\# ??d?'$\}$", ""
+        )
+    if "ElJC-even2." in filename:
+        regex = re.compile(
+            "\\(see Figure 1\\)\\..*?\\\\medskip.*?\\\\medskip",
+            re.DOTALL,
+        )
+        tex_source = re.sub(regex, "(see Figure 1).", tex_source)
+
+    # A bunch of files, including
+    # 0006/math-ph0006001/nonlinwa.tex
+    # 0202/math0202057/h1_hand0.tex
+    # 0507/math0507198/ass.tex
+    # 0510/math0510058/bounded_sp.tex
+    # 0710/0710.2682/cuspidal_sl_new.tex
+    # 0710/0710.0906/TheBigPreamble.sty
+    # 0810/0810.2637/paper1.tex
+    # 1306/1306.3673/bounded_sl_submitted.tex
+    tex_source = tex_source.replace(
+        "\\let\\myLabel\\@gobble", "\\def\\myLabel#1{\\label{#1}}"
+    )
+
+    # print("Filename", filename, "\\snote" in tex_source)
     # print(tex_source)
 
     # elif "regularisation_robustness." in filename:
     #     tex_source = tex_source.replace("
+    return tex_source
+
+
+def highlight_arrows(tex_source: str):
+    arrows = [
+        "leftarrow",
+        "rightarrow",
+        "leftrightarrow",
+        "Leftarrow",
+        "Rightarrow",
+        "Leftrightarrow",
+        "longleftarrow",
+        "longrightarrow",
+        "longleftrightarrow",
+        "Longleftarrow",
+        "Longrightarrow",
+        "Longleftrightarrow",
+        "nleftarrow",
+        "nLeftarrow",
+        "nLeftrightarrow",
+        "nleftrightarrow",
+        "nRightarrow",
+        "nrightarrow",
+        "shortleftarrow",
+        "shortrightarrow",
+    ]
+    arrow_regex = "\\s*\\\\(?:" + "|".join(arrows) + ")\\s*"
+    tex_source = re.sub(
+        "(\\s+|(?<![$]))[$]" + arrow_regex + "[$]\\s*", " ARROW ", tex_source
+    )
+    tex_source = re.sub(
+        "\\s*\\\\\\(" + arrow_regex + "\\\\\)\\s*", " ARROW ", tex_source
+    )
+    section_regex = "\\s*\\\\S\\s*"
+    tex_source = re.sub(
+        "(\\s+|(?<![$]))[$]" + section_regex + "[$]\\s*", " ARROW ", tex_source
+    )
+    tex_source = re.sub(
+        "\\s*\\\\\\(" + section_regex + "\\\\\)\\s*", " Section ", tex_source
+    )
     return tex_source
 
 
@@ -720,8 +933,17 @@ def tokenize_string(filename: str, tex_source: str):
     # Remove all the comments
     tex_source = decomment(tex_source)
 
+    # Make sure ellipses aren't confused with periods
+    # Might screw up macros applied to ellipses, but that's rare.
+    # in particular, it seems more common to have $<stuff>...$
+    # which generates a false positive for the final-period detector.
+    tex_source = re.sub(r"\.\.+", "…", tex_source)
+
     # Ad-hoc fixups
     tex_source = fixup(filename, tex_source)
+
+    # Handle single-arrow $..$'s
+    tex_source = highlight_arrows(tex_source)
 
     # Insert "\par" where there were blank lines
     tex_source = re.sub("^[ \\t]*$", "\\\\par", tex_source, flags=re.MULTILINE)
@@ -769,14 +991,14 @@ def tokenize_string(filename: str, tex_source: str):
             if d.isdigit() and d != "0":
                 next(chars)
                 word += d
-        elif word == "`":
-            if chars.peek("!") == "`":
-                next(chars)
-                word = '"'
-        elif word == "'":
-            if chars.peek("!") == "'":
-                next(chars)
-                word = '"'
+        # elif word == "`":
+        #     if chars.peek("!") == "`":
+        #         next(chars)
+        #         word = '"'
+        # elif word == "'":
+        #     if chars.peek("!") == "'":
+        #         next(chars)
+        #         word = '"'
         elif word == "-":
             if chars.peek("!") == "-":
                 next(chars)
@@ -931,9 +1153,16 @@ def skip_rest_conditional(
     Looks for \fi, and optionally \else. Skips nested
     conditionals, but does not pay attention to { } grouping.
     """
+    # print("skip_rest_conditional")
     while True:
         w = next(words)
-        # print(f"xxx skipping <<{w}>>")
+        # print(
+        #     f"xxx skipping <<{w}>>",
+        #     # stop_on_else,
+        #     # w == "\\else",
+        #     # w in TEX_IFS,
+        #     # w in macros["new ifs"],
+        # )
         if w == "\\fi" or (w == "\\else" and stop_on_else):
             return
         elif w == "\\loop" and w not in macros:
@@ -1289,6 +1518,10 @@ def skip_rest_math(
                     debug=debug,
                     verbose=verbose,
                 )
+            elif w == "\\right":
+                # We don't want math ending with the "empty" \right. to signal as ending with a period.
+                if words.peek("x") == ".":
+                    next(words)
             elif w == ".":
                 final_period = True
             elif w == "\\end":
@@ -1317,7 +1550,7 @@ def skip_rest_math(
                 env_name = "".join(get_arg(words))
                 skip_optional_arg(words, macros)
                 if env_name.rstrip("*") in DELETE_UNINTERPRETED_ENVS:
-                    print("SKIPPING ", env_name)
+                    # print("SKIPPING ", env_name)
                     final_period = skip_rest_env(words, {}, stop_at=env_name)
                 else:
                     final_period = skip_rest_env(words, macros)
@@ -1378,6 +1611,10 @@ def skip_rest_env(words, macros, stop_at=None) -> bool:
             if (env_nesting == 0 and stop_at is None) or env_name == stop_at:
                 break
 
+        elif w == "\\right":
+            # We don't want math ending with the "empty" \right. to signal as ending with a period.
+            if words.peek("x") == ".":
+                next(words)
         elif w == ".":
             final_period = True
         elif w == "\\label" and stop_at is None:
@@ -1592,6 +1829,19 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
             pass
         return [" "]
 
+    # qtree package
+    if cmd == "\\Tree" and "\\Tree" not in macros:
+        nesting = 0
+        while True:
+            word = next(words)
+            if word == "[":
+                nesting += 1
+            elif word == "]":
+                nesting -= 1
+                if nesting == 0:
+                    break
+        return [" MATH "]
+
     if cmd not in macros:
         # Allow user to override these, but otherwise
         # translate accent commands to unicode
@@ -1732,7 +1982,7 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         return [" "]
 
     if cmd == "\\epsfbox":
-        skip_optional_arg(words)
+        skip_optional_arg(words, macros)
         get_arg(words)
         return [" "]
 
@@ -1743,6 +1993,14 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         get_arg(words)
         get_arg(words)
         get_arg(words)
+        return [" "]
+
+    if cmd == "\\fig" and cmd not in macros:
+        # 0703/math070392
+        get_arg(words)
+        get_arg(words)
+        get_arg(words)
+        return [" "]
 
     if cmd in ["\\DeclareMathSymbol", "\\mathchoice"]:
         get_arg(words)
@@ -1833,6 +2091,11 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         skip_optional_arg(words, macros)
         return []
 
+    if cmd == "\\scalebox":
+        get_arg(words)
+        skip_optional_arg(words, macros)
+        return []
+
     if cmd == "\\parbox":
         skip_optional_arg(words, macros)
         get_arg(words)
@@ -1843,7 +2106,7 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         skip_optional_arg(words, macros)
         return []
 
-    if cmd in ["\\resizebox"]:
+    if cmd == "\\resizebox":
         if words.peek("!") == "*":
             next(words)
         get_arg(words)
@@ -1921,6 +2184,28 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         get_arg(words)
         return []
 
+    if cmd == "\\tablehead" or cmd == "\\tablefirsthead":
+        # supertabular?
+        get_arg(words)
+        return []
+
+    if cmd == "\\todo" and "\\todo" not in macros:
+        # todonotes package
+        skip_optional_arg(words, macros)
+        get_arg(words)
+        return []
+
+    if cmd == "\\setuptodonotes":
+        # todonotes package
+        get_arg(words)
+        return []
+
+    if cmd == "\\missingfigure":
+        # todonotes package
+        skip_optional_arg(words, macros)
+        get_arg(words)
+        return [" "]
+
     if cmd in VERB_COMMANDS:
         end_ch = next(words)
         while next(words) != end_ch:
@@ -1937,13 +2222,30 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         #         arg.append(w)
 
     if cmd == "\\lstinputlisting":
-        skip_optional_arg(words)
+        skip_optional_arg(words, macros)
         get_arg(words)
         return [" "]
+
+    if cmd == "\\lstset":
+        # Ignore setting defaults for listings package
+        get_arg(words)
+        return []
+
+    if cmd == "\\ytableausetup":
+        # Ignore settings for ytableau package
+        get_arg(words)
+        return []
 
     if cmd == "\\footnote":
         # Footnotes can interrupt sentences, and do not necessarily
         # contain normal "proof-like" wording.
+        get_arg(words)
+        return []
+
+    if cmd == "\\footnotetext":
+        # Footnotes can interrupt sentences, and do not necessarily
+        # contain normal "proof-like" wording.
+        skip_optional_arg(words, macros)
         get_arg(words)
         return []
 
@@ -2082,6 +2384,27 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
             # leave the else alone (in braces)
             return []
 
+    if cmd == "\\IfEqCase":
+        # still from xstring
+        if words.peek("!") == "*":
+            next(words)
+        skip_optional_arg(words, macros)
+        a1 = "".join(get_arg(words))
+        skip_ws(words)
+        found = False
+        then_arg = []
+        if next(words) == "{":
+            while words.peek("!") != "}":
+                a2 = "".join(get_arg(words))
+                if a1 == a2 and not found:
+                    found = True
+                    then_arg = get_arg(words)
+                else:
+                    get_arg(words)
+                skip_ws(words)
+            next(words)  # skip the "}"
+            words.prepend(*then_arg)
+
     if cmd == "\\write":
         if words.peek("q").isdigit():
             while words.peek("q").isdigit():
@@ -2164,6 +2487,10 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         get_arg(words)  # ignore argument
         return []
 
+    if cmd == "\\tikzmath":
+        get_arg(words)  # ignore argument
+        return [" MATH "]
+
     if cmd == "\\adjustimage":
         get_arg(words)
         get_arg(words)
@@ -2231,6 +2558,20 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         get_arg(words)
         skip_optional_arg(words, macros)
         return []
+
+    if cmd == "\\lq":
+        if words.peek() == "\\lq":
+            next(words)
+            return ['"']
+        else:
+            return ["`"]
+
+    if cmd == "\\rq":
+        if words.peek() == "\\rq":
+            next(words)
+            return ['"']
+        else:
+            return ["'"]
 
     if cmd == "\\xspace":
         XSPACE_EXCEPTIONS = {
@@ -2311,6 +2652,9 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         get_arg(words)
         return ["42"]
 
+    if cmd in {"\\thechapter", "\\thesection", "\\thesubsection"}:
+        return ["42"]
+
     if cmd == "\\tabto":
         get_arg(words)
         return [" "]
@@ -2347,6 +2691,21 @@ def execute(cmd, words, macros, nomath=True, debug=False, inproof=False):
         get_arg(words)
         get_arg(words)
         return [" MATH "]
+
+    if cmd == "\\bordermatrix":
+        get_arg(words)
+        return [" MATH "]
+
+    if cmd == "\hvFloat":
+        if words.peek("!") == "*":
+            next(words)
+        # from hvfloat.sty
+        skip_optional_arg(words, macros)
+        get_arg(words)
+        get_arg(words)
+        skip_optional_arg(words, macros)
+        get_arg(words)
+        get_arg(words)
 
     if cmd in macros:
         if cmd == "\\BoxedEPSF":
@@ -2549,8 +2908,8 @@ def get_proofs(
         elif w in {
             "\\usepackage",
             "\\RequirePackage",
-            "\\documentclass",
-            "\\LoadClass",
+            # "\\documentclass",
+            # "\\LoadClass",
         }:
             if words.peek() == "[":
                 optional = get_optional_arg(words)
@@ -2558,6 +2917,8 @@ def get_proofs(
                 optional = ""
             filenames = "".join(get_arg(words)).split(",")
             for filename in filenames:
+                if filename == "":  # e.g., 1903/1903.03668 has \usepackage{}
+                    continue
                 fn = Path(filename.strip().lower())
                 if fn.name == "babel":
                     if "german" in optional:
@@ -2571,7 +2932,11 @@ def get_proofs(
                         fn = fn.with_suffix(".cls")
                     else:
                         fn = fn.with_suffix(".sty")
-                if (fn.stem in IGNORED_INCLUDES) or kpse.in_TeX_path(fn.name):
+                if (
+                    (fn.stem in IGNORED_INCLUDES)
+                    or (fn.name in IGNORED_INCLUDES)
+                    or kpse.in_TeX_path(fn.name)
+                ):
                     continue
                 subfname = directory / fn
                 try:
@@ -2664,7 +3029,7 @@ def get_proofs(
                 get_arg(words)  # end part
 
         elif w in ["\\newif"]:
-            newif = next(words)
+            newif = "".join(get_arg(words))
             macros["new ifs"].append(newif)
             # \iftest
             macros[newif] = ([[]], [], ["\\iffalse"])
@@ -2691,7 +3056,10 @@ def get_proofs(
             if debug:
                 print("   ", env_name, env_name.rstrip("*"))
                 print(words[:80])
-            if env_name.startswith(("proof", "Proof")):
+            if (
+                env_name.startswith(("proof", "Proof"))
+                and env_name.rstrip("*") not in DELETE_ENVS
+            ):
                 if proof_nesting == 0:
                     current_proof_words = []
                 proof_nesting += 1
@@ -2707,7 +3075,7 @@ def get_proofs(
                 # than one such argument, but just in case...
                 guessed_args = 0
                 while words.peek() == "{":
-                    get_arg(words)
+                    maybe_arg = get_arg(words)
                     guessed_args += 1
                 if guessed_args:
                     # Handle things like
@@ -2716,6 +3084,11 @@ def get_proofs(
                     skip_ws(words)
                     if words.peek("x") in {".", ":"}:
                         next(words)
+                    if words.peek("X").islower():
+                        # Oops. it's something like
+                        # \begin{proof}
+                        #   {\myref{foo}} gives us...
+                        words.prepend(*(["{"] + maybe_arg + ["}", " "]))
 
             elif env_name.rstrip("*") in MATH_ENVS:
                 fp = skip_rest_env(words, macros)
@@ -2741,7 +3114,7 @@ def get_proofs(
                     get_arg(words)
                     get_arg(words)
                 elif "\\" + env_name in macros:
-                    print("GGG entering user-defined environment", env_name)
+                    # print("GGG entering user-defined environment", env_name)
                     words.prepend("\\" + env_name)
                     continue
 
@@ -2767,11 +3140,11 @@ def get_proofs(
                         proof = re.sub("\\s+", " ", proof)
                         proofs.append(proof)
                         if verbose:
-                            print("***", proof)
+                            print("***\n ", proof)
             elif env_name == "document":
                 break
             elif "\\end" + env_name in macros:
-                print("GGG leaving user-defined environment", env_name)
+                # print("GGG leaving user-defined environment", env_name)
                 words.prepend("\\end" + env_name)
                 continue
             else:

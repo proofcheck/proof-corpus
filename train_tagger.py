@@ -14,6 +14,11 @@ from load_tagged_sent import load_one_sent_tags, is_sent
 from load_ontonotes_pos import *
 from sent_tools import *
 
+"""
+Typical usage :
+    Imports
+"""
+
 WSJ_TRAIN = make_wsj_train()
 WSJ_TEST = make_wsj_test()
 
@@ -37,11 +42,14 @@ def pick_sents(lines, n=None, compare=[]):
     #        number of random sentences
     #        list of sentences (if we need to make sure there are no overlaps)
     
-    if n:
+    if not n:
+        sampled_lines = lines
+    
+    elif n <= len(lines):
         sampled_lines = random.sample(lines, n)
         
     else:
-        sampled_lines = lines
+        return []
 
     if compare == []:
         sents = [load_one_sent_tags(line)[1] for line in sampled_lines if is_sent(load_one_sent_tags(line)[1])]

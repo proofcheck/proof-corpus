@@ -25,7 +25,7 @@ def strikethrough(s: str):
     return "".join(cs)
 
 
-def print_diff(diff: List[Tuple[int, str]], show_del: bool = False):
+def print_diff(diff: List[Tuple[int, str]], show_del: bool = True):
     """Pretty-print the result of the line diff."""
 
     num_diffs = len(diff)
