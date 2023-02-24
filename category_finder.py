@@ -17,10 +17,12 @@ years = ["0" + str(x) if len(str(x)) == 1 else str(x) for x in years] # a list o
 f = open("successful-proof-ids.txt", "r")
 ids = f.readlines()
 f.close()
-
+idset = {}
 ids = [s[:-1] for s in ids]         # remove \n characters
 for s in range(len(ids)):
+    idset[re.sub(r"(([A-Za-z]|[-])+)([0-9]+)", "\\1/\\3", ids[s])] = ids[s]
     ids[s] = re.sub(r"(([A-Za-z]|[-])+)([0-9]+)", "\\1/\\3", ids[s])   # add / in middle for changed formatting of certain IDs
+    
 
 tree = ET.parse("metha-metadata.xml")
 root = tree.getroot()
@@ -62,7 +64,7 @@ yearCats = [[0,0,0,0,0,0] for l in years]        # a list of lists to track big 
 
 
 # the which main categories correspond to which smaller categories
-# types = {'math.CO': r'Math', 'math.NT': r'Math', 'hep-th': r'Phys', 'math.FA': r'Math', 'math.OA': r'Math', 'math.AC': r'Math', 'math.AG': r'Math', 'math.GT': r'Math', 'math.QA': r'Math', 'math.RT': r'Math', 'nlin.CG': r'Systems', 'cs.DM': r'CS', 'cs.LO': r'CS', 'math.DG': r'Math', 'math.RA': r'Math', 'math-ph': r'Math', 'math.MP': r'Math', 'math.SG': r'Math', 'math.GR': r'Math', 'math.AT': r'Math', 'math.CT': r'Math', 'math.PR': r'Math', 'math.ST': r'Math', 'stat.TH': r'Math', 'math.CV': r'Math', 'math.OC': r'Math', 'math.CA': r'Math', 'math.AP': r'Math', 'math.DS': r'Math', 'math.GM': r'Math', 'stat.CO': r'Math', 'quant-ph': r'Phys', 'math.KT': r'Math', 'cs.CG': r'CS', 'cs.NE': r'CS', 'cs.GT': r'CS', 'cs.CC': r'CS', 'math.NA': r'Math', 'gr-qc': r'Phys', 'nlin.SI': r'Systems', 'cs.CR': r'CS', 'cs.DC': r'CS', 'cs.SC': r'CS', 'math.MG': r'Math', 'cs.LG': r'CS', 'q-bio.GN': r'Biology', 'q-bio.QM': r'Biology', 'nlin.CD': r'Systems', 'cs.IR': r'CS', 'cs.AI': r'CS', 'cs.DS': r'CS', 'math.LO': r'Math', 'math.GN': r'Math', 'math.SP': r'Math', 'cs.NI': r'CS', 'cs.CL': r'CS', 'cond-mat.other': r'Phys', 'astro-ph': r'Phys', 'q-bio.SC': r'Biology', 'cs.PL': r'CS', 'nlin.PS': r'Math', 'cond-mat.stat-mech': r'Phys', 'cs.DB': r'CS', 'adap-org': r'Systems', 'nlin.AO': r'Systems', 'q-bio': r'Biology', 'alg-geom': r'Math', 'q-alg': r'Math', 'chao-dyn': r'Systems', 'cmp-lg': r'CS', 'cond-mat': r'Phys', 'cond-mat.str-el': r'Phys', 'cond-mat.dis-nn': r'Phys', 'cond-mat.soft': r'Phys', 'cond-mat.mes-hall': r'Phys', 'q-bio.PE': r'Biology', 'physics.soc-ph': r'Phys', 'cs.CE': r'CS', 'cs.CV': r'CS', 'cs.NA': r'CS', 'cs.AR': r'CS', 'cs.MA': r'CS', 'cs.SE': r'CS', 'cs.PF': r'CS', 'q-bio.BM': r'Biology', 'cs.GR': r'CS', 'physics.data-an': r'Phys', 'cs.RO': r'CS', 'cs.CY': r'CS', 'cs.OH': r'CS', 'cs.DL': r'CS', 'cs.GL': r'CS', 'cs.MS': r'CS', 'cs.HC': r'CS', 'cs.MM': r'CS', 'q-bio.MN': r'Biology', 'dg-ga': r'Math','funct-an': r'Math', 'hep-lat': r'Phys', 'hep-ph': r'Phys', 'physics.class-ph': r'Phys', 'math.HO': r'Math', 'physics.chem-ph': r'Phys', 'physics.flu-dyn': r'Phys', 'physics.atom-ph': r'Phys', 'physics.comp-ph': r'Phys', 'physics.geo-ph': r'Phys', 'physics.optics': r'Phys', 'stat.ML': r'Math', 'physics.plasm-ph': r'Phys', 'q-bio.TO': r'Biology', 'solv-int': r'Math', 'nucl-th': r'Phys', 'nucl-ex': r'Phys', 'patt-sol': r'Systems', 'physics.bio-ph': r'Phys', 'physics.gen-ph': r'Phys', 'physics.ed-ph': r'Phys', 'physics.acc-ph': r'Phys', 'q-bio.OT': r'Biology', 'q-bio.CB': r'Biology', 'q-bio.NC': r'Biology', 'stat.AP': r'Math', 'stat.ME': r'Math', 'cs.IT': r'CS', 'math.IT': r'Math', 'cond-mat.mtrl-sci': r'Phys', 'physics.ao-ph': r'Phys', 'physics.hist-ph': r'Phys', 'cond-mat.supr-con': r'Phys', 'cs.OS': r'CS', 'bayes-an': r'Phys', 'comp-gas': r'Phys', 'physics.space-ph': r'Phys', 'physics.ins-det': r'Phys', 'q-fin.PR': r'Econ', 'q-fin.CP': r'Econ', 'q-fin.ST': r'Econ', 'q-fin.RM': r'Econ', 'q-fin.GN': r'Econ', 'q-fin.PM': r'Econ', 'q-fin.TR': r'Econ', 'astro-ph.EP': r'Phys', 'cs.FL': r'CS', 'astro-ph.SR': r'Phys', 'astro-ph.HE': r'Phys', 'cond-mat.quant-gas': r'Phys', 'astro-ph.GA': r'Phys', 'astro-ph.CO': r'Phys', 'physics.atm-clus': r'Phys', 'stat.OT': r'Math', 'cs.SY': r'CS', 'physics.med-ph': r'Phys', 'cs.SI': r'CS', 'hep-ex': r'Phys', 'cs.ET': r'CS', 'astro-ph.IM': r'Phys', 'physics.pop-ph': r'Phys', 'cs.SD': r'CS', 'q-fin.MF': r'Econ', 'q-fin.EC': r'Econ', 'physics.app-ph': r'Phys', 'econ.EM': r'Econ', 'eess.SP': r'Systems', 'eess.AS': r'Systems', 'eess.IV': r'Systems', 'econ.TH': r'Systems', 'econ.GN': r'Econ', 'eess.SY': r'Systems'}
+types = {'math.CO': r'Math', 'math.NT': r'Math', 'hep-th': r'Phys', 'math.FA': r'Math', 'math.OA': r'Math', 'math.AC': r'Math', 'math.AG': r'Math', 'math.GT': r'Math', 'math.QA': r'Math', 'math.RT': r'Math', 'nlin.CG': r'Systems', 'cs.DM': r'CS', 'cs.LO': r'CS', 'math.DG': r'Math', 'math.RA': r'Math', 'math-ph': r'Math', 'math.MP': r'Math', 'math.SG': r'Math', 'math.GR': r'Math', 'math.AT': r'Math', 'math.CT': r'Math', 'math.PR': r'Math', 'math.ST': r'Math', 'stat.TH': r'Math', 'math.CV': r'Math', 'math.OC': r'Math', 'math.CA': r'Math', 'math.AP': r'Math', 'math.DS': r'Math', 'math.GM': r'Math', 'stat.CO': r'Math', 'quant-ph': r'Phys', 'math.KT': r'Math', 'cs.CG': r'CS', 'cs.NE': r'CS', 'cs.GT': r'CS', 'cs.CC': r'CS', 'math.NA': r'Math', 'gr-qc': r'Phys', 'nlin.SI': r'Systems', 'cs.CR': r'CS', 'cs.DC': r'CS', 'cs.SC': r'CS', 'math.MG': r'Math', 'cs.LG': r'CS', 'q-bio.GN': r'Biology', 'q-bio.QM': r'Biology', 'nlin.CD': r'Systems', 'cs.IR': r'CS', 'cs.AI': r'CS', 'cs.DS': r'CS', 'math.LO': r'Math', 'math.GN': r'Math', 'math.SP': r'Math', 'cs.NI': r'CS', 'cs.CL': r'CS', 'cond-mat.other': r'Phys', 'astro-ph': r'Phys', 'q-bio.SC': r'Biology', 'cs.PL': r'CS', 'nlin.PS': r'Math', 'cond-mat.stat-mech': r'Phys', 'cs.DB': r'CS', 'adap-org': r'Systems', 'nlin.AO': r'Systems', 'q-bio': r'Biology', 'alg-geom': r'Math', 'q-alg': r'Math', 'chao-dyn': r'Systems', 'cmp-lg': r'CS', 'cond-mat': r'Phys', 'cond-mat.str-el': r'Phys', 'cond-mat.dis-nn': r'Phys', 'cond-mat.soft': r'Phys', 'cond-mat.mes-hall': r'Phys', 'q-bio.PE': r'Biology', 'physics.soc-ph': r'Phys', 'cs.CE': r'CS', 'cs.CV': r'CS', 'cs.NA': r'CS', 'cs.AR': r'CS', 'cs.MA': r'CS', 'cs.SE': r'CS', 'cs.PF': r'CS', 'q-bio.BM': r'Biology', 'cs.GR': r'CS', 'physics.data-an': r'Phys', 'cs.RO': r'CS', 'cs.CY': r'CS', 'cs.OH': r'CS', 'cs.DL': r'CS', 'cs.GL': r'CS', 'cs.MS': r'CS', 'cs.HC': r'CS', 'cs.MM': r'CS', 'q-bio.MN': r'Biology', 'dg-ga': r'Math','funct-an': r'Math', 'hep-lat': r'Phys', 'hep-ph': r'Phys', 'physics.class-ph': r'Phys', 'math.HO': r'Math', 'physics.chem-ph': r'Phys', 'physics.flu-dyn': r'Phys', 'physics.atom-ph': r'Phys', 'physics.comp-ph': r'Phys', 'physics.geo-ph': r'Phys', 'physics.optics': r'Phys', 'stat.ML': r'Math', 'physics.plasm-ph': r'Phys', 'q-bio.TO': r'Biology', 'solv-int': r'Math', 'nucl-th': r'Phys', 'nucl-ex': r'Phys', 'patt-sol': r'Systems', 'physics.bio-ph': r'Phys', 'physics.gen-ph': r'Phys', 'physics.ed-ph': r'Phys', 'physics.acc-ph': r'Phys', 'q-bio.OT': r'Biology', 'q-bio.CB': r'Biology', 'q-bio.NC': r'Biology', 'stat.AP': r'Math', 'stat.ME': r'Math', 'cs.IT': r'CS', 'math.IT': r'Math', 'cond-mat.mtrl-sci': r'Phys', 'physics.ao-ph': r'Phys', 'physics.hist-ph': r'Phys', 'cond-mat.supr-con': r'Phys', 'cs.OS': r'CS', 'bayes-an': r'Phys', 'comp-gas': r'Phys', 'physics.space-ph': r'Phys', 'physics.ins-det': r'Phys', 'q-fin.PR': r'Econ', 'q-fin.CP': r'Econ', 'q-fin.ST': r'Econ', 'q-fin.RM': r'Econ', 'q-fin.GN': r'Econ', 'q-fin.PM': r'Econ', 'q-fin.TR': r'Econ', 'astro-ph.EP': r'Phys', 'cs.FL': r'CS', 'astro-ph.SR': r'Phys', 'astro-ph.HE': r'Phys', 'cond-mat.quant-gas': r'Phys', 'astro-ph.GA': r'Phys', 'astro-ph.CO': r'Phys', 'physics.atm-clus': r'Phys', 'stat.OT': r'Math', 'cs.SY': r'CS', 'physics.med-ph': r'Phys', 'cs.SI': r'CS', 'hep-ex': r'Phys', 'cs.ET': r'CS', 'astro-ph.IM': r'Phys', 'physics.pop-ph': r'Phys', 'cs.SD': r'CS', 'q-fin.MF': r'Econ', 'q-fin.EC': r'Econ', 'physics.app-ph': r'Phys', 'econ.EM': r'Econ', 'eess.SP': r'Systems', 'eess.AS': r'Systems', 'eess.IV': r'Systems', 'econ.TH': r'Systems', 'econ.GN': r'Econ', 'eess.SY': r'Systems'}
 # Math: "math.CO", "math.NT", "math.FA", "Math.OA", "math.AC", "math.AG", "math.GT", "math.QA", "math.RT", "nlin.CG", "math.DG", "math.RA", "math-ph", "math.MP", "math.SG", "math.GR", 
 # CS: "cs.DM", "cs.LO", 
 # Phys: "hep-th", 
@@ -82,12 +84,19 @@ for arxiv in tree.findall(".//{http://arxiv.org/OAI/arXiv/}arXiv"):         # it
             date = arxivId[arxivId.index("/")+1:arxivId.index("/")+5]
         categories = arxiv.find("{http://arxiv.org/OAI/arXiv/}categories").text  # find the proof's categories
         cats = categories.split(" ")
-        if "math.CO" in cats:   # code to extract all proof IDs in the math.CO category. There currently is no supported way to use this list
-            arxid = re.sub(r"(([A-Za-z]|[-])+)\/([0-9]+)", "\\1\\3", arxivId)
-            proofs =  os.listdir(f'./texes/{date}/{arxid}/')
-            for x in proofs:
-                if x[-3:] == "tex":
-                    print(f"./texes/{date}/{arxid}/{x}")
+        # if arxiv in idset:
+        #     print(f"{idset[arxiv]}\t{arxivId}\t{cats}")
+        # else:
+        #     print(f"fail\t{arxivId}\t{cats}")
+        print(idset)
+
+        print(f"{arxivId}\t{cats}")
+        # if "math.CO" in cats:   # code to extract all proof IDs in the math.CO category. There currently is no supported way to use this list
+        #     arxid = re.sub(r"(([A-Za-z]|[-])+)\/([0-9]+)", "\\1\\3", arxivId)
+        #     proofs =  os.listdir(f'./texes/{date}/{arxid}/')
+        #     for x in proofs:
+        #         if x[-3:] == "tex":
+        #             print(f"./texes/{date}/{arxid}/{x}")
                 
 """ the commented code below contains other ways to use the above code. Uncommenting blocks can allow counting by major or minor categories, or by year
  it contains different methods of dealing with ties, papers with multiple categories, and other counting edge cases """
