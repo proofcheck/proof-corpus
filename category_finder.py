@@ -88,9 +88,13 @@ for arxiv in tree.findall(".//{http://arxiv.org/OAI/arXiv/}arXiv"):         # it
         #     print(f"{idset[arxiv]}\t{arxivId}\t{cats}")
         # else:
         #     print(f"fail\t{arxivId}\t{cats}")
-        print(idset)
+        # print(idset)
+        if "." in arxivId:
+            print(f"{date}/{arxivId}\t{','.join(cats)}")
+        else:
+            newId = arxivId[:arxivId.index("/")] + arxivId[arxivId.index("/")+1:]
+            print(f"{date}/{newId}\t{','.join(cats)}")
 
-        print(f"{arxivId}\t{cats}")
         # if "math.CO" in cats:   # code to extract all proof IDs in the math.CO category. There currently is no supported way to use this list
         #     arxid = re.sub(r"(([A-Za-z]|[-])+)\/([0-9]+)", "\\1\\3", arxivId)
         #     proofs =  os.listdir(f'./texes/{date}/{arxid}/')
