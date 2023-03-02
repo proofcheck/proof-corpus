@@ -22,8 +22,27 @@ ids = [s[:-1] for s in ids]         # remove \n characters
 for s in range(len(ids)):
     idset[re.sub(r"(([A-Za-z]|[-])+)([0-9]+)", "\\1/\\3", ids[s])] = ids[s]
     ids[s] = re.sub(r"(([A-Za-z]|[-])+)([0-9]+)", "\\1/\\3", ids[s])   # add / in middle for changed formatting of certain IDs
-    
+ids.sort()
 
+g = open("proofcats4.txt", "r")
+pcats = g.readlines()
+g.close
+for s in range(len(pcats)):
+    pcats[s] = re.sub(r"(([A-Za-z]|[-])+)([0-9]+)", "\\1/\\3", ids[s])   # add / in middle for changed formatting of certain IDs
+
+def diff(l1, l2):
+    c = set(l1).union(set(l2))  # or c = set(list1) | set(list2)
+    d = set(l1).intersection(set(l2))  # or d = set(list1) & set(list2)
+    return list(c - d)
+
+pcats.sort()
+# print(ids[:10])
+# print(pcats[:10])
+# print([diff(pcats, ids),len(diff(pcats, ids))])
+
+# print(pcats[::-1])
+
+# print(ids[::-1])
 tree = ET.parse("metha-metadata.xml")
 root = tree.getroot()
 # d = {"Hello":"World"}
