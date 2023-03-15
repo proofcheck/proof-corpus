@@ -7,7 +7,7 @@ import nicer
 from multiprocessing import Pool
 from itertools import repeat
 import sys
-
+from collections import Counter
 
 from sent_tools import *
 # SORTED_PATH = "/research/proofcheck/noda/proof-corpus/sorted_small.txt"
@@ -81,16 +81,20 @@ def read_sorted(filename=SORTED_PATH, cores=4):
     with Pool(processes=cores) as p:
         with open(WC_PATH, "w") as o:
             with open(filename, "r") as fd:
-                sent_tuples = []
+                # sent_tuples = []
+                sent_counter = Counter()
                 for sent_tuple in p.imap(
                     make_tuple_from_sorted,
                             fd.readlines(),
                         50
                         ) :
-                            sent_tuples += [sent_tuple]
-                            sent_list = [ str(x) for x in sent_tuple ]
-                            o.write("\t".join(sent_list) + "\n")
-    return sent_tuples
+                            num_count, sent, word_count = sent_tuple
+                            # if sent in sent_counter.keys():
+                            sent_counter.update({sent : num_count})
+                            # else:
+                            # sent_counter.update({ sent : num_count })
+                            
+    return sent_counter
 
 def read_word_count_file(fd, cores):
     with Pool(processes=cores) as p:
@@ -102,11 +106,11 @@ def read_word_count_file(fd, cores):
                 )
     return sent_tuples
 
-def write_results(sent_list, output):
-    sent_list = [ [str(x) for x in sent] for sent in sent_list]
-    for sent in sent_list:
-        sent_formatted = "\t".join([str(x) for x in sent])
-        output.write(sent_formatted + "\n")
+def write_results(sent_counter, output):
+    # sent_list = [ [str(x) for x in sent] for sent in sent_list]
+    for sent, num_count in sent_counter.items():
+        sent_formatted = num_count + "\t" + sent + "\t" + count_words(sent) + "\n"
+        output.write(sent_formatted)
 
 def filter_by_word_count(sent_tuple, word_count):
     if sent_tuple[2] == word_count:
