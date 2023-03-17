@@ -15,7 +15,7 @@ ifeq ($(NUMPROC),0)
 endif
 
 
-all: clean
+all: check_venv clean
 	hostname > log.txt
 	date >> log.txt
 	./naive.py -p$(NUMPROC) -m matches/eng-matches >> log.txt 2>&1
@@ -63,13 +63,22 @@ successful-proof-ids:
 	find proofs -name "*.txt" -not -empty | cut -d'/' -f3 > successful-proof-ids
 
 .PRECIOUS: matches/matches% proofs%.tsv cleanproofs%.tsv sent%.tsv sorted%.txt
-.PHONY: test archive reclean clean
+.PHONY: test archive reclean clean check_venv
 
 DATE=$(shell date "+%Y-%m-%d")
 archive:
 	mkdir $(DATE)
 	mv *.tsv successful-proof-ids sorted.txt $(DATE)/
 	-mv log.txt $(DATE)/
+
+check_venv:
+    # Check some but not all required packages; just enough to confirm we're in a good venv.
+	python -c "import bs4"
+	python -c "import langdetect"
+	python -c "import more_itertools"
+	python -c "import psutil"
+	python -c "import nltk"
+
 
 
 test: new_cleanproofs10.tsv
