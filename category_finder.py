@@ -14,16 +14,18 @@ any changes must be made within the code. """
 years = list(range(21)) + list(range(91, 100))
 years = ["0" + str(x) if len(str(x)) == 1 else str(x) for x in years] # a list of all two-digit year codes, from 91 to 20
 
-f = open("successful-proof-ids-sorted.txt", "r")
+f = open("successful-proof-ids-sorted-final.txt", "r")
 ids = f.readlines()
 f.close()
 idset = {}
 ids = [s[:-1] for s in ids]         # remove \n characters
-# for s in range(len(ids)):
+for s in range(len(ids)):
 #     # idset[re.sub(r"(([A-Za-z]|[-])+)([0-9]+)", "\\1/\\3", ids[s])] = ids[s]
-#     ids[s] = re.sub(r"(([A-Za-z]|[-])+)([0-9]+)", "\\1\\3", ids[s])   # add / in middle for changed formatting of certain IDs
+    ids[s] = re.sub(r"(([A-Za-z]|[-])+)([0-9]+)", "\\1/\\3", ids[s])   # add / in middle for changed formatting of certain IDs
 ids.sort()
-
+ids = set(ids)          # ensure faster lookup
+tree = ET.parse("metha-metadata.xml")
+root = tree.getroot()
 # g = open("proofcats6.txt", "r")
 # pcats = g.readlines()
 # g.close
@@ -98,47 +100,45 @@ ids.sort()
 # # Phys: "hep-th", 
 # count = 0
 # allIds = []
-ids = set(ids)          # ensure faster lookup
-tree = ET.parse("metha-metadata.xml")
-root = tree.getroot()
-weirdos = ['1702.06462', '1707.08178', '1708.01597', '1803.02621', '1803.08004', '1805.03309', '1806.05081', '1809.10215', '1811.03334', '1812.04649', '1812.09403', '1812.11694', '1901.08353', '1902.06535', '1902.08280', '1902.11191', '1903.06861', '1903.09440', '1903.10249', '1903.12251', '1904.00844', '1904.06468', '1905.04095', '1905.05141', '1905.13423', '1906.07255', '1906.07865', '1906.10529', '1906.11185', '1906.12268', '1907.01218', '1907.03359', '1907.11672', '1908.04025', '1908.04196', '1908.06486', '1909.01925', '1909.02054', '1909.02302', '1909.02901', '1910.01228', '1910.01594', '1910.05468', '1910.07682', '1910.11286', '1910.12738', '1911.01388', '1911.03357', '1911.04596', '1911.06268', '1911.06894', '1911.08600', '1912.02099', '1912.03312', '1912.12850', '1912.13093', '1912.13499', '2001.00625', '2001.03983', '2001.04800', '2001.04812', '2001.05711', '2001.10429', '2002.00450', '2002.01220', '2002.04905', '2002.06421', '2002.06751', '2002.07153', '2002.08103', '2002.08142', '2002.11874', '2003.01925', '2003.03086', '2003.03646', '2003.06676', '2003.07343', '2003.09667', '2003.09972', '2003.10356', '2003.10913', '2003.11309', '2003.13040', '2003.13725', '2004.00460', '2004.01493', '2004.02154', '2004.05459', '2004.05511', '2004.06959', '2004.07128', '2004.07831', '2004.11710', '2004.11996', '2004.12508', '2004.12986', '2004.14263']
-arxivIds = set()
-for arxiv in tree.findall(".//{http://arxiv.org/OAI/arXiv/}arXiv"):
-    arxivIds.add(arxiv.find("{http://arxiv.org/OAI/arXiv/}id").text)
-print([[weirdId, weirdId in arxivIds] for weirdId in weirdos])
-for i in range(10):
-    print(arxivIds.pop())
 
-# for arxiv in tree.findall(".//{http://arxiv.org/OAI/arXiv/}arXiv"):         # iterate through the tree
-#     arxivId = arxiv.find("{http://arxiv.org/OAI/arXiv/}id").text            # extract the proof ID
-#     if arxivId in ids:                                                      # ensure that the paper is actually a valid english one containing a nonempty proof
-# #         if "." in arxivId:
-# #             yr = arxivId[0:2]
-# #         else:q
-# #             yr = arxivId[arxivId.index("/")+1:arxivId.index("/")+3]
+# weirdos = ['1702.06462', '1707.08178', '1708.01597', '1803.02621', '1803.08004', '1805.03309', '1806.05081', '1809.10215', '1811.03334', '1812.04649', '1812.09403', '1812.11694', '1901.08353', '1902.06535', '1902.08280', '1902.11191', '1903.06861', '1903.09440', '1903.10249', '1903.12251', '1904.00844', '1904.06468', '1905.04095', '1905.05141', '1905.13423', '1906.07255', '1906.07865', '1906.10529', '1906.11185', '1906.12268', '1907.01218', '1907.03359', '1907.11672', '1908.04025', '1908.04196', '1908.06486', '1909.01925', '1909.02054', '1909.02302', '1909.02901', '1910.01228', '1910.01594', '1910.05468', '1910.07682', '1910.11286', '1910.12738', '1911.01388', '1911.03357', '1911.04596', '1911.06268', '1911.06894', '1911.08600', '1912.02099', '1912.03312', '1912.12850', '1912.13093', '1912.13499', '2001.00625', '2001.03983', '2001.04800', '2001.04812', '2001.05711', '2001.10429', '2002.00450', '2002.01220', '2002.04905', '2002.06421', '2002.06751', '2002.07153', '2002.08103', '2002.08142', '2002.11874', '2003.01925', '2003.03086', '2003.03646', '2003.06676', '2003.07343', '2003.09667', '2003.09972', '2003.10356', '2003.10913', '2003.11309', '2003.13040', '2003.13725', '2004.00460', '2004.01493', '2004.02154', '2004.05459', '2004.05511', '2004.06959', '2004.07128', '2004.07831', '2004.11710', '2004.11996', '2004.12508', '2004.12986', '2004.14263']
+# arxivIds = set()
+# for arxiv in tree.findall(".//{http://arxiv.org/OAI/arXiv/}arXiv"):
+#     arxivIds.add(arxiv.find("{http://arxiv.org/OAI/arXiv/}id").text)
+# print([[weirdId, weirdId in arxivIds] for weirdId in weirdos])
+# for i in range(10):
+#     print(arxivIds.pop())
+count = 0
+for arxiv in tree.findall(".//{http://arxiv.org/OAI/arXiv/}arXiv"):         # iterate through the tree
+    arxivId = arxiv.find("{http://arxiv.org/OAI/arXiv/}id").text            # extract the proof ID
+    if arxivId in ids:                                                      # ensure that the paper is actually a valid english one containing a nonempty proof
 #         if "." in arxivId:
-#             date = arxivId[0:4]
-#         else:
-#             date = arxivId[arxivId.index("/")+1:arxivId.index("/")+5]
-#         categories = arxiv.find("{http://arxiv.org/OAI/arXiv/}categories").text  # find the proof's categories
-#         cats = categories.split(" ")
-#         # if arxiv in idset:
-#         #     print(f"{idset[arxiv]}\t{arxivId}\t{cats}")
-#         # else:
-#         #     print(f"fail\t{arxivId}\t{cats}")
-#         # print(idset)
-#         if "." in arxivId:
-#             print(f"{date}/{arxivId}\t{','.join(cats)}")
-#         else:
-#             newId = arxivId[:arxivId.index("/")] + arxivId[arxivId.index("/")+1:]
-#             print(f"{date}/{newId}\t{','.join(cats)}")
+#             yr = arxivId[0:2]
+#         else:q
+#             yr = arxivId[arxivId.index("/")+1:arxivId.index("/")+3]
+        if "." in arxivId:
+            date = arxivId[0:4]
+        else:
+            date = arxivId[arxivId.index("/")+1:arxivId.index("/")+5]
+        categories = arxiv.find("{http://arxiv.org/OAI/arXiv/}categories").text  # find the proof's categories
+        cats = categories.split(" ")
+        # if arxiv in idset:
+        #     print(f"{idset[arxiv]}\t{arxivId}\t{cats}")
+        # else:
+        #     print(f"fail\t{arxivId}\t{cats}")
+        # print(idset)
+        if "." in arxivId:
+            print(f"{date}/{arxivId}\t{','.join(cats)}")
+        else:
+            newId = arxivId[:arxivId.index("/")] + arxivId[arxivId.index("/")+1:]
+            print(f"{date}/{newId}\t{','.join(cats)}")
 
-# #         # if "math.CO" in cats:   # code to extract all proof IDs in the math.CO category. There currently is no supported way to use this list
-# #         #     arxid = re.sub(r"(([A-Za-z]|[-])+)\/([0-9]+)", "\\1\\3", arxivId)
-# #         #     proofs =  os.listdir(f'./texes/{date}/{arxid}/')
-# #         #     for x in proofs:
-# #         #         if x[-3:] == "tex":
-# #         #             print(f"./texes/{date}/{arxid}/{x}")
+#         # if "math.CO" in cats:   # code to extract all proof IDs in the math.CO category. There currently is no supported way to use this list
+#         #     arxid = re.sub(r"(([A-Za-z]|[-])+)\/([0-9]+)", "\\1\\3", arxivId)
+#         #     proofs =  os.listdir(f'./texes/{date}/{arxid}/')
+#         #     for x in proofs:
+#         #         if x[-3:] == "tex":
+#         #             print(f"./texes/{date}/{arxid}/{x}")
                 
 """ the commented code below contains other ways to use the above code. Uncommenting blocks can allow counting by major or minor categories, or by year
  it contains different methods of dealing with ties, papers with multiple categories, and other counting edge cases """
