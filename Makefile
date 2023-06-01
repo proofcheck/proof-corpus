@@ -63,13 +63,15 @@ successful-proof-ids:
 	find proofs -name "*.txt" -not -empty | cut -d'/' -f3 > successful-proof-ids
 
 .PRECIOUS: matches/matches% proofs%.tsv cleanproofs%.tsv sent%.tsv sorted%.txt
-.PHONY: test archive reclean clean check_venv
+.PHONY: test archive reclean clean check_venv dist
 
 DATE=$(shell date "+%Y-%m-%d")
 archive:
-	mkdir $(DATE)
-	mv *.tsv successful-proof-ids sorted.txt $(DATE)/
-	-mv log.txt $(DATE)/
+	mkdir -p Old/$(DATE)
+	mv *.tsv successful-proof-ids sorted.txt Old/$(DATE)/
+	-mv log.txt Old/$(DATE)/
+	-rm today
+	ln -s Old/$(DATE) today
 
 check_venv:
     # Check some but not all required packages; just enough to confirm we're in a good venv.
@@ -86,3 +88,17 @@ test: new_cleanproofs10.tsv
 
 new_cleanproofs10.tsv: cleanup.py
 	./cleanup.py -p15 2023-01-01/proofs10.tsv > new_cleanproofs10.tsv
+
+
+dist: prooflang/proofs.zip prooflang/sentences.zip
+
+
+prooflang/proofs.zip: today/sorted.txt
+	echo "fileID\tproof" > prooflang/proofs.tsv
+	cat today/cleanproofs*.tsv >> prooflang/proofs.tsv
+	zip --junk-paths prooflang/proofs.zip prooflang/proofs.tsv
+
+prooflang/sentences.zip: today/sorted.txt
+	echo "fileID\tsentence" > prooflang/sentences.tsv
+	cat today/sent*.tsv >> prooflang/sentences.tsv
+	zip --junk-paths prooflang/sentences.zip prooflang/sentences.tsv
