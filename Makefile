@@ -90,15 +90,25 @@ new_cleanproofs10.tsv: cleanup.py
 	./cleanup.py -p15 2023-01-01/proofs10.tsv > new_cleanproofs10.tsv
 
 
-dist: prooflang/proofs.zip prooflang/sentences.zip
+dist: prooflang/proofs.zip prooflang/sentences.zip prooflang/raw.zip prooflang/tags.zip
 
 
 prooflang/proofs.zip: today/sorted.txt
-	echo "fileID\tproof" > prooflang/proofs.tsv
-	cat today/cleanproofs*.tsv >> prooflang/proofs.tsv
+	echo "paper\tproof" > prooflang/proofs.tsv
+	cat today/cleanproofs*.tsv | ./id_fixer.py >> prooflang/proofs.tsv
 	zip --junk-paths prooflang/proofs.zip prooflang/proofs.tsv
 
 prooflang/sentences.zip: today/sorted.txt
-	echo "fileID\tsentence" > prooflang/sentences.tsv
-	cat today/sent*.tsv >> prooflang/sentences.tsv
+	echo "paper\tsentence" > prooflang/sentences.tsv
+	cat today/sent*.tsv | ./id_fixer.py >> prooflang/sentences.tsv
 	zip --junk-paths prooflang/sentences.zip prooflang/sentences.tsv
+
+prooflang/raw.zip: today/sorted.txt
+	echo "paper\tproof" > prooflang/raw.tsv
+	cat today/proofs*.tsv | ./id_fixer.py >> prooflang/raw.tsv
+	zip --junk-paths prooflang/raw.zip prooflang/raw.tsv
+
+prooflang/tags.zip: today/sorted.txt
+	echo "paper\ttags" > prooflang/tags.tsv
+	cat proofcats-complete.tsv | ./id_fixer.py >> prooflang/tags.tsv
+	zip --junk-paths prooflang/tags.zip prooflang/tags.tsv
